@@ -147,6 +147,9 @@ export default function ProjectDetail() {
         </nav>
 
         <div className="project-detail">
+                    <div style={{ color: 'red', fontSize: '11px', wordBreak: 'break-all', marginBottom: '10px' }}>
+  DEBUG — project.user_id: {String(project.user_id)} | currentUserId: {String(currentUserId)}
+</div>
                     <div className="project-detail-top">
             <h1>{project.title}</h1>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
