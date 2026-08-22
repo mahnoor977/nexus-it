@@ -70,7 +70,11 @@ export default function Projects() {
         {!loading && projects.length > 0 && (
           <div className="projects-list">
             {projects.map((p) => (
-              <div className="project-card" key={p.id}>
+                              <div
+                className="project-card project-card-link"
+                key={p.id}
+                onClick={() => router.push(`/project/${p.id}`)}
+              >
                 <div className="project-card-top">
                   <h3>{p.title}</h3>
                   <span className="project-author">by {p.author_nickname}</span>
