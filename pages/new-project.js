@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
+import MobileMenu from '../components/MobileMenu';
 
 export default function NewProject() {
   const router = useRouter();
@@ -28,6 +29,11 @@ export default function NewProject() {
     }
     checkAuth();
   }, [router]);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace('/');
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -73,9 +79,11 @@ export default function NewProject() {
       <div className="new-project-page">
         <nav>
           <div className="logo">
-            <button className="hamburger" aria-label="Menu">
-              <span></span><span></span><span></span>
-            </button>
+            <MobileMenu links={[
+              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
+              { label: 'Projects', onClick: () => router.push('/projects') },
+              { label: 'Log out', onClick: handleLogout },
+            ]} />
             <span>NEXUS-IT</span>
           </div>
           <div className="nav-links">
