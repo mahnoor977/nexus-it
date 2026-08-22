@@ -15,7 +15,6 @@ export default function Dashboard() {
   const [saveMsg, setSaveMsg] = useState('');
   const [editingNickname, setEditingNickname] = useState(false);
 
-  // ---------- Auth ----------
   useEffect(() => {
     let mounted = true;
 
@@ -71,7 +70,6 @@ export default function Dashboard() {
     setTimeout(() => setSaveMsg(''), 2000);
   }
 
-  // ---------- Network canvas background (same as landing page) ----------
   useEffect(() => {
     if (loading) return;
     const canvas = canvasRef.current;
@@ -200,9 +198,11 @@ export default function Dashboard() {
 
       <nav>
         <div className="logo">
-                    <MobileMenu links={[
+          <MobileMenu links={[
             { label: 'Dashboard', onClick: () => router.push('/dashboard') },
             { label: 'Projects', onClick: () => router.push('/projects') },
+            { label: 'Messages', onClick: () => router.push('/messages') },
+            { label: 'Forum', onClick: () => router.push('/forum') },
             { label: 'Ask advisor', onClick: () => router.push('/advisor') },
             { label: 'Log out', onClick: handleLogout },
           ]} />
@@ -263,17 +263,23 @@ export default function Dashboard() {
               </span>
             </div>
           )}
+
+          <div className="quick-actions">
+            <button className="btn btn-solid" onClick={() => router.push('/new-project')}>+ New project</button>
+            <button className="btn" onClick={() => router.push('/projects')}>View projects</button>
+            <button className="btn" onClick={() => router.push('/messages')}>Messages</button>
+            <button className="btn" onClick={() => router.push('/forum')}>Forum</button>
+            <button className="btn" onClick={() => router.push('/advisor')}>Ask the advisor</button>
+          </div>
         </div>
       </section>
 
-      {/* Floating AI advisor button — bottom right */}
       <button className="fab fab-ai" aria-label="AI Advisor" onClick={() => router.push('/advisor')}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M12 2 L14 9 L21 12 L14 15 L12 22 L10 15 L3 12 L10 9 Z" fill="currentColor" />
         </svg>
       </button>
 
-      {/* N logo button — bottom left, opposite side, same pulse style */}
       <button className="fab fab-brand" aria-label="NEXUS-IT" onClick={() => router.push('/dashboard')}>
         <span className="mono">N</span>
       </button>

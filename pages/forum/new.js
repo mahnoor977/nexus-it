@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../lib/supabaseClient';
-import MobileMenu from '../components/MobileMenu';
+import { supabase } from '../../lib/supabaseClient';
+import MobileMenu from '../../components/MobileMenu';
 
-export default function NewProject() {
+export default function NewForumPost() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [nickname, setNickname] = useState('');
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [techStack, setTechStack] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
-  const [demoUrl, setDemoUrl] = useState('');
+  const [body, setBody] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,8 +20,7 @@ export default function NewProject() {
         router.replace('/');
         return;
       }
-      const nick = session.user.user_metadata?.nickname || session.user.email;
-      setNickname(nick);
+      setNickname(session.user.user_metadata?.nickname || session.user.email);
       setLoading(false);
     }
     checkAuth();
@@ -39,22 +35,19 @@ export default function NewProject() {
     e.preventDefault();
     setError('');
 
-    if (!title.trim() || !description.trim()) {
-      setError('Title and description are required.');
+    if (!title.trim() || !body.trim()) {
+      setError('Title and body are required.');
       return;
     }
 
     setSaving(true);
     const { data: { session } } = await supabase.auth.getSession();
 
-    const { error } = await supabase.from('projects').insert({
+    const { error } = await supabase.from('forum_posts').insert({
       user_id: session.user.id,
       author_nickname: nickname,
       title: title.trim(),
-      description: description.trim(),
-      tech_stack: techStack.trim() || null,
-      github_url: githubUrl.trim() || null,
-      demo_url: demoUrl.trim() || null,
+      body: body.trim(),
     });
 
     setSaving(false);
@@ -64,7 +57,7 @@ export default function NewProject() {
       return;
     }
 
-    router.push('/projects');
+    router.push('/forum');
   }
 
   if (loading) {
@@ -74,7 +67,7 @@ export default function NewProject() {
   return (
     <>
       <Head>
-        <title>New Project — NEXUS-IT</title>
+        <title>New Post — NEXUS-IT</title>
       </Head>
       <div className="new-project-page">
         <nav>
@@ -89,67 +82,37 @@ export default function NewProject() {
             <span>NEXUS-IT</span>
           </div>
           <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/projects')}>Back to projects</button>
+            <button className="btn" onClick={() => router.push('/forum')}>Back to forum</button>
           </div>
         </nav>
 
         <form className="new-project-form" onSubmit={handleSubmit}>
-          <h1>Post a project</h1>
+          <h1>Start a discussion</h1>
 
           <div className="field">
             <label>Title</label>
             <input
               type="text"
-              placeholder="e.g. Real-time chat app with WebSockets"
+              placeholder="e.g. Best resources for learning Docker?"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
           <div className="field">
-            <label>Description</label>
+            <label>Body</label>
             <textarea
               className="form-textarea"
-              placeholder="What does it do? What did you learn building it? What feedback are you looking for?"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label>Tech stack</label>
-            <input
-              type="text"
-              placeholder="e.g. React, Node.js, PostgreSQL (comma separated)"
-              value={techStack}
-              onChange={(e) => setTechStack(e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label>GitHub link (optional)</label>
-            <input
-              type="url"
-              placeholder="https://github.com/you/project"
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-            />
-          </div>
-
-          <div className="field">
-            <label>Live demo link (optional)</label>
-            <input
-              type="url"
-              placeholder="https://your-demo.vercel.app"
-              value={demoUrl}
-              onChange={(e) => setDemoUrl(e.target.value)}
+              placeholder="Share details, ask your question, or start the discussion..."
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
             />
           </div>
 
           {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
 
           <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
-            {saving ? 'Posting…' : 'Post project'}
+            {saving ? 'Posting…' : 'Post discussion'}
           </button>
         </form>
       </div>

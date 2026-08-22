@@ -1,39 +1,55 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../lib/supabaseClient';
-import MobileMenu from '../components/MobileMenu';
+import { supabase } from '../../lib/supabaseClient';
+import MobileMenu from '../../components/MobileMenu';
 
-export default function Advisor() {
+export default function Conversation() {
   const router = useRouter();
+  const { userId, nickname: nicknameQuery } = router.query;
+
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [myNickname, setMyNickname] = useState('');
+  const [otherNickname, setOtherNickname] = useState('');
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    let mounted = true;
-    async function checkAuth() {
+    if (!userId) return;
+
+    async function load() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!mounted) return;
       if (!session) {
         router.replace('/');
         return;
       }
+      const myId = session.user.id;
+      setCurrentUserId(myId);
+      setMyNickname(session.user.user_metadata?.nickname || session.user.email);
+      if (nicknameQuery) setOtherNickname(nicknameQuery);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(
+          `and(sender_id.eq.${myId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${myId})`
+        )
+        .order('created_at', { ascending: true });
+
+      if (!error && data) {
+        setMessages(data);
+        if (!nicknameQuery && data.length > 0) {
+          const fromOther = data.find((m) => m.sender_id === userId);
+          if (fromOther) setOtherNickname(fromOther.sender_nickname);
+        }
+      }
       setLoading(false);
     }
-    checkAuth();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) router.replace('/');
-    });
-    return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
-    };
-  }, [router]);
+    load();
+  }, [userId, nicknameQuery, router]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -48,36 +64,27 @@ export default function Advisor() {
 
   async function handleSend() {
     const trimmed = input.trim();
-    if (!trimmed || sending) return;
+    if (!trimmed || sending || !currentUserId) return;
 
-    const newMessages = [...messages, { role: 'user', content: trimmed }];
-    setMessages(newMessages);
-    setInput('');
-    setError('');
     setSending(true);
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        sender_id: currentUserId,
+        receiver_id: userId,
+        sender_nickname: myNickname,
+        receiver_nickname: otherNickname || 'them',
+        content: trimmed,
+      })
+      .select()
+      .single();
 
-    try {
-      const res = await fetch('/api/advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: trimmed,
-          history: messages.slice(-8),
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong.');
-        setSending(false);
-        return;
-      }
-
-      setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
-    } catch (err) {
-      setError('Could not reach the advisor. Try again.');
-    }
     setSending(false);
+
+    if (!error) {
+      setMessages([...messages, data]);
+      setInput('');
+    }
   }
 
   function handleKeyDown(e) {
@@ -94,7 +101,7 @@ export default function Advisor() {
   return (
     <>
       <Head>
-        <title>AI Advisor — NEXUS-IT</title>
+        <title>{otherNickname || 'Conversation'} — NEXUS-IT</title>
       </Head>
       <div className="advisor-page">
         <nav>
@@ -109,36 +116,32 @@ export default function Advisor() {
             <span>NEXUS-IT</span>
           </div>
           <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/dashboard')}>Back to dashboard</button>
+            <button className="btn" onClick={() => router.push('/messages')}>Back to messages</button>
           </div>
         </nav>
 
         <div className="advisor-chat">
-          <div className="eyebrow mono" style={{ marginTop: '30px', marginBottom: '10px' }}>// AI ADVISOR</div>
+          <div className="eyebrow mono" style={{ marginTop: '30px', marginBottom: '10px' }}>
+            // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
+          </div>
           <div className="advisor-messages" ref={scrollRef}>
             {messages.length === 0 && (
-              <div className="advisor-empty">
-                Ask for a project idea, feedback on your approach, or help getting unstuck.
-              </div>
+              <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
             )}
-            {messages.map((m, i) => (
-              <div key={i} className={`advisor-msg ${m.role === 'user' ? 'user' : 'assistant'}`}>
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`advisor-msg ${m.sender_id === currentUserId ? 'user' : 'assistant'}`}
+              >
                 {m.content}
               </div>
             ))}
-            {sending && <div className="advisor-msg assistant">Thinking…</div>}
           </div>
-
-          {error && (
-            <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '10px' }}>
-              {error}
-            </div>
-          )}
 
           <div className="advisor-input-bar">
             <input
               type="text"
-              placeholder="Ask something..."
+              placeholder="Type a message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}

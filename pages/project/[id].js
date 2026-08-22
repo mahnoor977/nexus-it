@@ -136,6 +136,8 @@ export default function ProjectDetail() {
             <MobileMenu links={[
               { label: 'Dashboard', onClick: () => router.push('/dashboard') },
               { label: 'Projects', onClick: () => router.push('/projects') },
+              { label: 'Messages', onClick: () => router.push('/messages') },
+              { label: 'Forum', onClick: () => router.push('/forum') },
               { label: '+ New project', onClick: () => router.push('/new-project') },
               { label: 'Log out', onClick: handleLogout },
             ]} />
@@ -147,14 +149,24 @@ export default function ProjectDetail() {
         </nav>
 
         <div className="project-detail">
-                    <div className="project-detail-top">
+                              <div className="project-detail-top">
             <h1>{project.title}</h1>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
               <span className="project-author">by {project.author_nickname}</span>
-              {project.user_id === currentUserId && (
+              {project.user_id === currentUserId ? (
                 <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
                   {deleting ? 'deleting…' : 'delete project'}
                 </button>
+              ) : (
+                currentUserId && (
+                  <button
+                    className="btn"
+                    style={{ padding: '6px 14px', fontSize: '12px' }}
+                    onClick={() => router.push(`/messages/${project.user_id}?nickname=${encodeURIComponent(project.author_nickname)}`)}
+                  >
+                    Message {project.author_nickname}
+                  </button>
+                )
               )}
             </div>
           </div>
