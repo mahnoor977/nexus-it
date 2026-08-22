@@ -16,6 +16,7 @@ export default function ProjectDetail() {
   const [posting, setPosting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [nickname, setNickname] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -96,6 +97,21 @@ export default function ProjectDetail() {
       setComments(comments.filter((c) => c.id !== commentId));
     }
   }
+    async function handleDeleteProject() {
+    const confirmed = window.confirm('Delete this project? This cannot be undone.');
+    if (!confirmed) return;
+
+    setDeleting(true);
+    const { error } = await supabase.from('projects').delete().eq('id', id);
+    setDeleting(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    router.push('/projects');
+  }
 
   if (loading) {
     return <div className="dash-loading mono">Loading…</div>;
@@ -131,9 +147,16 @@ export default function ProjectDetail() {
         </nav>
 
         <div className="project-detail">
-          <div className="project-detail-top">
+                    <div className="project-detail-top">
             <h1>{project.title}</h1>
-            <span className="project-author">by {project.author_nickname}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+              <span className="project-author">by {project.author_nickname}</span>
+              {project.user_id === currentUserId && (
+                <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
+                  {deleting ? 'deleting…' : 'delete project'}
+                </button>
+              )}
+            </div>
           </div>
 
           <p className="project-desc">{project.description}</p>
