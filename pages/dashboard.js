@@ -121,7 +121,7 @@ export default function Dashboard() {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 140) {
             const opacity = (1 - dist / 140) * 0.35;
-            ctx.strokeStyle = `rgba(207,225,180,${opacity})`;
+            ctx.strokeStyle = `rgba(30,58,95,${opacity})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -143,7 +143,7 @@ export default function Dashboard() {
       nodes.forEach(n => {
         ctx.beginPath();
         ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(207,225,180,0.75)';
+        ctx.fillStyle = 'rgba(30,58,95,0.5)';
         ctx.fill();
       });
       if (!prefersReduced) rafId = requestAnimationFrame(draw);

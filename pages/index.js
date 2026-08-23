@@ -266,7 +266,7 @@ export default function Home() {
         const dist=Math.sqrt(dx*dx+dy*dy);
         if(dist<140){
           const opacity = (1-dist/140)*0.35;
-          ctx.strokeStyle = `rgba(207,225,180,${opacity})`;
+          ctx.strokeStyle = `rgba(30,58,95,${opacity})`;
           ctx.lineWidth = 0.6;
           ctx.beginPath();
           ctx.moveTo(a.x,a.y);
@@ -277,7 +277,7 @@ export default function Home() {
       const dxm = nodes[i].x-mouse.x, dym = nodes[i].y-mouse.y;
       const dm = Math.sqrt(dxm*dxm+dym*dym);
       if(dm<160){
-        ctx.strokeStyle = `rgba(227,240,196,${(1-dm/160)*0.6})`;
+        ctx.strokeStyle = `rgba(30,58,95,${(1-dm/160)*0.6})`;
         ctx.lineWidth=0.8;
         ctx.beginPath();
         ctx.moveTo(nodes[i].x,nodes[i].y);
@@ -288,7 +288,7 @@ export default function Home() {
     nodes.forEach(n=>{
       ctx.beginPath();
       ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-      ctx.fillStyle = 'rgba(207,225,180,0.75)';
+      ctx.fillStyle = 'rgba(30,58,95,0.5)';
       ctx.fill();
     });
     if(!prefersReduced) rafId = requestAnimationFrame(draw);
