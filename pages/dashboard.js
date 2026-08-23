@@ -154,10 +154,7 @@ export default function Dashboard() {
     draw();
     if (prefersReduced) draw();
 
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', resize);
-    };
+    return () => {};
   }, [loading]);
 
   const builderPrompts = [
