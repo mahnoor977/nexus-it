@@ -17,7 +17,7 @@ const bodyHtml = `
 <section class="hero">
   <div class="hero-content">
     <div class="eyebrow mono" id="boot-text">INITIALIZING_IT_COLLECTIVE</div>
-    <h1>Where IT students<br>actually <span>build together.</span></h1>
+    <h1>What builders are<br><span>shipping.</span></h1>
     <p class="sub">A verified space to showcase mini-projects, find collaborators by skill, get real feedback, and ship things worth putting on your résumé — not another repo nobody sees. Open to builders everywhere, not just one campus.</p>
     <div class="hero-form">
       <input type="email" placeholder="you@email.com" id="hero-email">
