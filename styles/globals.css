@@ -46,8 +46,7 @@ a{color:inherit;text-decoration:none;}
 }
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 
-h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:600;line-height:1.05;letter-spacing:-0.01em;}
-
+h1,h2,h3{font-family:'Newsreader',serif;font-weight:400;line-height:1.15;letter-spacing:0;}
 /* ---------- NAV ---------- */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
@@ -105,7 +104,7 @@ nav{
   margin:22px 0 22px;
   color:var(--text);
 }
-.hero h1 span{color:var(--tea);}
+.hero h1 span{color:var(--tea);font-style:italic;}
 .hero p.sub{
   font-size:20px;
   color:var(--muted);
