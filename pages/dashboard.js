@@ -69,16 +69,26 @@ export default function Dashboard() {
     if (loading) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
     let W, H, nodes = [];
     let rafId;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dpr = window.devicePixelRatio || 1;
 
     function resize() {
-      W = canvas.width = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
+      const rect = canvas.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initNodes();
     }
     window.addEventListener('resize', resize);
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(canvas);
 
     function initNodes() {
       nodes = [];
@@ -144,14 +154,16 @@ export default function Dashboard() {
       if (!prefersReduced) rafId = requestAnimationFrame(draw);
     }
 
-    resize();
-    initNodes();
+      resize();
     draw();
     if (prefersReduced) draw();
 
-    return () => {};
+    return () => {
+      window.removeEventListener('resize', resize);
+      ro.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [loading]);
-
   const builderPrompts = [
     "What are you shipping this week? Post it and get real feedback.",
     "Stuck on a bug? Ask the advisor before you rage-quit.",
