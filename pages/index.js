@@ -341,17 +341,21 @@ export default function Home() {
 
   let pendingEmail = '';
 
-  function showError(elId, message){
+    function showError(elId, message){
     const el = document.getElementById(elId);
+    if (!el) return;
     el.textContent = message;
     el.style.color = '#e35d5d';
     el.style.display = 'block';
   }
   function hideError(elId){
-    document.getElementById(elId).style.display = 'none';
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.style.display = 'none';
   }
   function setBtnLoading(btnId, loading, defaultText){
     const btn = document.getElementById(btnId);
+    if (!btn) return;
     btn.disabled = loading;
     btn.textContent = loading ? 'Please wait…' : defaultText;
   }
@@ -379,11 +383,13 @@ export default function Home() {
       return;
     }
 
-    pendingEmail = email;
-    document.getElementById('verify-email-display').textContent = email;
+      pendingEmail = email;
+    const verifyDisplay = document.getElementById('verify-email-display');
+    if (verifyDisplay) verifyDisplay.textContent = email;
     hideAllModals();
-    verifyModal.style.display = 'block';
-    document.querySelector('.code-digit').focus();
+    if (verifyModal) verifyModal.style.display = 'block';
+    const firstDigit = document.querySelector('.code-digit');
+    if (firstDigit) firstDigit.focus();
   }
 
   async function verifySuccess(){
@@ -408,8 +414,8 @@ export default function Home() {
       return;
     }
 
-    verifyModal.style.display = 'none';
-    successModal.style.display = 'block';
+    if (verifyModal) verifyModal.style.display = 'none';
+    if (successModal) successModal.style.display = 'block';
   }
 
   async function resendCode(){
@@ -418,9 +424,10 @@ export default function Home() {
     const { error } = await supabase.auth.resend({ type: 'signup', email: pendingEmail });
     if(error){
       showError('verify-error', error.message);
-    } else {
+      } else {
       showError('verify-error', 'Code resent — check your inbox.');
-      document.getElementById('verify-error').style.color = 'var(--tea, #6fae6f)';
+      const verifyErrorEl = document.getElementById('verify-error');
+      if (verifyErrorEl) verifyErrorEl.style.color = 'var(--tea, #A3752F)';
     }
   }
 

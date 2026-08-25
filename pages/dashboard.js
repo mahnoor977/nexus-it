@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import MobileMenu from '../components/MobileMenu';
+import Sidebar from '../components/Sidebar';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -44,11 +44,6 @@ export default function Dashboard() {
       listener.subscription.unsubscribe();
     };
   }, [router]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
 
   async function handleSaveNickname() {
     const trimmed = nicknameInput.trim();
@@ -193,93 +188,72 @@ export default function Dashboard() {
         <title>Dashboard — NEXUS-IT</title>
       </Head>
 
-      <nav>
-        <div className="logo">
-          <MobileMenu links={[
-            { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-            { label: 'Projects', onClick: () => router.push('/projects') },
-            { label: 'Messages', onClick: () => router.push('/messages') },
-            { label: 'Forum', onClick: () => router.push('/forum') },
-            { label: 'Ask advisor', onClick: () => router.push('/advisor') },
-            { label: 'Log out', onClick: handleLogout },
-          ]} />
-          <span>NEXUS-IT</span>
-        </div>
-        <div className="nav-links">
-          <button className="btn" onClick={handleLogout}>Log out</button>
-        </div>
-      </nav>
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
 
-      <section className="hero dash-hero">
-        <canvas id="network-canvas" ref={canvasRef}></canvas>
-        <div className="hero-content dash-content">
-          <div className="eyebrow mono">// SIGNED IN</div>
-          <h1 className="dash-welcome">Welcome back, <span>{displayName}</span></h1>
-          <p className="sub">
-            {nickname
-              ? getGreeting()
-              : "Your nickname shows here instead of your email."}
-          </p>
+        <main className="app-main">
+          <section className="hero dash-hero">
+            <canvas id="network-canvas" ref={canvasRef}></canvas>
+            <div className="hero-content dash-content">
+              <div className="eyebrow mono">// SIGNED IN</div>
+              <h1 className="dash-welcome">Welcome back, <span>{displayName}</span></h1>
+              <p className="sub">
+                {nickname
+                  ? getGreeting()
+                  : "Your nickname shows here instead of your email."}
+              </p>
 
-          {(!nickname || editingNickname) ? (
-            <div className="nickname-panel">
-              <label className="field-label mono">Set your nickname</label>
-              <div className="nickname-row">
-                <input
-                  type="text"
-                  placeholder="e.g. mahnoor.dev"
-                  value={nicknameInput}
-                  onChange={(e) => setNicknameInput(e.target.value)}
-                  className="mono"
-                />
-                <button
-                  className="btn btn-solid"
-                  onClick={() => {
-                    handleSaveNickname();
-                    setEditingNickname(false);
-                  }}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving…' : 'Save'}
-                </button>
+              {(!nickname || editingNickname) ? (
+                <div className="nickname-panel">
+                  <label className="field-label mono">Set your nickname</label>
+                  <div className="nickname-row">
+                    <input
+                      type="text"
+                      placeholder="e.g. mahnoor.dev"
+                      value={nicknameInput}
+                      onChange={(e) => setNicknameInput(e.target.value)}
+                      className="mono"
+                    />
+                    <button
+                      className="btn btn-solid"
+                      onClick={() => {
+                        handleSaveNickname();
+                        setEditingNickname(false);
+                      }}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                  {saveMsg && <div className="field-hint">{saveMsg}</div>}
+                </div>
+              ) : (
+                <div className="prompt-card">
+                  <div className="prompt-label">// today's prompt</div>
+                  <div className="prompt-text">{getTodaysPrompt()}</div>
+                  <span
+                    className="nickname-edit-link"
+                    onClick={() => {
+                      setNicknameInput(nickname);
+                      setEditingNickname(true);
+                    }}
+                  >
+                    change nickname
+                  </span>
+                </div>
+              )}
+
+              <div className="quick-actions">
+                <button className="btn btn-solid" onClick={() => router.push('/new-project')}>+ New project</button>
+                <button className="btn" onClick={() => router.push('/projects')}>View projects</button>
+                <button className="btn" onClick={() => router.push('/messages')}>Messages</button>
+                <button className="btn" onClick={() => router.push('/forum')}>Forum</button>
+                <button className="btn" onClick={() => router.push('/advisor')}>Ask the advisor</button>
               </div>
-              {saveMsg && <div className="field-hint">{saveMsg}</div>}
             </div>
-          ) : (
-            <div className="prompt-card">
-              <div className="prompt-label">// today's prompt</div>
-              <div className="prompt-text">{getTodaysPrompt()}</div>
-              <span
-                className="nickname-edit-link"
-                onClick={() => {
-                  setNicknameInput(nickname);
-                  setEditingNickname(true);
-                }}
-              >
-                change nickname
-              </span>
-            </div>
-          )}
-
-          <div className="quick-actions">
-            <button className="btn btn-solid" onClick={() => router.push('/new-project')}>+ New project</button>
-            <button className="btn" onClick={() => router.push('/projects')}>View projects</button>
-            <button className="btn" onClick={() => router.push('/messages')}>Messages</button>
-            <button className="btn" onClick={() => router.push('/forum')}>Forum</button>
-            <button className="btn" onClick={() => router.push('/advisor')}>Ask the advisor</button>
-          </div>
-        </div>
-      </section>
-
-      <button className="fab fab-ai" aria-label="AI Advisor" onClick={() => router.push('/advisor')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2 L14 9 L21 12 L14 15 L12 22 L10 15 L3 12 L10 9 Z" fill="currentColor" />
-        </svg>
-      </button>
-
-      <button className="fab fab-brand" aria-label="NEXUS-IT" onClick={() => router.push('/dashboard')}>
-        <span className="mono">N</span>
-      </button>
+          </section>
+        </main>
+      </div>
     </>
   );
 }
