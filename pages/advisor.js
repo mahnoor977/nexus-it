@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import MobileMenu from '../components/MobileMenu';
+import Sidebar from '../components/Sidebar';
 
 export default function Advisor() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [nickname, setNickname] = useState('');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -22,6 +23,7 @@ export default function Advisor() {
         router.replace('/');
         return;
       }
+      setNickname(session.user.user_metadata?.nickname || session.user.email);
       setLoading(false);
     }
     checkAuth();
@@ -40,11 +42,6 @@ export default function Advisor() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
 
   async function handleSend() {
     const trimmed = input.trim();
@@ -96,57 +93,44 @@ export default function Advisor() {
       <Head>
         <title>AI Advisor — NEXUS-IT</title>
       </Head>
-      <div className="advisor-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/dashboard')}>Back to dashboard</button>
-          </div>
-        </nav>
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
+        <div className="app-main">
+          <div className="advisor-chat" style={{ padding: '40px 5vw 30px' }}>
+            <div className="eyebrow mono" style={{ marginBottom: '10px' }}>// AI ADVISOR</div>
+            <div className="advisor-messages" ref={scrollRef}>
+              {messages.length === 0 && (
+                <div className="advisor-empty">
+                  Ask for a project idea, feedback on your approach, or help getting unstuck.
+                </div>
+              )}
+              {messages.map((m, i) => (
+                <div key={i} className={`advisor-msg ${m.role === 'user' ? 'user' : 'assistant'}`}>
+                  {m.content}
+                </div>
+              ))}
+              {sending && <div className="advisor-msg assistant">Thinking…</div>}
+            </div>
 
-        <div className="advisor-chat">
-          <div className="eyebrow mono" style={{ marginTop: '30px', marginBottom: '10px' }}>// AI ADVISOR</div>
-          <div className="advisor-messages" ref={scrollRef}>
-            {messages.length === 0 && (
-              <div className="advisor-empty">
-                Ask for a project idea, feedback on your approach, or help getting unstuck.
+            {error && (
+              <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '10px' }}>
+                {error}
               </div>
             )}
-            {messages.map((m, i) => (
-              <div key={i} className={`advisor-msg ${m.role === 'user' ? 'user' : 'assistant'}`}>
-                {m.content}
-              </div>
-            ))}
-            {sending && <div className="advisor-msg assistant">Thinking…</div>}
-          </div>
 
-          {error && (
-            <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '10px' }}>
-              {error}
+            <div className="advisor-input-bar">
+              <input
+                type="text"
+                placeholder="Ask something..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={sending}
+              />
+              <button onClick={handleSend} disabled={sending || !input.trim()}>
+                Send
+              </button>
             </div>
-          )}
-
-          <div className="advisor-input-bar">
-            <input
-              type="text"
-              placeholder="Ask something..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={sending}
-            />
-            <button onClick={handleSend} disabled={sending || !input.trim()}>
-              Send
-            </button>
           </div>
         </div>
       </div>

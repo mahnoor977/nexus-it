@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import MobileMenu from '../../components/MobileMenu';
+import Sidebar from '../../components/Sidebar';
 
 export default function Messages() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [nickname, setNickname] = useState('');
   const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function Messages() {
         return;
       }
       const myId = session.user.id;
+      setNickname(session.user.user_metadata?.nickname || session.user.email);
 
       const { data, error } = await supabase
         .from('messages')
@@ -44,11 +46,6 @@ export default function Messages() {
     load();
   }, [router]);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
-
   if (loading) {
     return <div className="dash-loading mono">Loading…</div>;
   }
@@ -58,47 +55,36 @@ export default function Messages() {
       <Head>
         <title>Messages — NEXUS-IT</title>
       </Head>
-      <div className="projects-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/dashboard')}>Dashboard</button>
-          </div>
-        </nav>
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
+        <div className="app-main">
+          <div style={{ padding: '40px 5vw', maxWidth: '1040px' }}>
+            <div className="projects-header" style={{ margin: '0 0 40px' }}>
+              <h1>Messages</h1>
+            </div>
 
-        <div className="projects-header">
-          <h1>Messages</h1>
-        </div>
-
-        {conversations.length === 0 ? (
-          <div className="projects-empty">
-            No conversations yet — message someone from their project page to start one.
-          </div>
-        ) : (
-          <div className="projects-list">
-            {conversations.map((c) => (
-              <div
-                className="project-card project-card-link"
-                key={c.userId}
-                onClick={() => router.push(`/messages/${c.userId}?nickname=${encodeURIComponent(c.nickname)}`)}
-              >
-                <div className="project-card-top">
-                  <h3>{c.nickname}</h3>
-                </div>
-                <p className="project-desc">{c.lastMessage}</p>
+            {conversations.length === 0 ? (
+              <div className="projects-empty">
+                No conversations yet — message someone from their project page to start one.
               </div>
-            ))}
+            ) : (
+              <div className="projects-list">
+                {conversations.map((c) => (
+                  <div
+                    className="project-card project-card-link"
+                    key={c.userId}
+                    onClick={() => router.push(`/messages/${c.userId}?nickname=${encodeURIComponent(c.nickname)}`)}
+                  >
+                    <div className="project-card-top">
+                      <h3>{c.nickname}</h3>
+                    </div>
+                    <p className="project-desc">{c.lastMessage}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </>
   );

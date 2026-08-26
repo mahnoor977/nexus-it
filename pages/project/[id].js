@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import MobileMenu from '../../components/MobileMenu';
+import Sidebar from '../../components/Sidebar';
 
 export default function ProjectDetail() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function ProjectDetail() {
   const [posting, setPosting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [nickname, setNickname] = useState('');
-    const [deleting, setDeleting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -53,11 +53,6 @@ export default function ProjectDetail() {
 
     load();
   }, [id]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
 
   async function handlePostComment() {
     const trimmed = commentText.trim();
@@ -97,7 +92,8 @@ export default function ProjectDetail() {
       setComments(comments.filter((c) => c.id !== commentId));
     }
   }
-    async function handleDeleteProject() {
+
+  async function handleDeleteProject() {
     const confirmed = window.confirm('Delete this project? This cannot be undone.');
     if (!confirmed) return;
 
@@ -118,11 +114,7 @@ export default function ProjectDetail() {
   }
 
   if (error || !project) {
-    return (
-      <div className="dash-loading mono">
-        {error || 'Project not found.'}
-      </div>
-    );
+    return <div className="dash-loading mono">{error || 'Project not found.'}</div>;
   }
 
   return (
@@ -130,98 +122,84 @@ export default function ProjectDetail() {
       <Head>
         <title>{project.title} — NEXUS-IT</title>
       </Head>
-      <div className="project-detail-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: '+ New project', onClick: () => router.push('/new-project') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/projects')}>Back to projects</button>
-          </div>
-        </nav>
-
-        <div className="project-detail">
-                              <div className="project-detail-top">
-            <h1>{project.title}</h1>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-              <span className="project-author">by {project.author_nickname}</span>
-              {project.user_id === currentUserId ? (
-                <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
-                  {deleting ? 'deleting…' : 'delete project'}
-                </button>
-              ) : (
-                currentUserId && (
-                  <button
-                    className="btn"
-                    style={{ padding: '6px 14px', fontSize: '12px' }}
-                    onClick={() => router.push(`/messages/${project.user_id}?nickname=${encodeURIComponent(project.author_nickname)}`)}
-                  >
-                    Message {project.author_nickname}
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
+        <div className="app-main">
+          <div className="project-detail" style={{ margin: '40px auto 0', maxWidth: '760px', padding: '0 5vw' }}>
+            <div className="project-detail-top">
+              <h1>{project.title}</h1>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <span className="project-author">by {project.author_nickname}</span>
+                {project.user_id === currentUserId ? (
+                  <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
+                    {deleting ? 'deleting…' : 'delete project'}
                   </button>
-                )
-              )}
-            </div>
-          </div>
-
-          <p className="project-desc">{project.description}</p>
-
-          {project.tech_stack && (
-            <div className="project-tags">
-              {project.tech_stack.split(',').map((tag, i) => (
-                <span className="project-tag" key={i}>{tag.trim()}</span>
-              ))}
-            </div>
-          )}
-
-          <div className="project-links">
-            {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}
-            {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo →</a>}
-          </div>
-
-          <div className="comments-section">
-            <h2>Feedback ({comments.length})</h2>
-
-            <div className="comment-form">
-              <input
-                type="text"
-                placeholder={currentUserId ? "Leave feedback..." : "Log in to leave feedback"}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handlePostComment()}
-                disabled={!currentUserId || posting}
-              />
-              <button onClick={handlePostComment} disabled={!currentUserId || posting || !commentText.trim()}>
-                {posting ? 'Posting…' : 'Post'}
-              </button>
+                ) : (
+                  currentUserId && (
+                    <button
+                      className="btn"
+                      style={{ padding: '6px 14px', fontSize: '12px' }}
+                      onClick={() => router.push(`/messages/${project.user_id}?nickname=${encodeURIComponent(project.author_nickname)}`)}
+                    >
+                      Message {project.author_nickname}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
 
-            {comments.length === 0 ? (
-              <div className="comments-empty">No feedback yet — be the first to comment.</div>
-            ) : (
-              <div className="comment-list">
-                {comments.map((c) => (
-                  <div className="comment-item" key={c.id}>
-                    <div className="comment-item-top">
-                      <span className="comment-author">{c.author_nickname}</span>
-                      {c.user_id === currentUserId && (
-                        <button className="comment-delete" onClick={() => handleDeleteComment(c.id)}>
-                          delete
-                        </button>
-                      )}
-                    </div>
-                    <div className="comment-content">{c.content}</div>
-                  </div>
+            <p className="project-desc">{project.description}</p>
+
+            {project.tech_stack && (
+              <div className="project-tags">
+                {project.tech_stack.split(',').map((tag, i) => (
+                  <span className="project-tag" key={i}>{tag.trim()}</span>
                 ))}
               </div>
             )}
+
+            <div className="project-links">
+              {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}
+              {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo →</a>}
+            </div>
+
+            <div className="comments-section">
+              <h2>Feedback ({comments.length})</h2>
+
+              <div className="comment-form">
+                <input
+                  type="text"
+                  placeholder={currentUserId ? "Leave feedback..." : "Log in to leave feedback"}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handlePostComment()}
+                  disabled={!currentUserId || posting}
+                />
+                <button onClick={handlePostComment} disabled={!currentUserId || posting || !commentText.trim()}>
+                  {posting ? 'Posting…' : 'Post'}
+                </button>
+              </div>
+
+              {comments.length === 0 ? (
+                <div className="comments-empty">No feedback yet — be the first to comment.</div>
+              ) : (
+                <div className="comment-list">
+                  {comments.map((c) => (
+                    <div className="comment-item" key={c.id}>
+                      <div className="comment-item-top">
+                        <span className="comment-author">{c.author_nickname}</span>
+                        {c.user_id === currentUserId && (
+                          <button className="comment-delete" onClick={() => handleDeleteComment(c.id)}>
+                            delete
+                          </button>
+                        )}
+                      </div>
+                      <div className="comment-content">{c.content}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

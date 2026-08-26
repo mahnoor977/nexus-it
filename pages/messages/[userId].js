@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import MobileMenu from '../../components/MobileMenu';
+import Sidebar from '../../components/Sidebar';
 
 export default function Conversation() {
   const router = useRouter();
@@ -57,11 +57,6 @@ export default function Conversation() {
     }
   }, [messages]);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
-
   async function handleSend() {
     const trimmed = input.trim();
     if (!trimmed || sending || !currentUserId) return;
@@ -103,53 +98,40 @@ export default function Conversation() {
       <Head>
         <title>{otherNickname || 'Conversation'} — NEXUS-IT</title>
       </Head>
-      <div className="advisor-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/messages')}>Back to messages</button>
-          </div>
-        </nav>
+      <div className="app-shell">
+        <Sidebar nickname={myNickname} />
+        <div className="app-main">
+          <div className="advisor-chat" style={{ padding: '40px 5vw 30px' }}>
+            <div className="eyebrow mono" style={{ marginBottom: '10px' }}>
+              // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
+            </div>
+            <div className="advisor-messages" ref={scrollRef}>
+              {messages.length === 0 && (
+                <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
+              )}
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`advisor-msg ${m.sender_id === currentUserId ? 'user' : 'assistant'}`}
+                >
+                  {m.content}
+                </div>
+              ))}
+            </div>
 
-        <div className="advisor-chat">
-          <div className="eyebrow mono" style={{ marginTop: '30px', marginBottom: '10px' }}>
-            // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
-          </div>
-          <div className="advisor-messages" ref={scrollRef}>
-            {messages.length === 0 && (
-              <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
-            )}
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`advisor-msg ${m.sender_id === currentUserId ? 'user' : 'assistant'}`}
-              >
-                {m.content}
-              </div>
-            ))}
-          </div>
-
-          <div className="advisor-input-bar">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={sending}
-            />
-            <button onClick={handleSend} disabled={sending || !input.trim()}>
-              Send
-            </button>
+            <div className="advisor-input-bar">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={sending}
+              />
+              <button onClick={handleSend} disabled={sending || !input.trim()}>
+                Send
+              </button>
+            </div>
           </div>
         </div>
       </div>

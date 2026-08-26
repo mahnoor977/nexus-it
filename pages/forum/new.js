@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import MobileMenu from '../../components/MobileMenu';
+import Sidebar from '../../components/Sidebar';
 
 export default function NewForumPost() {
   const router = useRouter();
@@ -25,11 +25,6 @@ export default function NewForumPost() {
     }
     checkAuth();
   }, [router]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -69,52 +64,39 @@ export default function NewForumPost() {
       <Head>
         <title>New Post — NEXUS-IT</title>
       </Head>
-      <div className="new-project-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/forum')}>Back to forum</button>
-          </div>
-        </nav>
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
+        <div className="app-main">
+          <form className="new-project-form" style={{ margin: '40px auto', maxWidth: '640px' }} onSubmit={handleSubmit}>
+            <h1>Start a discussion</h1>
 
-        <form className="new-project-form" onSubmit={handleSubmit}>
-          <h1>Start a discussion</h1>
+            <div className="field">
+              <label>Title</label>
+              <input
+                type="text"
+                placeholder="e.g. Best resources for learning Docker?"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Title</label>
-            <input
-              type="text"
-              placeholder="e.g. Best resources for learning Docker?"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+            <div className="field">
+              <label>Body</label>
+              <textarea
+                className="form-textarea"
+                placeholder="Share details, ask your question, or start the discussion..."
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Body</label>
-            <textarea
-              className="form-textarea"
-              placeholder="Share details, ask your question, or start the discussion..."
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-            />
-          </div>
+            {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
 
-          {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
-
-          <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
-            {saving ? 'Posting…' : 'Post discussion'}
-          </button>
-        </form>
+            <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
+              {saving ? 'Posting…' : 'Post discussion'}
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );

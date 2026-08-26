@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import MobileMenu from '../components/MobileMenu';
+import Sidebar from '../components/Sidebar';
 
 export default function NewProject() {
   const router = useRouter();
@@ -29,11 +29,6 @@ export default function NewProject() {
     }
     checkAuth();
   }, [router]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/');
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -76,82 +71,69 @@ export default function NewProject() {
       <Head>
         <title>New Project — NEXUS-IT</title>
       </Head>
-      <div className="new-project-page">
-        <nav>
-          <div className="logo">
-            <MobileMenu links={[
-              { label: 'Dashboard', onClick: () => router.push('/dashboard') },
-              { label: 'Projects', onClick: () => router.push('/projects') },
-              { label: 'Messages', onClick: () => router.push('/messages') },
-              { label: 'Forum', onClick: () => router.push('/forum') },
-              { label: 'Log out', onClick: handleLogout },
-            ]} />
-            <span>NEXUS-IT</span>
-          </div>
-          <div className="nav-links">
-            <button className="btn" onClick={() => router.push('/projects')}>Back to projects</button>
-          </div>
-        </nav>
+      <div className="app-shell">
+        <Sidebar nickname={nickname} />
+        <div className="app-main">
+          <form className="new-project-form" style={{ margin: '40px auto', maxWidth: '640px' }} onSubmit={handleSubmit}>
+            <h1>Post a project</h1>
 
-        <form className="new-project-form" onSubmit={handleSubmit}>
-          <h1>Post a project</h1>
+            <div className="field">
+              <label>Title</label>
+              <input
+                type="text"
+                placeholder="e.g. Real-time chat app with WebSockets"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Title</label>
-            <input
-              type="text"
-              placeholder="e.g. Real-time chat app with WebSockets"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+            <div className="field">
+              <label>Description</label>
+              <textarea
+                className="form-textarea"
+                placeholder="What does it do? What did you learn building it? What feedback are you looking for?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Description</label>
-            <textarea
-              className="form-textarea"
-              placeholder="What does it do? What did you learn building it? What feedback are you looking for?"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+            <div className="field">
+              <label>Tech stack</label>
+              <input
+                type="text"
+                placeholder="e.g. React, Node.js, PostgreSQL (comma separated)"
+                value={techStack}
+                onChange={(e) => setTechStack(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Tech stack</label>
-            <input
-              type="text"
-              placeholder="e.g. React, Node.js, PostgreSQL (comma separated)"
-              value={techStack}
-              onChange={(e) => setTechStack(e.target.value)}
-            />
-          </div>
+            <div className="field">
+              <label>GitHub link (optional)</label>
+              <input
+                type="url"
+                placeholder="https://github.com/you/project"
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>GitHub link (optional)</label>
-            <input
-              type="url"
-              placeholder="https://github.com/you/project"
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-            />
-          </div>
+            <div className="field">
+              <label>Live demo link (optional)</label>
+              <input
+                type="url"
+                placeholder="https://your-demo.vercel.app"
+                value={demoUrl}
+                onChange={(e) => setDemoUrl(e.target.value)}
+              />
+            </div>
 
-          <div className="field">
-            <label>Live demo link (optional)</label>
-            <input
-              type="url"
-              placeholder="https://your-demo.vercel.app"
-              value={demoUrl}
-              onChange={(e) => setDemoUrl(e.target.value)}
-            />
-          </div>
+            {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
 
-          {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
-
-          <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
-            {saving ? 'Posting…' : 'Post project'}
-          </button>
-        </form>
+            <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
+              {saving ? 'Posting…' : 'Post project'}
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );

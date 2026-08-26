@@ -13,6 +13,11 @@ export default function Projects() {
 
   useEffect(() => {
     async function loadProjects() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setNickname(session.user.user_metadata?.nickname || session.user.email);
+      }
+
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -26,12 +31,6 @@ export default function Projects() {
       setLoading(false);
     }
     loadProjects();
-
-    async function loadNickname() {
-      const { data: { session } } = await supabase.auth.getSession();
-      setNickname(session?.user?.user_metadata?.nickname || '');
-    }
-    loadNickname();
   }, []);
 
   return (
@@ -41,12 +40,10 @@ export default function Projects() {
       </Head>
       <div className="app-shell">
         <Sidebar nickname={nickname} />
-
-        <main className="app-main">
-          <div className="projects-page">
-            <div className="projects-header">
+        <div className="app-main">
+          <div style={{ padding: '40px 5vw', maxWidth: '1040px' }}>
+            <div className="projects-header" style={{ margin: '0 0 40px' }}>
               <h1>Projects</h1>
-              <button className="btn btn-solid" onClick={() => router.push('/new-project')}>+ New project</button>
             </div>
 
             {loading && <div className="projects-empty">Loading projects…</div>}
@@ -87,7 +84,7 @@ export default function Projects() {
               </div>
             )}
           </div>
-        </main>
+        </div>
       </div>
     </>
   );
