@@ -63,9 +63,15 @@ export default function Projects() {
                     key={p.id}
                     onClick={() => router.push(`/project/${p.id}`)}
                   >
-                    <div className="project-card-top">
+                      <div className="project-card-top">
                       <h3>{p.title}</h3>
-                      <span className="project-author">by {p.author_nickname}</span>
+                      <span
+                        className="project-author"
+                        onClick={(e) => { e.stopPropagation(); router.push(`/user/${p.user_id}`); }}
+                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        by {p.author_nickname}
+                      </span>
                     </div>
                     <p className="project-desc">{p.description}</p>
                     {p.tech_stack && (

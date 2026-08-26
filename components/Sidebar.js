@@ -60,6 +60,13 @@ export default function Sidebar({ nickname }) {
         >
           <i className="ti ti-messages"></i>
         </button>
+        <button
+          className={`sidebar-icon-btn ${router.pathname === '/profile' ? 'active' : ''}`}
+          onClick={() => router.push('/profile')}
+          title="Your profile"
+        >
+          <i className="ti ti-user"></i>
+        </button>
       </div>
 
       <div className="sidebar-footer">
