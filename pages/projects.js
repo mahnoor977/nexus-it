@@ -6,12 +6,14 @@ import Sidebar from '../components/Sidebar';
 
 export default function Projects() {
   const router = useRouter();
-  const [projects, setProjects] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [nickname, setNickname] = useState('');
   const [currentUserId, setCurrentUserId] = useState(null);
   const [likedIds, setLikedIds] = useState(new Set());
+  const [followingIds, setFollowingIds] = useState(new Set());
+  const [activeTab, setActiveTab] = useState('recent');
 
   useEffect(() => {
     async function load() {
@@ -19,6 +21,12 @@ export default function Projects() {
       if (session) {
         setNickname(session.user.user_metadata?.nickname || session.user.email);
         setCurrentUserId(session.user.id);
+
+        const { data: followingData } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', session.user.id);
+        setFollowingIds(new Set((followingData || []).map((f) => f.following_id)));
       }
 
       const { data: projectsData, error: projectsError } = await supabase
@@ -59,12 +67,10 @@ export default function Projects() {
         score: (likeCounts[p.id] || 0) + (commentCounts[p.id] || 0) * 2,
       }));
 
-      withScores.sort((a, b) => b.score - a.score);
-      const topId = withScores.length > 0 && withScores[0].score > 0 ? withScores[0].id : null;
+      const scoredCopy = [...withScores].sort((a, b) => b.score - a.score);
+      const topId = scoredCopy.length > 0 && scoredCopy[0].score > 0 ? scoredCopy[0].id : null;
 
-      withScores.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      setProjects(withScores.map((p) => ({ ...p, isTop: p.id === topId })));
+      setAllProjects(withScores.map((p) => ({ ...p, isTop: p.id === topId })));
       setLikedIds(myLikes);
       setLoading(false);
     }
@@ -85,14 +91,21 @@ export default function Projects() {
       const newLiked = new Set(likedIds);
       newLiked.delete(projectId);
       setLikedIds(newLiked);
-      setProjects(projects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount - 1 } : p));
+      setAllProjects(allProjects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount - 1 } : p));
     } else {
       await supabase.from('project_likes').insert({ project_id: projectId, user_id: currentUserId });
       const newLiked = new Set(likedIds);
       newLiked.add(projectId);
       setLikedIds(newLiked);
-      setProjects(projects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount + 1 } : p));
+      setAllProjects(allProjects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount + 1 } : p));
     }
+  }
+
+  let visibleProjects = allProjects;
+  if (activeTab === 'trending') {
+    visibleProjects = [...allProjects].sort((a, b) => b.score - a.score);
+  } else if (activeTab === 'following') {
+    visibleProjects = allProjects.filter((p) => followingIds.has(p.user_id));
   }
 
   return (
@@ -104,22 +117,41 @@ export default function Projects() {
         <Sidebar nickname={nickname} />
         <div className="app-main">
           <div style={{ padding: '40px 5vw', maxWidth: '1040px' }}>
-            <div className="projects-header" style={{ margin: '0 0 40px' }}>
+            <div className="projects-header" style={{ margin: '0 0 24px' }}>
               <h1>Projects</h1>
+            </div>
+
+            <div style={{ display: 'flex', gap: '20px', borderBottom: '1px solid var(--line)', marginBottom: '24px' }}>
+              {['recent', 'trending', 'following'].map((tab) => (
+                <span
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    fontSize: '13px', cursor: 'pointer', paddingBottom: '10px', textTransform: 'capitalize',
+                    color: activeTab === tab ? 'var(--text)' : 'var(--muted)',
+                    fontWeight: activeTab === tab ? 500 : 400,
+                    borderBottom: activeTab === tab ? '2px solid var(--tea)' : '2px solid transparent',
+                  }}
+                >
+                  {tab}
+                </span>
+              ))}
             </div>
 
             {loading && <div className="projects-empty">Loading projects…</div>}
             {error && <div className="projects-empty">Couldn't load projects: {error}</div>}
 
-            {!loading && !error && projects.length === 0 && (
+            {!loading && !error && visibleProjects.length === 0 && (
               <div className="projects-empty">
-                No projects yet — be the first to post one.
+                {activeTab === 'following'
+                  ? "You're not following anyone with projects yet — follow builders from their profile."
+                  : "No projects yet — be the first to post one."}
               </div>
             )}
 
-            {!loading && projects.length > 0 && (
+            {!loading && visibleProjects.length > 0 && (
               <div className="projects-list">
-                {projects.map((p) => (
+                {visibleProjects.map((p) => (
                   <div
                     className="project-card project-card-link"
                     key={p.id}
