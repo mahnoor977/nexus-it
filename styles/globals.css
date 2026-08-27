@@ -625,3 +625,15 @@ h1.dash-welcome span{color:var(--tea);}
   background:rgba(184,134,62,0.14);padding:3px 10px;border-radius:20px;
   margin-bottom:10px;font-family:'IBM Plex Mono',monospace;
 }
+
+/* ---------- COLLABORATORS ---------- */
+.collab-section{margin:20px 0;padding:16px 18px;background:var(--panel);border:1px solid var(--line);}
+.collab-section h3{font-size:14px;margin-bottom:10px;}
+.collab-request-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);}
+.collab-request-row:last-child{border-bottom:none;}
+.collab-actions{display:flex;gap:8px;}
+.collab-badge{
+  font-size:11px;padding:3px 9px;border-radius:20px;font-family:'IBM Plex Mono',monospace;
+}
+.collab-badge.approved{background:rgba(184,134,62,0.14);color:var(--tea-bright);}
+.collab-badge.pending{background:rgba(0,0,0,0.06);color:var(--muted);}

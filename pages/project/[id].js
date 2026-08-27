@@ -19,6 +19,9 @@ export default function ProjectDetail() {
   const [deleting, setDeleting] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [liked, setLiked] = useState(false);
+  const [collabRequests, setCollabRequests] = useState([]);
+  const [myRequestStatus, setMyRequestStatus] = useState(null);
+  const [requesting, setRequesting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -48,17 +51,25 @@ export default function ProjectDetail() {
         .select('*')
         .eq('project_id', id)
         .order('created_at', { ascending: true });
-
       if (!commentsError) setComments(commentsData);
 
       const { data: likesData } = await supabase
         .from('project_likes')
         .select('user_id')
         .eq('project_id', id);
-
       setLikeCount((likesData || []).length);
+      if (session) setLiked((likesData || []).some((l) => l.user_id === session.user.id));
+
+      const { data: collabData } = await supabase
+        .from('collaboration_requests')
+        .select('*')
+        .eq('project_id', id)
+        .order('created_at', { ascending: true });
+
+      setCollabRequests(collabData || []);
       if (session) {
-        setLiked((likesData || []).some((l) => l.user_id === session.user.id));
+        const mine = (collabData || []).find((r) => r.requester_id === session.user.id);
+        if (mine) setMyRequestStatus(mine.status);
       }
 
       setLoading(false);
@@ -68,11 +79,7 @@ export default function ProjectDetail() {
   }, [id]);
 
   async function handleLike() {
-    if (!currentUserId) {
-      router.push('/');
-      return;
-    }
-
+    if (!currentUserId) { router.push('/'); return; }
     if (liked) {
       await supabase.from('project_likes').delete().eq('project_id', id).eq('user_id', currentUserId);
       setLiked(false);
@@ -87,65 +94,69 @@ export default function ProjectDetail() {
   async function handlePostComment() {
     const trimmed = commentText.trim();
     if (!trimmed) return;
-
-    if (!currentUserId) {
-      router.push('/');
-      return;
-    }
+    if (!currentUserId) { router.push('/'); return; }
 
     setPosting(true);
     const { data, error } = await supabase
       .from('comments')
-      .insert({
-        project_id: id,
-        user_id: currentUserId,
-        author_nickname: nickname,
-        content: trimmed,
-      })
+      .insert({ project_id: id, user_id: currentUserId, author_nickname: nickname, content: trimmed })
       .select()
       .single();
-
     setPosting(false);
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
+    if (error) { setError(error.message); return; }
     setComments([...comments, data]);
     setCommentText('');
   }
 
   async function handleDeleteComment(commentId) {
     const { error } = await supabase.from('comments').delete().eq('id', commentId);
-    if (!error) {
-      setComments(comments.filter((c) => c.id !== commentId));
-    }
+    if (!error) setComments(comments.filter((c) => c.id !== commentId));
   }
 
   async function handleDeleteProject() {
     const confirmed = window.confirm('Delete this project? This cannot be undone.');
     if (!confirmed) return;
-
     setDeleting(true);
     const { error } = await supabase.from('projects').delete().eq('id', id);
     setDeleting(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
+    if (error) { setError(error.message); return; }
     router.push('/projects');
   }
 
-  if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
+  async function handleRequestCollab() {
+    if (!currentUserId) { router.push('/'); return; }
+    setRequesting(true);
+    const { data, error } = await supabase
+      .from('collaboration_requests')
+      .insert({ project_id: id, requester_id: currentUserId, requester_nickname: nickname })
+      .select()
+      .single();
+    setRequesting(false);
+
+    if (!error) {
+      setCollabRequests([...collabRequests, data]);
+      setMyRequestStatus('pending');
+    }
   }
 
-  if (error || !project) {
-    return <div className="dash-loading mono">{error || 'Project not found.'}</div>;
+  async function handleUpdateRequest(requestId, status) {
+    const { error } = await supabase
+      .from('collaboration_requests')
+      .update({ status })
+      .eq('id', requestId);
+
+    if (!error) {
+      setCollabRequests(collabRequests.map((r) => r.id === requestId ? { ...r, status } : r));
+    }
   }
+
+  if (loading) return <div className="dash-loading mono">Loading…</div>;
+  if (error || !project) return <div className="dash-loading mono">{error || 'Project not found.'}</div>;
+
+  const isOwner = project.user_id === currentUserId;
+  const approvedCollabs = collabRequests.filter((r) => r.status === 'approved');
+  const pendingCollabs = collabRequests.filter((r) => r.status === 'pending');
 
   return (
     <>
@@ -166,7 +177,7 @@ export default function ProjectDetail() {
                 >
                   by {project.author_nickname}
                 </span>
-                {project.user_id === currentUserId ? (
+                {isOwner ? (
                   <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
                     {deleting ? 'deleting…' : 'delete project'}
                   </button>
@@ -203,6 +214,49 @@ export default function ProjectDetail() {
             <div className="project-links">
               {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}
               {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo →</a>}
+            </div>
+
+            <div className="collab-section">
+              <h3>Collaborators {approvedCollabs.length > 0 && `(${approvedCollabs.length})`}</h3>
+
+              {approvedCollabs.length > 0 && (
+                <div style={{ marginBottom: '12px' }}>
+                  {approvedCollabs.map((c) => (
+                    <div key={c.id} className="collab-request-row">
+                      <span>{c.requester_nickname}</span>
+                      <span className="collab-badge approved">Collaborator</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {isOwner && pendingCollabs.length > 0 && (
+                <div style={{ marginBottom: '12px' }}>
+                  {pendingCollabs.map((c) => (
+                    <div key={c.id} className="collab-request-row">
+                      <span>{c.requester_nickname} wants to join</span>
+                      <div className="collab-actions">
+                        <button className="btn btn-solid" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'approved')}>Approve</button>
+                        <button className="btn" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'declined')}>Decline</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!isOwner && currentUserId && (
+                myRequestStatus === 'pending' ? (
+                  <span className="collab-badge pending">Request pending</span>
+                ) : myRequestStatus === 'approved' ? (
+                  <span className="collab-badge approved">You're a collaborator</span>
+                ) : myRequestStatus === 'declined' ? (
+                  <span className="collab-badge pending">Request declined</span>
+                ) : (
+                  <button className="btn" onClick={handleRequestCollab} disabled={requesting}>
+                    {requesting ? 'Requesting…' : 'Request to join'}
+                  </button>
+                )
+              )}
             </div>
 
             <div className="comments-section">
