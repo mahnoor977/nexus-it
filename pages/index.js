@@ -136,6 +136,7 @@ const bodyHtml = `
     <div class="form-error" id="signup-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
     <button class="btn btn-solid" id="signup-submit-btn" onclick="goToVerify()">Create account</button>
     <button class="btn" id="github-signup-btn" style="margin-top:10px;width:100%;">Continue with GitHub</button>
+    <button class="btn" id="google-signup-btn" style="margin-top:10px;width:100%;">Continue with Google</button>
     <div class="modal-switch">Already a member? <a href="#" id="switch-to-login">Log in</a></div>
   </div>
 
@@ -154,6 +155,7 @@ const bodyHtml = `
     <div class="form-error" id="login-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
     <button class="btn btn-solid" id="login-submit-btn">Log in</button>
     <button class="btn" id="github-login-btn" style="margin-top:10px;width:100%;">Continue with GitHub</button>
+    <button class="btn" id="google-login-btn" style="margin-top:10px;width:100%;">Continue with Google</button>
     <div class="modal-switch">New here? <a href="#" id="switch-to-signup">Create an account</a></div>
   </div>
 
@@ -442,6 +444,15 @@ export default function Home() {
     console.error('GitHub login error:', error);
   }
 }
+  async function handleGoogleLogin(){
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/dashboard` }
+  });
+  if(error){
+    console.error('Google login error:', error);
+  }
+}
   async function handleLogin(){
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -484,6 +495,8 @@ export default function Home() {
   document.getElementById('login-submit-btn').addEventListener('click', handleLogin);
   document.getElementById('github-signup-btn').addEventListener('click', handleGitHubLogin);
   document.getElementById('github-login-btn').addEventListener('click', handleGitHubLogin);
+  document.getElementById('google-signup-btn').addEventListener('click', handleGoogleLogin);
+  document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin); 
 
   const digits = document.querySelectorAll('.code-digit');
   digits.forEach((d,idx)=>{
