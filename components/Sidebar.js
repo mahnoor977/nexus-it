@@ -16,6 +16,13 @@ export default function Sidebar({ nickname }) {
       <div className="sidebar-logo" onClick={() => router.push('/dashboard')}>
         <i className="ti ti-hexagon"></i>
       </div>
+            <button
+        className={`sidebar-icon-btn ${router.pathname === '/search' ? 'active' : ''}`}
+        onClick={() => router.push('/search')}
+        title="Search"
+      >
+        <i className="ti ti-search"></i>
+      </button>
 
       <div className="sidebar-nav">
         <button
