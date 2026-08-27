@@ -15,6 +15,10 @@ export default function PublicProfile() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [myNickname, setMyNickname] = useState('');
   const [error, setError] = useState('');
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -44,13 +48,49 @@ export default function PublicProfile() {
         .select('*')
         .eq('user_id', id)
         .order('created_at', { ascending: false });
-
       setProjects(projectsData || []);
+
+      const { data: followersData } = await supabase
+        .from('follows')
+        .select('follower_id')
+        .eq('following_id', id);
+      setFollowerCount((followersData || []).length);
+      if (session) {
+        setIsFollowing((followersData || []).some((f) => f.follower_id === session.user.id));
+      }
+
+      const { data: followingData } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', id);
+      setFollowingCount((followingData || []).length);
+
       setLoading(false);
     }
 
     load();
   }, [id]);
+
+  async function handleFollowToggle() {
+    if (!currentUserId) {
+      router.push('/');
+      return;
+    }
+
+    setFollowBusy(true);
+
+    if (isFollowing) {
+      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', id);
+      setIsFollowing(false);
+      setFollowerCount((c) => c - 1);
+    } else {
+      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: id });
+      setIsFollowing(true);
+      setFollowerCount((c) => c + 1);
+    }
+
+    setFollowBusy(false);
+  }
 
   if (loading) {
     return <div className="dash-loading mono">Loading…</div>;
@@ -75,7 +115,9 @@ export default function PublicProfile() {
               <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
               <div className="profile-name-block">
                 <h1>{profile.nickname || 'Unnamed builder'}</h1>
-                <div className="profile-meta">{projects.length} project{projects.length !== 1 ? 's' : ''}</div>
+                <div className="profile-meta">
+                  {followerCount} follower{followerCount !== 1 ? 's' : ''} · {followingCount} following · {projects.length} project{projects.length !== 1 ? 's' : ''}
+                </div>
               </div>
               {isOwnProfile ? (
                 <button
@@ -87,13 +129,21 @@ export default function PublicProfile() {
                 </button>
               ) : (
                 currentUserId && (
-                  <button
-                    className="btn btn-solid"
-                    style={{ marginLeft: 'auto' }}
-                    onClick={() => router.push(`/messages/${id}?nickname=${encodeURIComponent(profile.nickname || '')}`)}
-                  >
-                    Message
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                    <button
+                      className={isFollowing ? 'btn' : 'btn btn-solid'}
+                      onClick={handleFollowToggle}
+                      disabled={followBusy}
+                    >
+                      {isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => router.push(`/messages/${id}?nickname=${encodeURIComponent(profile.nickname || '')}`)}
+                    >
+                      Message
+                    </button>
+                  </div>
                 )
               )}
             </div>

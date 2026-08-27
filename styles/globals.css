@@ -609,3 +609,19 @@ h1.dash-welcome span{color:var(--tea);}
 }
 .profile-bio-textarea:focus{border-color:var(--tea);}
 .profile-tags-display{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+
+/* ---------- LIKES & RANKING ---------- */
+.like-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:none;border:none;cursor:pointer;
+  font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;
+  padding:4px 0;transition:color .2s;
+}
+.like-btn:hover{color:var(--tea);}
+.like-btn.liked{color:#c0392b;}
+.project-card-footer{display:flex;gap:18px;margin-top:12px;align-items:center;}
+.top-ranked-badge{
+  display:inline-block;font-size:10px;color:var(--tea-bright);
+  background:rgba(184,134,62,0.14);padding:3px 10px;border-radius:20px;
+  margin-bottom:10px;font-family:'IBM Plex Mono',monospace;
+}

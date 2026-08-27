@@ -17,6 +17,8 @@ export default function ProjectDetail() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [nickname, setNickname] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -48,11 +50,39 @@ export default function ProjectDetail() {
         .order('created_at', { ascending: true });
 
       if (!commentsError) setComments(commentsData);
+
+      const { data: likesData } = await supabase
+        .from('project_likes')
+        .select('user_id')
+        .eq('project_id', id);
+
+      setLikeCount((likesData || []).length);
+      if (session) {
+        setLiked((likesData || []).some((l) => l.user_id === session.user.id));
+      }
+
       setLoading(false);
     }
 
     load();
   }, [id]);
+
+  async function handleLike() {
+    if (!currentUserId) {
+      router.push('/');
+      return;
+    }
+
+    if (liked) {
+      await supabase.from('project_likes').delete().eq('project_id', id).eq('user_id', currentUserId);
+      setLiked(false);
+      setLikeCount((c) => c - 1);
+    } else {
+      await supabase.from('project_likes').insert({ project_id: id, user_id: currentUserId });
+      setLiked(true);
+      setLikeCount((c) => c + 1);
+    }
+  }
 
   async function handlePostComment() {
     const trimmed = commentText.trim();
@@ -163,6 +193,12 @@ export default function ProjectDetail() {
                 ))}
               </div>
             )}
+
+            <div className="project-card-footer" style={{ marginBottom: '10px' }}>
+              <button className={`like-btn ${liked ? 'liked' : ''}`} onClick={handleLike}>
+                <i className="ti ti-heart"></i> {likeCount}
+              </button>
+            </div>
 
             <div className="project-links">
               {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}

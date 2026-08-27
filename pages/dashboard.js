@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [editingNickname, setEditingNickname] = useState(false);
+  const [topProject, setTopProject] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +34,28 @@ export default function Dashboard() {
     }
 
     loadUser();
+      async function loadTopProject() {
+      const { data: projectsData } = await supabase.from('projects').select('*');
+      const { data: likesData } = await supabase.from('project_likes').select('project_id');
+      const { data: commentsData } = await supabase.from('comments').select('project_id');
+
+      if (!projectsData || projectsData.length === 0) return;
+
+      const likeCounts = {};
+      (likesData || []).forEach((l) => { likeCounts[l.project_id] = (likeCounts[l.project_id] || 0) + 1; });
+      const commentCounts = {};
+      (commentsData || []).forEach((c) => { commentCounts[c.project_id] = (commentCounts[c.project_id] || 0) + 1; });
+
+      const scored = projectsData.map((p) => ({
+        ...p,
+        likeCount: likeCounts[p.id] || 0,
+        score: (likeCounts[p.id] || 0) + (commentCounts[p.id] || 0) * 2,
+      }));
+
+      scored.sort((a, b) => b.score - a.score);
+      if (scored[0].score > 0) setTopProject(scored[0]);
+    }
+    loadTopProject();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) router.replace('/');
@@ -149,6 +172,21 @@ export default function Dashboard() {
               </div>
             )}
 
+                        {topProject && (
+              <div className="prompt-card" style={{ marginTop: '16px', borderColor: 'rgba(184,134,62,0.4)' }}>
+                <span className="top-ranked-badge">🏆 Top ranked</span>
+                <div
+                  className="prompt-text"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => router.push(`/project/${topProject.id}`)}
+                >
+                  {topProject.title}
+                </div>
+                <span className="project-meta" style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                  by {topProject.author_nickname} · {topProject.likeCount} likes
+                </span>
+              </div>
+            )}
             <div className="quick-actions">
               <button className="btn btn-solid" onClick={() => router.push('/new-project')}>+ New project</button>
               <button className="btn" onClick={() => router.push('/projects')}>View projects</button>
