@@ -129,7 +129,13 @@ export default function ProjectDetail() {
             <div className="project-detail-top">
               <h1>{project.title}</h1>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                <span className="project-author">by {project.author_nickname}</span>
+                <span
+                  className="project-author"
+                  onClick={() => router.push(`/user/${project.user_id}`)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  by {project.author_nickname}
+                </span>
                 {project.user_id === currentUserId ? (
                   <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
                     {deleting ? 'deleting…' : 'delete project'}
@@ -187,7 +193,13 @@ export default function ProjectDetail() {
                   {comments.map((c) => (
                     <div className="comment-item" key={c.id}>
                       <div className="comment-item-top">
-                        <span className="comment-author">{c.author_nickname}</span>
+                        <span
+                          className="comment-author"
+                          onClick={() => router.push(`/user/${c.user_id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {c.author_nickname}
+                        </span>
                         {c.user_id === currentUserId && (
                           <button className="comment-delete" onClick={() => handleDeleteComment(c.id)}>
                             delete
