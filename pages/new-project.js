@@ -8,6 +8,7 @@ export default function NewProject() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [nickname, setNickname] = useState('');
+  const [userId, setUserId] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [techStack, setTechStack] = useState('');
@@ -15,6 +16,7 @@ export default function NewProject() {
   const [demoUrl, setDemoUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [mediaFiles, setMediaFiles] = useState([]);
 
   useEffect(() => {
     async function checkAuth() {
@@ -23,12 +25,26 @@ export default function NewProject() {
         router.replace('/');
         return;
       }
-      const nick = session.user.user_metadata?.nickname || session.user.email;
-      setNickname(nick);
+      setUserId(session.user.id);
+      setNickname(session.user.user_metadata?.nickname || session.user.email);
       setLoading(false);
     }
     checkAuth();
   }, [router]);
+
+  function handleFileSelect(e) {
+    const files = Array.from(e.target.files || []);
+    const withPreviews = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      type: file.type.startsWith('video') ? 'video' : 'image',
+    }));
+    setMediaFiles([...mediaFiles, ...withPreviews].slice(0, 6));
+  }
+
+  function removeMediaFile(index) {
+    setMediaFiles(mediaFiles.filter((_, i) => i !== index));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -40,26 +56,46 @@ export default function NewProject() {
     }
 
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
 
-    const { error } = await supabase.from('projects').insert({
-      user_id: session.user.id,
-      author_nickname: nickname,
-      title: title.trim(),
-      description: description.trim(),
-      tech_stack: techStack.trim() || null,
-      github_url: githubUrl.trim() || null,
-      demo_url: demoUrl.trim() || null,
-    });
+    const { data: projectData, error: projectError } = await supabase
+      .from('projects')
+      .insert({
+        user_id: userId,
+        author_nickname: nickname,
+        title: title.trim(),
+        description: description.trim(),
+        tech_stack: techStack.trim() || null,
+        github_url: githubUrl.trim() || null,
+        demo_url: demoUrl.trim() || null,
+      })
+      .select()
+      .single();
 
-    setSaving(false);
-
-    if (error) {
-      setError(error.message);
+    if (projectError) {
+      setError(projectError.message);
+      setSaving(false);
       return;
     }
 
-    router.push('/projects');
+    for (const item of mediaFiles) {
+      const filePath = `${userId}/${projectData.id}/${Date.now()}-${item.file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('project-media')
+        .upload(filePath, item.file);
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from('project-media').getPublicUrl(filePath);
+        await supabase.from('project_media').insert({
+          project_id: projectData.id,
+          user_id: userId,
+          media_url: urlData.publicUrl,
+          media_type: item.type,
+        });
+      }
+    }
+
+    setSaving(false);
+    router.push(`/project/${projectData.id}`);
   }
 
   if (loading) {
@@ -125,6 +161,45 @@ export default function NewProject() {
                 value={demoUrl}
                 onChange={(e) => setDemoUrl(e.target.value)}
               />
+            </div>
+
+            <div className="field">
+              <label>Screenshots or short videos (optional, up to 6)</label>
+              <label className="media-upload-area" htmlFor="media-input">
+                <i className="ti ti-photo-plus" style={{ fontSize: '22px', color: 'var(--muted)' }}></i>
+                <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '8px' }}>
+                  Click to add images or short video clips
+                </div>
+              </label>
+              <input
+                id="media-input"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+              />
+
+              {mediaFiles.length > 0 && (
+                <div className="media-preview-grid">
+                  {mediaFiles.map((item, i) => (
+                    <div className="media-preview-item" key={i}>
+                      {item.type === 'video' ? (
+                        <video src={item.preview} muted />
+                      ) : (
+                        <img src={item.preview} alt="" />
+                      )}
+                      <button
+                        type="button"
+                        className="media-preview-remove"
+                        onClick={() => removeMediaFile(i)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}

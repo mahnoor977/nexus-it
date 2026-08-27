@@ -9,6 +9,7 @@ export default function ProjectDetail() {
   const { id } = router.query;
 
   const [project, setProject] = useState(null);
+  const [media, setMedia] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -45,6 +46,13 @@ export default function ProjectDetail() {
         return;
       }
       setProject(projectData);
+
+      const { data: mediaData } = await supabase
+        .from('project_media')
+        .select('*')
+        .eq('project_id', id)
+        .order('created_at', { ascending: true });
+      setMedia(mediaData || []);
 
       const { data: commentsData, error: commentsError } = await supabase
         .from('comments')
@@ -194,6 +202,20 @@ export default function ProjectDetail() {
                 )}
               </div>
             </div>
+
+            {media.length > 0 && (
+              <div className="media-gallery">
+                {media.map((m) => (
+                  <div className="media-gallery-item" key={m.id}>
+                    {m.media_type === 'video' ? (
+                      <video src={m.media_url} controls />
+                    ) : (
+                      <img src={m.media_url} alt={project.title} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <p className="project-desc">{project.description}</p>
 
