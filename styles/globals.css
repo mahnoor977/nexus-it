@@ -13,6 +13,20 @@ html{scroll-behavior:smooth;}
   --line:#EDEBE6;
   --radius:10px;
 }
+[data-theme="dark"]{
+  --black:#17140F;
+  --panel:#211D16;
+  --panel-2:#2A251C;
+  --army:#3D3627;
+  --army-dark:#2E2A20;
+  --army-light:#4A4230;
+  --tea:#D9A857;
+  --tea-bright:#EBC383;
+  --muted:#9C9482;
+  --text:#F2ECDF;
+  --line:#332E23;
+  --radius:10px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;font-size:18px;}
 body{

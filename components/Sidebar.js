@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-
+import ThemeToggle from './ThemeToggle';
 export default function Sidebar({ nickname }) {
   const router = useRouter();
 
@@ -84,6 +84,13 @@ export default function Sidebar({ nickname }) {
       </div>
 
       <div className="sidebar-footer">
+        <div className="sidebar-avatar">{initials}</div>
+        <button className="sidebar-icon-btn sidebar-logout" onClick={handleLogout} title="Log out">
+          <i className="ti ti-logout"></i>
+        </button>
+      </div>
+        <div className="sidebar-footer">
+        <ThemeToggle />
         <div className="sidebar-avatar">{initials}</div>
         <button className="sidebar-icon-btn sidebar-logout" onClick={handleLogout} title="Log out">
           <i className="ti ti-logout"></i>
