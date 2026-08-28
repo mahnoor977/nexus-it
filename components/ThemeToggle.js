@@ -18,7 +18,7 @@ export default function ThemeToggle() {
 
   return (
     <button className="sidebar-icon-btn" onClick={toggleTheme} title="Toggle theme">
-      <i className={`ti ${theme === 'light' ? 'ti-moon' : 'ti-sun'}`}></i>
+    <i className={`ti ${theme === 'light' ? 'ti-moon-stars' : 'ti-sun'}`}></i>
     </button>
   );
 }
