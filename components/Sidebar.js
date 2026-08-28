@@ -32,6 +32,13 @@ export default function Sidebar({ nickname }) {
         >
           <i className="ti ti-home"></i>
         </button>
+                <button
+          className={`sidebar-icon-btn ${router.pathname.startsWith('/posts') ? 'active' : ''}`}
+          onClick={() => router.push('/posts')}
+          title="Posts"
+        >
+          <i className="ti ti-news"></i>
+        </button>
         <button
           className={`sidebar-icon-btn ${router.pathname === '/projects' ? 'active' : ''}`}
           onClick={() => router.push('/projects')}

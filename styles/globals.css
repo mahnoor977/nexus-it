@@ -669,3 +669,23 @@ h1.dash-welcome span{color:var(--tea);}
 .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:20px 0;}
 .media-gallery-item{border-radius:8px;overflow:hidden;background:var(--panel-2);}
 .media-gallery-item img, .media-gallery-item video{width:100%;height:160px;object-fit:cover;display:block;}
+
+/* ---------- POSTS / BLOG FEED ---------- */
+.post-card{background:var(--panel);border:1px solid var(--line);padding:20px;margin-bottom:14px;}
+.post-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.post-card-header .post-author-name{font-size:13.5px;font-weight:500;color:var(--text);cursor:pointer;}
+.post-card-header .post-time{font-size:11.5px;color:var(--muted);margin-left:auto;}
+.post-content{font-size:14.5px;line-height:1.6;color:var(--text);margin-bottom:12px;white-space:pre-wrap;}
+.post-hashtags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.post-hashtag{font-size:12px;color:var(--tea-bright);}
+.post-media-grid{display:grid;gap:6px;margin-bottom:12px;border-radius:8px;overflow:hidden;}
+.post-media-grid.count-1{grid-template-columns:1fr;}
+.post-media-grid.count-2{grid-template-columns:1fr 1fr;}
+.post-media-grid.count-3plus{grid-template-columns:1fr 1fr;}
+.post-media-grid img, .post-media-grid video{width:100%;height:220px;object-fit:cover;display:block;}
+.post-compose-box{background:var(--panel);border:1px solid var(--line);padding:18px;margin-bottom:20px;}
+.post-compose-box textarea{
+  width:100%;border:none;outline:none;background:transparent;resize:vertical;
+  font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;color:var(--text);min-height:70px;
+}
+.post-compose-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
