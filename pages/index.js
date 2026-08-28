@@ -477,12 +477,12 @@ export default function Home() {
     }
 
     closeModal();
-    router.push('/dashboard');
+    router.push('/projects');
   }
 
-  function continueToDashboard(){
+    function continueToDashboard(){
     closeModal();
-    router.push('/dashboard');
+    router.push('/projects');
   }
 
   window.openModal = openModal;
