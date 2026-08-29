@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
 import Sidebar from '../../components/Sidebar';
 import Avatar from '../../components/Avatar';
+import ReportBlockMenu from '../../components/ReportBlockMenu';
 
 export default function PublicProfile() {
   const router = useRouter();
@@ -120,6 +121,7 @@ export default function PublicProfile() {
                 </div>
               </div>
               {isOwnProfile ? (
+                
                 <button
                   className="btn"
                   style={{ marginLeft: 'auto' }}

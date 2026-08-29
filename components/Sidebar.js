@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import ThemeToggle from './ThemeToggle';
+
 export default function Sidebar({ nickname }) {
   const router = useRouter();
 
@@ -16,7 +17,8 @@ export default function Sidebar({ nickname }) {
       <div className="sidebar-logo" onClick={() => router.push('/dashboard')}>
         <i className="ti ti-hexagon"></i>
       </div>
-            <button
+
+      <button
         className={`sidebar-icon-btn ${router.pathname === '/search' ? 'active' : ''}`}
         onClick={() => router.push('/search')}
         title="Search"
@@ -26,25 +28,25 @@ export default function Sidebar({ nickname }) {
 
       <div className="sidebar-nav">
         <button
-          className={`sidebar-icon-btn ${router.pathname === '/dashboard' ? 'active' : ''}`}
-          onClick={() => router.push('/dashboard')}
-          title="Feed"
+          className={`sidebar-icon-btn ${router.pathname === '/projects' ? 'active' : ''}`}
+          onClick={() => router.push('/projects')}
+          title="Home"
         >
           <i className="ti ti-home"></i>
         </button>
-                <button
+        <button
+          className={`sidebar-icon-btn ${router.pathname === '/dashboard' ? 'active' : ''}`}
+          onClick={() => router.push('/dashboard')}
+          title="Dashboard"
+        >
+          <i className="ti ti-layout-dashboard"></i>
+        </button>
+        <button
           className={`sidebar-icon-btn ${router.pathname.startsWith('/posts') ? 'active' : ''}`}
           onClick={() => router.push('/posts')}
           title="Posts"
         >
           <i className="ti ti-news"></i>
-        </button>
-        <button
-          className={`sidebar-icon-btn ${router.pathname === '/projects' ? 'active' : ''}`}
-          onClick={() => router.push('/projects')}
-          title="Projects"
-        >
-          <i className="ti ti-layout-grid"></i>
         </button>
         <button
           className="sidebar-icon-btn"
@@ -84,12 +86,6 @@ export default function Sidebar({ nickname }) {
       </div>
 
       <div className="sidebar-footer">
-        <div className="sidebar-avatar">{initials}</div>
-        <button className="sidebar-icon-btn sidebar-logout" onClick={handleLogout} title="Log out">
-          <i className="ti ti-logout"></i>
-        </button>
-      </div>
-        <div className="sidebar-footer">
         <ThemeToggle />
         <div className="sidebar-avatar">{initials}</div>
         <button className="sidebar-icon-btn sidebar-logout" onClick={handleLogout} title="Log out">
