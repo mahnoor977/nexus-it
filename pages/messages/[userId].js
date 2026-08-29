@@ -20,6 +20,7 @@ export default function Conversation() {
   const [attachedFile, setAttachedFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
+  const [activeMenuId, setActiveMenuId] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -177,11 +178,15 @@ export default function Conversation() {
               {messages.length === 0 && (
                 <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
               )}
-              {messages.map((m) => {
+                            {messages.map((m) => {
                 const isMine = m.sender_id === currentUserId;
                 return (
-                  <div key={m.id} className={`msg-wrap ${isMine ? 'user' : 'assistant'}`}>
-                    <div className="msg-actions">
+                  <div
+                    key={m.id}
+                    className={`msg-wrap ${isMine ? 'user' : 'assistant'}`}
+                    onClick={() => setActiveMenuId(activeMenuId === m.id ? null : m.id)}
+                  >
+                    <div className={`msg-actions ${activeMenuId === m.id ? 'menu-open' : ''}`}>
                       {m.content && (
                         <button className="msg-action-btn" onClick={() => handleCopy(m.content)} title="Copy">
                           <i className="ti ti-copy"></i>

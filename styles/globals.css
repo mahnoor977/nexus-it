@@ -738,11 +738,13 @@ h1.dash-welcome span{color:var(--tea);}
 
 /* ---------- MESSAGE ACTIONS ---------- */
 .msg-wrap{position:relative;}
-.msg-wrap:hover .msg-actions{opacity:1;}
+.msg-wrap{cursor:pointer;}
 .msg-actions{
-  position:absolute;top:-10px;display:flex;gap:4px;opacity:0;transition:opacity .15s;
+  position:absolute;top:-10px;display:none;gap:4px;
   background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
+.msg-actions.menu-open{display:flex;}
 .msg-wrap.user .msg-actions{right:0;}
 .msg-wrap.assistant .msg-actions{left:0;}
 .msg-action-btn{
