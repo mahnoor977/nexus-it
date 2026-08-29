@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -10,7 +10,7 @@ const bodyHtml = `
     <a class="link" href="#problem">Why</a>
     <a class="link" href="#features">What you get</a>
     <a class="link" href="#how">How it works</a>
-    <button class="btn" onclick="openModal('signup')">Join</button>
+    <button class="btn" id="nav-cta-btn" onclick="openModal('signup')">Join</button>
   </div>
 </nav>
 
@@ -21,7 +21,7 @@ const bodyHtml = `
     <p class="sub">A verified space to showcase mini-projects, find collaborators by skill, get real feedback, and ship things worth putting on your résumé — not another repo nobody sees. Open to builders everywhere, not just one campus.</p>
     <div class="hero-form">
       <input type="email" placeholder="you@email.com" id="hero-email">
-      <button onclick="openModal('signup')">Get Early Access</button>
+      <button id="hero-cta-btn" onclick="openModal('signup')">Get Early Access</button>
     </div>
     <div class="hero-note">// email-verified accounts · free to join · open worldwide</div>
   </div>
@@ -111,7 +111,7 @@ const bodyHtml = `
 <section class="cta-section reveal">
   <div class="eyebrow" style="justify-content:center;margin-bottom:20px;">Ready When You Are</div>
   <h2>Stop building in isolation.</h2>
-  <button class="btn btn-solid" style="padding:16px 34px;font-size:14px;" onclick="openModal('signup')">Join NEXUS-IT — it's free</button>
+  <button class="btn btn-solid" id="bottom-cta-btn" style="padding:16px 34px;font-size:14px;" onclick="openModal('signup')">Join NEXUS-IT — it's free</button>
 </section>
 
 <footer>
@@ -127,6 +127,11 @@ const bodyHtml = `
     <div class="field">
       <label>Email</label>
       <input type="email" placeholder="you@email.com" id="signup-email">
+    </div>
+    <div class="field">
+      <label>Nickname</label>
+      <input type="text" placeholder="e.g. mahnoor.dev" id="signup-nickname">
+      <div class="field-hint">// this is what others see, never your email</div>
     </div>
     <div class="field">
       <label>Password</label>
@@ -190,8 +195,35 @@ const bodyHtml = `
 
 export default function Home() {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isReturning, setIsReturning] = useState(false);
 
   useEffect(() => {
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace('/projects');
+        return;
+      }
+      setIsReturning(localStorage.getItem('nexus-returning-user') === 'true');
+      setCheckingAuth(false);
+    }
+    checkSession();
+  }, [router]);
+
+  useEffect(() => {
+    if (checkingAuth) return;
+
+    if (isReturning) {
+      ['nav-cta-btn', 'hero-cta-btn', 'bottom-cta-btn'].forEach((id) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.textContent = 'Log in';
+          btn.onclick = () => window.openModal('login');
+        }
+      });
+    }
+
     let rafId;
     let bootTimeoutId;
 
@@ -220,89 +252,6 @@ export default function Home() {
     entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
   }, {threshold:0.15});
   revealEls.forEach(el=>io.observe(el));
-
-  // ---------- Node network canvas ----------
-  // const canvas = document.getElementById('network-canvas');
-  // const ctx = canvas.getContext('2d');
-  // let W,H,nodes=[];
-  // const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // function resize(){
-  //   W = canvas.width = canvas.offsetWidth;
-  //   H = canvas.height = canvas.offsetHeight;
-  // }
-  // window.addEventListener('resize', resize);
-
-  // function initNodes(){
-  //   nodes = [];
-  //   const count = Math.max(28, Math.floor((W*H)/38000));
-  //   for(let i=0;i<count;i++){
-  //     nodes.push({
-  //       x: Math.random()*W,
-  //       y: Math.random()*H,
-  //       vx: (Math.random()-0.5)*0.25,
-  //       vy: (Math.random()-0.5)*0.25,
-  //       r: Math.random()*1.6+1
-  //     });
-  //   }
-  // }
-
-  // const mouse = {x:-9999,y:-9999};
-  // canvas.addEventListener('mousemove', e=>{
-  //   const rect = canvas.getBoundingClientRect();
-  //   mouse.x = e.clientX - rect.left;
-  //   mouse.y = e.clientY - rect.top;
-  // });
-  // canvas.addEventListener('mouseleave', ()=>{mouse.x=-9999;mouse.y=-9999;});
-
-  // function draw(){
-  //   ctx.clearRect(0,0,W,H);
-  //   nodes.forEach(n=>{
-  //     n.x += n.vx; n.y += n.vy;
-  //     if(n.x<0||n.x>W) n.vx*=-1;
-  //     if(n.y<0||n.y>H) n.vy*=-1;
-  //   });
-  //   for(let i=0;i<nodes.length;i++){
-  //     for(let j=i+1;j<nodes.length;j++){
-  //       const a=nodes[i], b=nodes[j];
-  //       const dx=a.x-b.x, dy=a.y-b.y;
-  //       const dist=Math.sqrt(dx*dx+dy*dy);
-  //       if(dist<140){
-  //         const opacity = (1-dist/140)*0.35;
-  //         ctx.strokeStyle = `rgba(30,58,95,${opacity})`;
-  //         ctx.lineWidth = 0.6;
-  //         ctx.beginPath();
-  //         ctx.moveTo(a.x,a.y);
-  //         ctx.lineTo(b.x,b.y);
-  //         ctx.stroke();
-  //       }
-  //     }
-  //     const dxm = nodes[i].x-mouse.x, dym = nodes[i].y-mouse.y;
-  //     const dm = Math.sqrt(dxm*dxm+dym*dym);
-  //     if(dm<160){
-  //       ctx.strokeStyle = `rgba(30,58,95,${(1-dm/160)*0.6})`;
-  //       ctx.lineWidth=0.8;
-  //       ctx.beginPath();
-  //       ctx.moveTo(nodes[i].x,nodes[i].y);
-  //       ctx.lineTo(mouse.x,mouse.y);
-  //       ctx.stroke();
-  //     }
-  //   }
-  //   nodes.forEach(n=>{
-  //     ctx.beginPath();
-  //     ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-  //     ctx.fillStyle = 'rgba(30,58,95,0.5)';
-  //     ctx.fill();
-  //   });
-  //   if(!prefersReduced) rafId = requestAnimationFrame(draw);
-  // }
-
-  // resize();
-  // initNodes();
-  // draw();
-  // if(prefersReduced){
-  //   draw();
-  // }
 
   // ---------- Modal logic ----------
   const overlay = document.getElementById('modal-overlay');
@@ -367,10 +316,11 @@ export default function Home() {
   async function goToVerify(){
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
+    const nickname = document.getElementById('signup-nickname').value.trim();
     hideError('signup-error');
 
-    if(!email || !password){
-      showError('signup-error', 'Please enter both an email and a password.');
+    if(!email || !password || !nickname){
+      showError('signup-error', 'Please fill in email, password, and a nickname.');
       return;
     }
     if(password.length < 8){
@@ -379,7 +329,11 @@ export default function Home() {
     }
 
     setBtnLoading('signup-submit-btn', true, 'Create account');
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { nickname } },
+    });
     setBtnLoading('signup-submit-btn', false, 'Create account');
 
     if(error){
@@ -420,6 +374,7 @@ export default function Home() {
 
     if (verifyModal) verifyModal.style.display = 'none';
     if (successModal) successModal.style.display = 'block';
+    localStorage.setItem('nexus-returning-user', 'true');
   }
 
   async function resendCode(){
@@ -438,7 +393,7 @@ export default function Home() {
   async function handleGitHubLogin(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
-    options: { redirectTo: `${window.location.origin}/dashboard` }
+    options: { redirectTo: `${window.location.origin}/projects` }
   });
   if(error){
     console.error('GitHub login error:', error);
@@ -447,7 +402,7 @@ export default function Home() {
   async function handleGoogleLogin(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${window.location.origin}/dashboard` }
+    options: { redirectTo: `${window.location.origin}/projects` }
   });
   if(error){
     console.error('Google login error:', error);
@@ -476,6 +431,7 @@ export default function Home() {
       return;
     }
 
+        localStorage.setItem('nexus-returning-user', 'true');
     closeModal();
     router.push('/projects');
   }
@@ -509,7 +465,11 @@ export default function Home() {
   });
 
       return () => {};
-  }, []);
+  }, [checkingAuth, isReturning]);
+
+    if (checkingAuth) {
+    return null;
+  }
 
   return (
     <>
