@@ -62,7 +62,7 @@ export default function Search() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div className="search-page-content">
+          <div className="search-page-content page-shell wide">
             <h1 style={{ marginBottom: '20px' }}>Search</h1>
 
             <div className="search-input-wrap">

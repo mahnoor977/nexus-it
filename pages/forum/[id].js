@@ -125,7 +125,7 @@ export default function ForumPostDetail() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div className="project-detail" style={{ margin: '40px auto 0', maxWidth: '760px', padding: '0 5vw' }}>
+          <div className="project-detail page-shell medium">
             <div className="project-detail-top">
               <h1>{post.title}</h1>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>

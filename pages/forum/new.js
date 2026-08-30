@@ -67,7 +67,7 @@ export default function NewForumPost() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <form className="new-project-form" style={{ margin: '40px auto', maxWidth: '640px' }} onSubmit={handleSubmit}>
+          <form className="new-project-form page-shell narrow" onSubmit={handleSubmit}>
             <h1>Start a discussion</h1>
 
             <div className="field">

@@ -111,7 +111,7 @@ export default function PublicProfile() {
       <div className="app-shell">
         <Sidebar nickname={myNickname} />
         <div className="app-main">
-          <div className="profile-page-content">
+          <div className="profile-page-content page-shell medium">
             <div className="profile-header">
               <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
               <div className="profile-name-block">

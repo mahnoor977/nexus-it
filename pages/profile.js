@@ -114,7 +114,7 @@ export default function Profile() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div className="profile-page-content">
+          <div className="profile-page-content page-shell medium">
             <div className="profile-header">
               <div
                 className="avatar-upload-wrap"

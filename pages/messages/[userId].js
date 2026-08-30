@@ -170,7 +170,7 @@ export default function Conversation() {
       <div className="app-shell">
         <Sidebar nickname={myNickname} />
         <div className="app-main">
-          <div className="advisor-chat" style={{ padding: '40px 5vw 30px' }}>
+          <div className="advisor-chat page-shell medium">
             <div className="eyebrow mono" style={{ marginBottom: '10px' }}>
               // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
             </div>

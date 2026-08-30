@@ -110,8 +110,8 @@ export default function NewProject() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <form className="new-project-form" style={{ margin: '40px auto', maxWidth: '640px' }} onSubmit={handleSubmit}>
-            <h1>Post a project</h1>
+          
+            <h1>Post a project</h1><form className="new-project-form page-shell narrow" onSubmit={handleSubmit}>
 
             <div className="field">
               <label>Title</label>

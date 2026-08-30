@@ -161,7 +161,7 @@ export default function Posts() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div style={{ padding: '40px 5vw', maxWidth: '640px', margin: '0 auto' }}>
+          <div className="page-shell narrow">
             <h1 style={{ marginBottom: '24px' }}>Posts</h1>
 
             {userId && (

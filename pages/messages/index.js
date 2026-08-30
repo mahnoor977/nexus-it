@@ -58,7 +58,7 @@ export default function Messages() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div style={{ padding: '40px 5vw', maxWidth: '1040px' }}>
+          <div className="page-shell wide">
             <div className="projects-header" style={{ margin: '0 0 40px' }}>
               <h1>Messages</h1>
             </div>

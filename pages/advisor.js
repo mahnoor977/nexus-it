@@ -96,7 +96,7 @@ export default function Advisor() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
-          <div className="advisor-chat" style={{ padding: '40px 5vw 30px' }}>
+          <div className="advisor-chat page-shell medium">
             <div className="eyebrow mono" style={{ marginBottom: '10px' }}>// AI ADVISOR</div>
             <div className="advisor-messages" ref={scrollRef}>
               {messages.length === 0 && (
