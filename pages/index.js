@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 const bodyHtml = `
+`.replace('${new Date().getFullYear()}', '') + `
 <nav>
   <div class="logo"><span class="dot"></span>NEXUS-IT</div>
   <div class="nav-links">
@@ -23,10 +24,33 @@ const bodyHtml = `
       <input type="email" placeholder="you@email.com" id="hero-email">
       <button id="hero-cta-btn" onclick="openModal('signup')">Get Early Access</button>
     </div>
-    <div class="hero-note">// email-verified accounts · free to join · open worldwide</div>
+        <div class="hero-note">// email-verified accounts · free to join · open worldwide</div>
   </div>
+
+  <div class="hero-mockup">
+    <div class="hero-mockup-bar"><span></span><span></span><span></span></div>
+    <div class="hero-mockup-body">
+      <div class="hero-mockup-card">
+        <span class="hero-mockup-badge">Top ranked</span>
+        <div class="hero-mockup-title">Weather dashboard</div>
+        <div class="hero-mockup-meta">by Aisha Rahman · 24 likes · 9 comments</div>
+      </div>
+      <div class="hero-mockup-card">
+        <div class="hero-mockup-title">Real-time chat app</div>
+        <div class="hero-mockup-meta">by Kwame Owusu · React, Node.js</div>
+      </div>
+    </div>
+  </div>
+
   <div class="scroll-cue"><div class="bar"></div>SCROLL</div>
 </section>
+
+<div class="trust-bar">
+  <span>🔒 Your data stays private</span>
+  <span>✅ Email-verified accounts</span>
+  <span>🌍 Open to builders everywhere</span>
+  <span>🆓 Free, always</span>
+</div>
 
 <section id="problem">
   <div class="section-head reveal">
@@ -108,14 +132,62 @@ const bodyHtml = `
   </div>
 </section>
 
-<section class="cta-section reveal">
+<section id="faq">
+  <div class="section-head reveal">
+    <div class="eyebrow">Questions</div>
+    <h2>Before you join.</h2>
+  </div>
+  <div class="faq-section reveal">
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">Is NEXUS-IT free? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes, completely free — no premium tier, no hidden costs.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">Do I need to be a student to join? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">No — students, self-taught developers, and working professionals are all welcome.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">Who can see my projects? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Your projects are public to anyone on the platform, so people can discover and give feedback on your work.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">Can I remove content I've posted? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes, you can edit or delete your own projects, posts, and comments at any time.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-question">What if someone is harassing me? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">You can block any user and report content directly from their profile.</div>
+    </div>
+  </div>
+</section>
   <div class="eyebrow" style="justify-content:center;margin-bottom:20px;">Ready When You Are</div>
   <h2>Stop building in isolation.</h2>
   <button class="btn btn-solid" id="bottom-cta-btn" style="padding:16px 34px;font-size:14px;" onclick="openModal('signup')">Join NEXUS-IT — it's free</button>
 </section>
 
-<footer>
-  <span class="footer-line">NEXUS-IT — WHERE BUILDERS FIND EACH OTHER<br>Built by <strong>Mahnoor Ahsan</strong> for Strangers</span>
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <div class="logo" style="margin-bottom:14px;"><span class="dot"></span>NEXUS-IT</div>
+      <p style="color:var(--muted);font-size:13px;line-height:1.6;max-width:280px;">
+        Where IT builders showcase projects, find collaborators, and get real feedback — open to everyone, everywhere.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#problem">Why NEXUS-IT</a>
+      <a href="#features">Features</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+      NEXUS-IT — Built by Mahnoor Ahsan for Strangers · © 2026
+  </div>
 </footer>
 
 <!-- SIGNUP MODAL -->
@@ -158,7 +230,7 @@ const bodyHtml = `
       <input type="password" placeholder="Your password" id="login-password">
     </div>
     <div class="form-error" id="login-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
-    <button class="btn btn-solid" id="login-submit-btn">Log in</button>
+    <butt    NEXUS-IT — Built by Mahnoor Ahsan for Strangers · on class="btn btn-solid" id="login-submit-btn">Log in</button>
     <button class="btn" id="github-login-btn" style="margin-top:10px;width:100%;">Continue with GitHub</button>
     <button class="btn" id="google-login-btn" style="margin-top:10px;width:100%;">Continue with Google</button>
     <div class="modal-switch">New here? <a href="#" id="switch-to-signup">Create an account</a></div>
