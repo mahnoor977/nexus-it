@@ -11,12 +11,18 @@ const bodyHtml = `
     <a class="link" href="#problem">Why</a>
     <a class="link" href="#features">What you get</a>
     <a class="link" href="#how">How it works</a>
-    <button class="btn" id="nav-cta-btn" onclick="openModal('signup')">Join</button>
+    <button class="btn" onclick="openModal('login')">Log in</button>
+    <button class="btn btn-solid" onclick="openModal('signup')">Create account</button>
   </div>
 </nav>
 
 <section class="hero">
-  <div class="hero-content">
+  <div class="gradient-mesh">
+    <div class="mesh-blob b1"></div>
+    <div class="mesh-blob b2"></div>
+    <div class="mesh-blob b3"></div>
+  </div>
+  <div class="hero-content" style="position:relative;z-index:1;">
     <div class="eyebrow mono" id="boot-text">INITIALIZING_IT_COLLECTIVE</div>
     <h1>What builders are<br><span>shipping.</span></h1>
     <p class="sub">A verified space to showcase mini-projects, find collaborators by skill, get real feedback, and ship things worth putting on your résumé — not another repo nobody sees. Open to builders everywhere, not just one campus.</p>
@@ -27,7 +33,7 @@ const bodyHtml = `
         <div class="hero-note">// email-verified accounts · free to join · open worldwide</div>
   </div>
 
-  <div class="hero-mockup">
+    <div class="hero-mockup glass-card" style="position:relative;z-index:1;">
     <div class="hero-mockup-bar"><span></span><span></span><span></span></div>
     <div class="hero-mockup-body">
       <div class="hero-mockup-card">
@@ -211,7 +217,7 @@ const bodyHtml = `
       <div class="field-hint">// stored securely, never shared</div>
     </div>
     <div class="form-error" id="signup-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
-    <button class="btn btn-solid" id="signup-submit-btn" onclick="goToVerify()">Create account</button>
+    <button class="btn btn-solid" id="signup-submit-btn" onclick="goToVerify()" style="width:100%;margin-bottom:10px;">Create account</button>
     <button class="btn" id="github-signup-btn" style="margin-top:10px;width:100%;">Continue with GitHub</button>
     <button class="btn" id="google-signup-btn" style="margin-top:10px;width:100%;">Continue with Google</button>
     <div class="modal-switch">Already a member? <a href="#" id="switch-to-login">Log in</a></div>
@@ -250,7 +256,7 @@ const bodyHtml = `
       <input maxlength="1" class="code-digit">
     </div>
     <div class="form-error" id="verify-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
-    <button class="btn btn-solid" id="verify-submit-btn" onclick="verifySuccess()">Verify & continue</button>
+    <button class="btn btn-solid" id="verify-submit-btn" onclick="verifySuccess()" style="width:100%;">Verify & continue</button>
     <div class="resend">Didn't get it? <a href="#" onclick="return false;" id="resend-link">Resend code</a></div>
   </div>
 
@@ -268,7 +274,6 @@ const bodyHtml = `
 export default function Home() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isReturning, setIsReturning] = useState(false);
 
   useEffect(() => {
     async function checkSession() {
@@ -277,7 +282,6 @@ export default function Home() {
         router.replace('/projects');
         return;
       }
-      setIsReturning(localStorage.getItem('nexus-returning-user') === 'true');
       setCheckingAuth(false);
     }
     checkSession();
@@ -285,16 +289,6 @@ export default function Home() {
 
   useEffect(() => {
     if (checkingAuth) return;
-
-    if (isReturning) {
-      ['nav-cta-btn', 'hero-cta-btn', 'bottom-cta-btn'].forEach((id) => {
-        const btn = document.getElementById(id);
-        if (btn) {
-          btn.textContent = 'Log in';
-          btn.onclick = () => window.openModal('login');
-        }
-      });
-    }
 
     let rafId;
     let bootTimeoutId;
@@ -317,7 +311,34 @@ export default function Home() {
     }, 45);
   }
   typeBoot();
+  //   // ---------- Custom cursor ----------
+  // const cursor = document.getElementById('custom-cursor');
+  // function moveCursor(e){
+  //   cursor.style.left = e.clientX + 'px';
+  //   cursor.style.top = e.clientY + 'px';
+  // }
+  // document.addEventListener('mousemove', moveCursor);
 
+  // const hoverTargets = document.querySelectorAll('a, button, .feature-card, .problem-card');
+  // hoverTargets.forEach((el) => {
+  //   el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+  //   el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  // });
+
+  // ---------- Magnetic hover ----------
+  // const magneticEls = document.querySelectorAll('.btn, .btn-solid');
+  // magneticEls.forEach((el) => {
+  //   el.classList.add('magnetic');
+  //   el.addEventListener('mousemove', (e) => {
+  //     const rect = el.getBoundingClientRect();
+  //     const x = e.clientX - rect.left - rect.width / 2;
+  //     const y = e.clientY - rect.top - rect.height / 2;
+  //     el.style.transform = `translate(${x * 0.2}px, ${y * 0.3}px)`;
+  //   });
+  //   el.addEventListener('mouseleave', () => {
+  //     el.style.transform = 'translate(0,0)';
+  //   });
+  // });
   // ---------- Reveal on scroll ----------
   const revealEls = document.querySelectorAll('.reveal');
   const io = new IntersectionObserver((entries)=>{
@@ -446,7 +467,7 @@ export default function Home() {
 
     if (verifyModal) verifyModal.style.display = 'none';
     if (successModal) successModal.style.display = 'block';
-    localStorage.setItem('nexus-returning-user', 'true');
+    // localStorage.setItem('nexus-returning-user', 'true');
   }
 
   async function resendCode(){
@@ -503,7 +524,7 @@ export default function Home() {
       return;
     }
 
-        localStorage.setItem('nexus-returning-user', 'true');
+        // localStorage.setItem('nexus-returning-user', 'true');
     closeModal();
     router.push('/projects');
   }
@@ -537,7 +558,7 @@ export default function Home() {
   });
 
       return () => {};
-  }, [checkingAuth, isReturning]);
+  }, [checkingAuth]);
 
     if (checkingAuth) {
     return null;
