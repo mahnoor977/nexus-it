@@ -28,7 +28,7 @@ export default function PublicProfile() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setCurrentUserId(session.user.id);
-        setMyNickname(session.user.user_metadata?.nickname || session.user.email);
+        setMyNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       }
 
       const { data: profileData, error: profileError } = await supabase

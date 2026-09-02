@@ -22,7 +22,7 @@ export default function Posts() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUserId(session.user.id);
-        setNickname(session.user.user_metadata?.nickname || session.user.email);
+        setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       }
 
       const { data: postsData } = await supabase

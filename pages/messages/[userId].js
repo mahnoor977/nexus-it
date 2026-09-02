@@ -35,7 +35,7 @@ export default function Conversation() {
       }
       const myId = session.user.id;
       setCurrentUserId(myId);
-      setMyNickname(session.user.user_metadata?.nickname || session.user.email);
+      setMyNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       if (nicknameQuery) setOtherNickname(nicknameQuery);
 
       const { data: blockData } = await supabase

@@ -26,7 +26,7 @@ export default function Dashboard() {
       }
       const uid = session.user.id;
       setUserId(uid);
-      setNickname(session.user.user_metadata?.nickname || session.user.email);
+      setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
 
       const { data: profileData } = await supabase
         .from('profiles')

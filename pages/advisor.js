@@ -23,7 +23,7 @@ export default function Advisor() {
         router.replace('/');
         return;
       }
-      setNickname(session.user.user_metadata?.nickname || session.user.email);
+      setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       setLoading(false);
     }
     checkAuth();

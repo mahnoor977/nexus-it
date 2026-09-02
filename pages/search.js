@@ -17,7 +17,7 @@ export default function Search() {
     async function loadUser() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        setNickname(session.user.user_metadata?.nickname || session.user.email);
+        setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       }
     }
     loadUser();

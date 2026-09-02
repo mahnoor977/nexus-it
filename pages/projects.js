@@ -19,7 +19,7 @@ export default function Projects() {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        setNickname(session.user.user_metadata?.nickname || session.user.email);
+        setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
         setCurrentUserId(session.user.id);
 
         const { data: followingData } = await supabase

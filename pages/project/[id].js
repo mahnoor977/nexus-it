@@ -31,7 +31,7 @@ export default function ProjectDetail() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setCurrentUserId(session.user.id);
-        setNickname(session.user.user_metadata?.nickname || session.user.email);
+        setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
       }
 
       const { data: projectData, error: projectError } = await supabase
