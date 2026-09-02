@@ -889,7 +889,7 @@ h1.dash-welcome span{color:var(--tea);}
 
 /* ---------- SITE-WIDE LIST ENTRANCE ANIMATION ---------- */
 .project-card, .post-card{
-  animation:cardRise .5s cubic-bezier(.16,1,.3,1) both;
+  animation:cardRise .7s cubic-bezier(.16,1,.3,1) both;
 }
 .projects-list .project-card:nth-child(1){animation-delay:0s;}
 .projects-list .project-card:nth-child(2){animation-delay:.06s;}
@@ -898,8 +898,8 @@ h1.dash-welcome span{color:var(--tea);}
 .projects-list .project-card:nth-child(5){animation-delay:.24s;}
 .projects-list .project-card:nth-child(n+6){animation-delay:.3s;}
 @keyframes cardRise{
-  from{opacity:0;transform:translateY(16px);}
-  to{opacity:1;transform:translateY(0);}
+  from{opacity:0;transform:translateY(40px) scale(0.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
 }
 @media(prefers-reduced-motion: reduce){
   .project-card, .post-card{animation:none;}
@@ -923,4 +923,4 @@ h1.dash-welcome span{color:var(--tea);}
 }
 
 /* Smooth page transitions on route change */
-.page-transitioning{opacity:0;transition:opacity .15s ease;}
+.page-transitioning{opacity:0;transform:translateY(6px);transition:opacity .25s ease, transform .25s ease;}
