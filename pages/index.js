@@ -236,7 +236,7 @@ const bodyHtml = `
       <input type="password" placeholder="Your password" id="login-password">
     </div>
     <div class="form-error" id="login-error" style="display:none;color:#e35d5d;font-size:13px;margin-top:8px;"></div>
-    <butt    NEXUS-IT — Built by Mahnoor Ahsan for Strangers · on class="btn btn-solid" id="login-submit-btn">Log in</button>
+    <button class="btn btn-solid" id="login-submit-btn" style="width:100%;margin-bottom:10px;">Log in</button>
     <button class="btn" id="github-login-btn" style="margin-top:10px;width:100%;">Continue with GitHub</button>
     <button class="btn" id="google-login-btn" style="margin-top:10px;width:100%;">Continue with Google</button>
     <div class="modal-switch">New here? <a href="#" id="switch-to-signup">Create an account</a></div>
