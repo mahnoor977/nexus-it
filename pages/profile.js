@@ -8,6 +8,7 @@ import Avatar from '../components/Avatar';
 export default function Profile() {
   const router = useRouter();
   const fileInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
@@ -18,6 +19,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [gallery, setGallery] = useState([]);
+  const [galleryUploading, setGalleryUploading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -40,6 +43,14 @@ export default function Profile() {
         setSkills(data.skills || '');
         setAvatarUrl(data.avatar_url || '');
       }
+
+      const { data: mediaData } = await supabase
+        .from('profile_media')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+      setGallery(mediaData || []);
+
       setLoading(false);
     }
     load();
@@ -81,10 +92,7 @@ export default function Profile() {
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
+    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
     const newUrl = publicUrlData.publicUrl;
 
     const { error: updateError } = await supabase
@@ -100,6 +108,47 @@ export default function Profile() {
     }
 
     setAvatarUrl(newUrl);
+  }
+
+  async function handleGalleryUpload(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setGalleryUploading(true);
+
+    for (const file of files) {
+      const type = file.type.startsWith('video') ? 'video' : 'image';
+      const filePath = `${userId}/${Date.now()}-${file.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profile-media')
+        .upload(filePath, file);
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from('profile-media').getPublicUrl(filePath);
+        const { data: mediaRow } = await supabase
+          .from('profile_media')
+          .insert({ user_id: userId, media_url: urlData.publicUrl, media_type: type })
+          .select()
+          .single();
+
+        if (mediaRow) {
+          setGallery((prev) => [mediaRow, ...prev]);
+        }
+      }
+    }
+
+    setGalleryUploading(false);
+  }
+
+  async function handleDeleteMedia(mediaId) {
+    const confirmed = window.confirm('Remove this from your gallery?');
+    if (!confirmed) return;
+
+    const { error } = await supabase.from('profile_media').delete().eq('id', mediaId);
+    if (!error) {
+      setGallery(gallery.filter((m) => m.id !== mediaId));
+    }
   }
 
   if (loading) {
@@ -164,6 +213,56 @@ export default function Profile() {
             <button className="btn btn-solid" onClick={handleSave} disabled={saving}>
               {saving ? 'Saving…' : 'Save profile'}
             </button>
+
+            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Gallery</h2>
+              <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
+                Photos and videos on your profile — not tied to any specific project.
+              </p>
+
+              <button
+                className="btn"
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={galleryUploading}
+                style={{ marginBottom: '20px' }}
+              >
+                <i className="ti ti-photo-plus"></i> {galleryUploading ? 'Uploading…' : 'Add photos or videos'}
+              </button>
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleGalleryUpload}
+              />
+
+              {gallery.length === 0 ? (
+                <div className="comments-empty">No media yet — add some photos or videos.</div>
+              ) : (
+                <div className="media-gallery">
+                  {gallery.map((m) => (
+                    <div className="media-gallery-item" key={m.id} style={{ position: 'relative' }}>
+                      {m.media_type === 'video' ? (
+                        <video src={m.media_url} controls />
+                      ) : (
+                        <img src={m.media_url} alt="" />
+                      )}
+                      <button
+                        onClick={() => handleDeleteMedia(m.id)}
+                        style={{
+                          position: 'absolute', top: '6px', right: '6px',
+                          background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none',
+                          borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', fontSize: '12px'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
