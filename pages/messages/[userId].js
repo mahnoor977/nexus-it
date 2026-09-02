@@ -21,6 +21,8 @@ export default function Conversation() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [blockedState, setBlockedState] = useState(null); // 'you-blocked-them' | 'they-blocked-you' | null
+  const [sendError, setSendError] = useState('');
 
   useEffect(() => {
     if (!userId) return;
@@ -35,6 +37,18 @@ export default function Conversation() {
       setCurrentUserId(myId);
       setMyNickname(session.user.user_metadata?.nickname || session.user.email);
       if (nicknameQuery) setOtherNickname(nicknameQuery);
+
+      const { data: blockData } = await supabase
+        .from('blocks')
+        .select('*')
+        .or(
+          `and(blocker_id.eq.${myId},blocked_id.eq.${userId}),and(blocker_id.eq.${userId},blocked_id.eq.${myId})`
+        );
+
+      if (blockData && blockData.length > 0) {
+        const iBlockedThem = blockData.some((b) => b.blocker_id === myId);
+        setBlockedState(iBlockedThem ? 'you-blocked-them' : 'they-blocked-you');
+      }
 
       const { data, error } = await supabase
         .from('messages')
@@ -74,9 +88,10 @@ export default function Conversation() {
 
   async function handleSend() {
     const trimmed = input.trim();
-    if ((!trimmed && !attachedFile) || sending || !currentUserId) return;
+    if ((!trimmed && !attachedFile) || sending || !currentUserId || blockedState) return;
 
     setSending(true);
+    setSendError('');
 
     let mediaUrl = null;
     let mediaType = null;
@@ -110,11 +125,14 @@ export default function Conversation() {
 
     setSending(false);
 
-    if (!error) {
-      setMessages([...messages, data]);
-      setInput('');
-      setAttachedFile(null);
+    if (error) {
+      setSendError('This message could not be sent.');
+      return;
     }
+
+    setMessages([...messages, data]);
+    setInput('');
+    setAttachedFile(null);
   }
 
   function handleKeyDown(e) {
@@ -174,11 +192,23 @@ export default function Conversation() {
             <div className="eyebrow mono" style={{ marginBottom: '10px' }}>
               // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
             </div>
+
+            {blockedState === 'you-blocked-them' && (
+              <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '12px' }}>
+                You've blocked this person. Unblock them from their profile to message again.
+              </div>
+            )}
+            {blockedState === 'they-blocked-you' && (
+              <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '12px' }}>
+                You can't message this person right now.
+              </div>
+            )}
+
             <div className="advisor-messages" ref={scrollRef}>
               {messages.length === 0 && (
                 <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
               )}
-                            {messages.map((m) => {
+              {messages.map((m) => {
                 const isMine = m.sender_id === currentUserId;
                 return (
                   <div
@@ -188,17 +218,17 @@ export default function Conversation() {
                   >
                     <div className={`msg-actions ${activeMenuId === m.id ? 'menu-open' : ''}`}>
                       {m.content && (
-                        <button className="msg-action-btn" onClick={() => handleCopy(m.content)} title="Copy">
+                        <button className="msg-action-btn" onClick={(e) => { e.stopPropagation(); handleCopy(m.content); }} title="Copy">
                           <i className="ti ti-copy"></i>
                         </button>
                       )}
                       {isMine && m.content && (
-                        <button className="msg-action-btn" onClick={() => startEdit(m)} title="Edit">
+                        <button className="msg-action-btn" onClick={(e) => { e.stopPropagation(); startEdit(m); }} title="Edit">
                           <i className="ti ti-pencil"></i>
                         </button>
                       )}
                       {isMine && (
-                        <button className="msg-action-btn" onClick={() => handleDelete(m.id)} title="Delete">
+                        <button className="msg-action-btn" onClick={(e) => { e.stopPropagation(); handleDelete(m.id); }} title="Delete">
                           <i className="ti ti-trash"></i>
                         </button>
                       )}
@@ -206,7 +236,7 @@ export default function Conversation() {
 
                     <div className={`advisor-msg ${isMine ? 'user' : 'assistant'}`}>
                       {editingId === m.id ? (
-                        <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
                           <input
                             className="msg-edit-input"
                             value={editText}
@@ -237,6 +267,12 @@ export default function Conversation() {
               })}
             </div>
 
+            {sendError && (
+              <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '10px' }}>
+                {sendError}
+              </div>
+            )}
+
             {attachedFile && (
               <div className="attach-preview-bar">
                 <div className="attach-preview-item">
@@ -250,34 +286,36 @@ export default function Conversation() {
               </div>
             )}
 
-            <div className="advisor-input-bar">
-              <button
-                type="button"
-                className="btn"
-                style={{ padding: '0 14px' }}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <i className="ti ti-paperclip"></i>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                style={{ display: 'none' }}
-                onChange={handleFileSelect}
-              />
-              <input
-                type="text"
-                placeholder="Type a message..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={sending}
-              />
-              <button onClick={handleSend} disabled={sending || (!input.trim() && !attachedFile)}>
-                Send
-              </button>
-            </div>
+            {!blockedState && (
+              <div className="advisor-input-bar">
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ padding: '0 14px' }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <i className="ti ti-paperclip"></i>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileSelect}
+                />
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={sending}
+                />
+                <button onClick={handleSend} disabled={sending || (!input.trim() && !attachedFile)}>
+                  Send
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
