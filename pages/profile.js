@@ -30,6 +30,7 @@ export default function Profile() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [messagePrivacy, setMessagePrivacy] = useState('everyone');
 
   useEffect(() => {
     async function load() {
@@ -51,6 +52,7 @@ export default function Profile() {
         setBio(data.bio || '');
         setSkills(data.skills || '');
         setAvatarUrl(data.avatar_url || '');
+        setMessagePrivacy(data.message_privacy || 'everyone');
       }
 
       const { data: mediaData } = await supabase
@@ -71,7 +73,7 @@ export default function Profile() {
 
     const { error } = await supabase
       .from('profiles')
-      .update({ bio: bio.trim(), skills: skills.trim() })
+      .update({ bio: bio.trim(), skills: skills.trim(), message_privacy: messagePrivacy })
       .eq('id', userId);
 
     setSaving(false);
@@ -274,8 +276,25 @@ export default function Profile() {
               {saving ? 'Saving…' : 'Save profile'}
             </button>
 
+                        <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Who can message you</h2>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  className={messagePrivacy === 'everyone' ? 'btn btn-solid' : 'btn'}
+                  onClick={() => setMessagePrivacy('everyone')}
+                >
+                  Everyone
+                </button>
+                <button
+                  className={messagePrivacy === 'followers' ? 'btn btn-solid' : 'btn'}
+                  onClick={() => setMessagePrivacy('followers')}
+                >
+                  Only people I follow back
+                </button>
+              </div>
+            </div>
+
             <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Gallery</h2>
               <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
                 Photos and videos on your profile — not tied to any specific project.
               </p>

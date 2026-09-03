@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }) {
 
   useEffect(() => {
     const handleStart = () => setTransitioning(true);
-    const handleComplete = () => setTimeout(() => setTransitioning(false), 200);
+    const handleComplete = () => setTransitioning(false);
 
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleComplete);
