@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
 import Sidebar from '../../components/Sidebar';
+import ReportBlockMenu from '../../components/ReportBlockMenu';
 
 export default function ProjectDetail() {
   const router = useRouter();
@@ -178,13 +179,21 @@ export default function ProjectDetail() {
             <div className="project-detail-top">
               <h1>{project.title}</h1>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                <span
-                  className="project-author"
-                  onClick={() => router.push(`/user/${project.user_id}`)}
-                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                  by {project.author_nickname}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    className="project-author"
+                    onClick={() => router.push(`/user/${project.user_id}`)}
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    by {project.author_nickname}
+                  </span>
+                  <ReportBlockMenu
+                    targetUserId={project.user_id}
+                    contentType="project"
+                    contentId={project.id}
+                    currentUserId={currentUserId}
+                  />
+                </div>
                 {isOwner ? (
                   <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
                     {deleting ? 'deleting…' : 'delete project'}

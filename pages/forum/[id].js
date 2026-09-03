@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
 import Sidebar from '../../components/Sidebar';
+import ReportBlockMenu from '../../components/ReportBlockMenu';
 
 export default function ForumPostDetail() {
   const router = useRouter();
@@ -129,13 +130,21 @@ export default function ForumPostDetail() {
             <div className="project-detail-top">
               <h1>{post.title}</h1>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                <span
-                  className="project-author"
-                  onClick={() => router.push(`/user/${post.user_id}`)}
-                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                  by {post.author_nickname}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    className="project-author"
+                    onClick={() => router.push(`/user/${post.user_id}`)}
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    by {post.author_nickname}
+                  </span>
+                  <ReportBlockMenu
+                    targetUserId={post.user_id}
+                    contentType="forum_post"
+                    contentId={post.id}
+                    currentUserId={currentUserId}
+                  />
+                </div>
                 {post.user_id === currentUserId && (
                   <button className="comment-delete" onClick={handleDeletePost} disabled={deleting}>
                     {deleting ? 'deleting…' : 'delete post'}
