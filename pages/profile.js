@@ -22,6 +22,15 @@ export default function Profile() {
   const [gallery, setGallery] = useState([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
 
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState('');
+
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   useEffect(() => {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -151,6 +160,57 @@ export default function Profile() {
     }
   }
 
+  async function handleChangePassword() {
+    setPasswordMsg('');
+
+    if (newPassword.length < 8) {
+      setPasswordMsg('Password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg("Passwords don't match.");
+      return;
+    }
+
+    setPasswordSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordSaving(false);
+
+    if (error) {
+      setPasswordMsg(error.message);
+      return;
+    }
+
+    setPasswordMsg('Password updated.');
+    setNewPassword('');
+    setConfirmPassword('');
+    setTimeout(() => setPasswordMsg(''), 3000);
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== 'DELETE') {
+      setDeleteError('Type DELETE exactly to confirm.');
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError('');
+
+    // Remove the user's own content first (RLS allows deleting your own rows)
+    await supabase.from('projects').delete().eq('user_id', userId);
+    await supabase.from('posts').delete().eq('user_id', userId);
+    await supabase.from('forum_posts').delete().eq('user_id', userId);
+    await supabase.from('comments').delete().eq('user_id', userId);
+    await supabase.from('profile_media').delete().eq('user_id', userId);
+    await supabase.from('profiles').delete().eq('id', userId);
+
+    // Sign out — full account/auth record deletion requires a server-side admin call,
+    // which we don't have set up. This removes all their visible content and data.
+    await supabase.auth.signOut();
+    setDeleting(false);
+    router.push('/');
+  }
+
   if (loading) {
     return <div className="dash-loading mono">Loading…</div>;
   }
@@ -262,6 +322,56 @@ export default function Profile() {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Change password</h2>
+              <div className="field">
+                <label>New password</label>
+                <input
+                  type="password"
+                  placeholder="At least 8 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label>Confirm new password</label>
+                <input
+                  type="password"
+                  placeholder="Re-enter password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+              {passwordMsg && <div className="field-hint" style={{ marginBottom: '12px' }}>{passwordMsg}</div>}
+              <button className="btn" onClick={handleChangePassword} disabled={passwordSaving}>
+                {passwordSaving ? 'Updating…' : 'Update password'}
+              </button>
+            </div>
+
+            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #e35d5d33' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '10px', color: '#e35d5d' }}>Delete account</h2>
+              <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
+                This permanently removes your projects, posts, comments, and gallery. Type <strong>DELETE</strong> to confirm.
+              </p>
+              <div className="field">
+                <input
+                  type="text"
+                  placeholder="Type DELETE"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                />
+              </div>
+              {deleteError && <div className="field-hint" style={{ color: '#e35d5d', marginBottom: '12px' }}>{deleteError}</div>}
+              <button
+                className="btn"
+                style={{ borderColor: '#e35d5d', color: '#e35d5d' }}
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting…' : 'Delete my account'}
+              </button>
             </div>
           </div>
         </div>
