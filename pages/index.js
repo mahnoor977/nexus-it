@@ -300,9 +300,10 @@ export default function Home() {
   function typeBoot(){
     const msg = bootMessages[bootIdx % bootMessages.length];
     let i = 0;
-    bootEl.textContent = '';
     const iv = setInterval(()=>{
-      bootEl.textContent = msg.slice(0,i);
+      requestAnimationFrame(() => {
+        bootEl.textContent = msg.slice(0,i);
+      });
       i++;
       if(i > msg.length){
         clearInterval(iv);
