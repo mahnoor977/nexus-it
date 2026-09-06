@@ -99,7 +99,7 @@ nav{
   background:transparent;
   cursor:pointer;
   transition:all .25s ease;
-  border-radius:var(--radius);
+  border-radius:999px;
 }
 .btn:hover{background:var(--tea);color:var(--black);}
 .btn-solid{background:var(--tea);color:var(--black);border:1px solid var(--tea);}
@@ -403,7 +403,7 @@ h1.dash-welcome span{color:var(--tea);}
 }
 .advisor-msg{
   max-width:78%;padding:14px 18px;font-size:15.5px;line-height:1.6;
-  border-radius:2px;white-space:pre-wrap;
+  border-radius:999px;white-space:pre-wrap;
 }
 .advisor-msg.user{
   align-self:flex-end;background:var(--tea);color:var(--black);
@@ -536,7 +536,7 @@ h1.dash-welcome span{color:var(--tea);}
   width:36px;height:36px;
   border:1.5px solid var(--tea);
   color:var(--tea);
-  border-radius:10px;
+  border-radius:999px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   margin-bottom:36px;
@@ -549,7 +549,7 @@ h1.dash-welcome span{color:var(--tea);}
 }
 .sidebar-icon-btn{
   width:44px;height:44px;
-  border-radius:10px;
+  border-radius:999px;
   border:none;
   background:transparent;
   color:rgba(250,248,245,0.5);
@@ -645,7 +645,7 @@ h1.dash-welcome span{color:var(--tea);}
 .project-card-footer{display:flex;gap:18px;margin-top:12px;align-items:center;}
 .top-ranked-badge{
   display:inline-block;font-size:10px;color:var(--tea-bright);
-  background:rgba(184,134,62,0.14);padding:3px 10px;border-radius:20px;
+  background:rgba(184,134,62,0.14);padding:3px 10px;border-radius:999px;
   margin-bottom:10px;font-family:'IBM Plex Mono',monospace;
 }
 
@@ -656,7 +656,7 @@ h1.dash-welcome span{color:var(--tea);}
 .collab-request-row:last-child{border-bottom:none;}
 .collab-actions{display:flex;gap:8px;}
 .collab-badge{
-  font-size:11px;padding:3px 9px;border-radius:20px;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;padding:3px 9px;border-radius:999px;font-family:'IBM Plex Mono',monospace;
 }
 .collab-badge.approved{background:rgba(184,134,62,0.14);color:var(--tea-bright);}
 .collab-badge.pending{background:rgba(0,0,0,0.06);color:var(--muted);}
@@ -682,7 +682,7 @@ h1.dash-welcome span{color:var(--tea);}
 }
 .media-upload-area:hover{border-color:var(--tea);}
 .media-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:20px;}
-.media-preview-item{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--panel-2);}
+.media-preview-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--panel-2);}
 .media-preview-item img, .media-preview-item video{width:100%;height:100%;object-fit:cover;}
 .media-preview-remove{
   position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#fff;
@@ -690,7 +690,7 @@ h1.dash-welcome span{color:var(--tea);}
   display:flex;align-items:center;justify-content:center;
 }
 .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:20px 0;}
-.media-gallery-item{border-radius:8px;overflow:hidden;background:var(--panel-2);}
+.media-gallery-item{border-radius:10px;overflow:hidden;background:var(--panel-2);}
 .media-gallery-item img, .media-gallery-item video{width:100%;height:160px;object-fit:cover;display:block;}
 
 /* ---------- POSTS / BLOG FEED ---------- */
@@ -701,7 +701,7 @@ h1.dash-welcome span{color:var(--tea);}
 .post-content{font-size:14.5px;line-height:1.6;color:var(--text);margin-bottom:12px;white-space:pre-wrap;}
 .post-hashtags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
 .post-hashtag{font-size:12px;color:var(--tea-bright);}
-.post-media-grid{display:grid;gap:6px;margin-bottom:12px;border-radius:8px;overflow:hidden;}
+.post-media-grid{display:grid;gap:6px;margin-bottom:12px;border-radius:10px;overflow:hidden;}
 .post-media-grid.count-1{grid-template-columns:1fr;}
 .post-media-grid.count-2{grid-template-columns:1fr 1fr;}
 .post-media-grid.count-3plus{grid-template-columns:1fr 1fr;}
@@ -750,7 +750,7 @@ h1.dash-welcome span{color:var(--tea);}
 .msg-wrap{cursor:pointer;}
 .msg-actions{
   position:absolute;top:-10px;display:none;gap:4px;
-  background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px;
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px;
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 .msg-actions.menu-open{display:flex;}
@@ -758,7 +758,7 @@ h1.dash-welcome span{color:var(--tea);}
 .msg-wrap.assistant .msg-actions{left:0;}
 .msg-action-btn{
   background:none;border:none;color:var(--muted);cursor:pointer;
-  font-size:13px;padding:4px 6px;border-radius:4px;
+  font-size:13px;padding:4px 6px;border-radius:999px;
 }
 .msg-action-btn:hover{background:var(--panel-2);color:var(--text);}
 .msg-edit-input{
@@ -766,9 +766,9 @@ h1.dash-welcome span{color:var(--tea);}
   padding:8px 10px;font-size:14px;outline:none;font-family:'IBM Plex Sans',sans-serif;
 }
 .msg-edited-tag{font-size:10px;color:var(--muted);margin-left:6px;font-style:italic;}
-.msg-media{max-width:220px;border-radius:8px;margin-top:6px;display:block;}
+.msg-media{max-width:220px;border-radius:10px;margin-top:6px;display:block;}
 .attach-preview-bar{display:flex;gap:8px;padding:8px 0;flex-wrap:wrap;}
-.attach-preview-item{position:relative;width:60px;height:60px;border-radius:6px;overflow:hidden;background:var(--panel-2);}
+.attach-preview-item{position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;background:var(--panel-2);}
 .attach-preview-item img, .attach-preview-item video{width:100%;height:100%;object-fit:cover;}
 .attach-preview-remove{
   position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;
@@ -785,19 +785,19 @@ h1.dash-welcome span{color:var(--tea);}
 
 .hero-mockup{
   max-width:520px;margin:40px auto 0;background:var(--panel);
-  border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  border:1px solid var(--line);border-radius:12px;overflow:hidden;
   box-shadow:0 20px 50px rgba(0,0,0,0.08);
 }
 .hero-mockup-bar{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);}
 .hero-mockup-bar span{width:9px;height:9px;border-radius:50%;background:var(--line);}
 .hero-mockup-body{padding:20px;}
-.hero-mockup-card{background:var(--panel-2);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.hero-mockup-card{background:var(--panel-2);border-radius:10px;padding:14px 16px;margin-bottom:10px;}
 .hero-mockup-card:last-child{margin-bottom:0;}
 .hero-mockup-title{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:4px;}
 .hero-mockup-meta{font-size:11px;color:var(--muted);}
 .hero-mockup-badge{
   display:inline-block;font-size:10px;color:var(--tea-bright);
-  background:rgba(184,134,62,0.14);padding:2px 8px;border-radius:20px;margin-bottom:8px;
+  background:rgba(184,134,62,0.14);padding:2px 8px;border-radius:999px;margin-bottom:8px;
 }
 
 .faq-section{max-width:720px;margin:0 auto;padding:0 5vw;}
@@ -919,7 +919,7 @@ h1.dash-welcome span{color:var(--tea);}
   background:var(--panel);border:1px solid var(--line);padding:20px;margin-bottom:14px;
 }
 .skeleton-line{
-  height:14px;border-radius:4px;margin-bottom:10px;
+  height:14px;border-radius:999px;margin-bottom:10px;
   background:linear-gradient(90deg, var(--panel-2) 25%, var(--line) 50%, var(--panel-2) 75%);
   background-size:200% 100%;animation:shimmer 1.4s infinite;
 }
@@ -933,3 +933,35 @@ h1.dash-welcome span{color:var(--tea);}
 
 /* Smooth page transitions on route change */
 .page-transitioning{opacity:0;transform:translateY(6px);transition:opacity .25s ease, transform .25s ease;}
+/* ---------- UNIFIED TYPE SCALE & ALIGNMENT ---------- */
+h1{font-size:clamp(28px,3.6vw,42px);}
+h2{font-size:clamp(22px,2.8vw,30px);}
+h3{font-size:20px;}
+p, .body-text{font-size:15px;line-height:1.6;}
+.page-shell, .app-main > div{text-align:left;}
+/* ---------- COLLAPSIBLE SIDEBAR DRAWER ---------- */
+.sidebar{
+  transition:width .25s ease;
+  width:76px;
+}
+.sidebar.expanded{
+  width:220px;
+  align-items:flex-start;
+  padding-left:16px;
+  padding-right:16px;
+}
+.sidebar-hamburger{margin-bottom:10px;}
+.sidebar.expanded .sidebar-icon-btn,
+.sidebar.expanded .sidebar-logo,
+.sidebar.expanded .sidebar-avatar{
+  width:100%;
+  justify-content:flex-start;
+  gap:12px;
+  padding-left:10px;
+}
+.sidebar-label{
+  font-size:13px;
+  font-family:'IBM Plex Sans',sans-serif;
+  white-space:nowrap;
+}
+.sidebar.expanded .app-main{margin-left:220px;}
