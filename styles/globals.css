@@ -984,3 +984,19 @@ p, .body-text{font-size:15px;line-height:1.6;}
 body.sidebar-expanded .app-main{
   margin-left:220px;
 }
+/* ---------- PERSISTENT TOPBAR ---------- */
+.topbar{
+  position:sticky;top:0;z-index:90;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 5vw;background:var(--panel);
+  border-bottom:1px solid var(--line);
+}
+.topbar-user{display:flex;align-items:center;gap:10px;}
+.topbar-name{font-size:14px;font-weight:500;color:var(--text);}
+.topbar-brand{font-weight:700;font-size:15px;color:var(--tea);letter-spacing:0.02em;}
+.projects-header{padding-top:20px;}
+.page-shell h1, .app-main h1{
+  font-weight:700;
+  color:var(--tea-bright);
+  font-family:'Newsreader', serif;
+}

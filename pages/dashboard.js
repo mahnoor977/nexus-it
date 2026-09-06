@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
 import Avatar from '../components/Avatar';
+import Topbar from '../components/Topbar';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -88,6 +89,8 @@ export default function Dashboard() {
       <div className="app-shell">
         <Sidebar nickname={nickname} />
         <div className="app-main">
+          <Topbar nickname={nickname} />
+          <Topbar nickname={nickname} />
           <div style={{ padding: '40px 5vw', maxWidth: '760px' }}>
             <div className="profile-header">
               <Avatar url={profile?.avatar_url} nickname={nickname} size={56} />
