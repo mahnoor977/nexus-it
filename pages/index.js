@@ -25,7 +25,7 @@ const bodyHtml = `
   <div class="hero-content" style="position:relative;z-index:1;">
     <div class="eyebrow mono" id="boot-text">INITIALIZING_IT_COLLECTIVE</div>
     <h1>What builders are<br><span>shipping.</span></h1>
-    <p class="sub">A verified space to showcase mini-projects, find collaborators by skill, get real feedback, and ship things worth putting on your résumé — not another repo nobody sees. Open to builders everywhere, not just one campus.</p>
+    <p class="sub">A verified space to showcase mini-projects, find collaborators by skill, get real feedback, and ship things worth putting on your résumé not another repo nobody sees. Open to builders everywhere, not just one campus.</p>
     <div class="hero-form">
       <input type="email" placeholder="you@email.com" id="hero-email">
       <button id="hero-cta-btn" onclick="openModal('signup')">Get Early Access</button>
@@ -75,7 +75,7 @@ const bodyHtml = `
     </div>
     <div class="problem-card">
       <div class="num">03</div>
-      <p>Feedback, when it happens, lives in screenshots and DMs — disconnected from the project it was actually about.</p>
+      <p>Feedback, when it happens, lives in screenshots and DMs disconnected from the project it was actually about.</p>
     </div>
   </div>
 </section>
@@ -90,12 +90,12 @@ const bodyHtml = `
     <div class="feature-card">
       <div class="feature-tag">Showcase</div>
       <h3>Project profiles</h3>
-      <p>Post your mini-projects and reports with tech stack, demo links, and files — and keep getting feedback long after submission.</p>
+      <p>Post your mini-projects and reports with tech stack, demo links, and files and keep getting feedback long after submission.</p>
     </div>
     <div class="feature-card">
       <div class="feature-tag">Connect</div>
       <h3>Direct messaging</h3>
-      <p>Message peers directly, form project teams, and keep the conversation attached to the work — not lost in a group chat.</p>
+      <p>Message peers directly, form project teams, and keep the conversation attached to the work not lost in a group chat.</p>
     </div>
     <div class="feature-card">
       <div class="feature-tag">Discuss</div>
@@ -120,7 +120,7 @@ const bodyHtml = `
     <div class="terminal-body">
       <div class="term-line">
         <span class="term-idx">01</span>
-        <div><strong>Join with your email</strong><span class="desc">Open to anyone building in IT — students, self-taught devs, professionals. No campus restriction.</span></div>
+        <div><strong>Join with your email</strong><span class="desc">Open to anyone building in IT students, self-taught devs, professionals. No campus restriction.</span></div>
       </div>
       <div class="term-line">
         <span class="term-idx">02</span>
@@ -176,7 +176,7 @@ const bodyHtml = `
     <div class="footer-col">
       <div class="logo" style="margin-bottom:14px;"><span class="dot"></span>NEXUS-IT</div>
       <p style="color:var(--muted);font-size:13px;line-height:1.6;max-width:280px;">
-        Where IT builders showcase projects, find collaborators, and get real feedback — open to everyone, everywhere.
+        Where IT builders showcase projects, find collaborators, and get real feedback open to everyone, everywhere.
       </p>
     </div>
     <div class="footer-col">
