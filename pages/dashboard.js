@@ -90,7 +90,6 @@ export default function Dashboard() {
         <Sidebar nickname={nickname} />
         <div className="app-main">
           <Topbar nickname={nickname} />
-          <Topbar nickname={nickname} />
           <div style={{ padding: '40px 5vw', maxWidth: '760px' }}>
             <div className="profile-header">
               <Avatar url={profile?.avatar_url} nickname={nickname} size={56} />

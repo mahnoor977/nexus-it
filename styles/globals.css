@@ -952,8 +952,7 @@ p, .body-text{font-size:15px;line-height:1.6;}
 }
 .sidebar-hamburger{margin-bottom:10px;}
 .sidebar.expanded .sidebar-icon-btn,
-.sidebar.expanded .sidebar-logo,
-.sidebar.expanded .sidebar-avatar{
+.sidebar.expanded .sidebar-logo{
   width:100%;
   justify-content:flex-start;
   gap:12px;
@@ -971,8 +970,8 @@ p, .body-text{font-size:15px;line-height:1.6;}
   width:100%;padding:2px 0;
 }
 .sidebar-avatar{
-  width:36px;height:36px;flex-shrink:0;
-  border-radius:50%;
+  width:36px !important;height:36px !important;flex-shrink:0;
+  border-radius:50% !important;
   display:flex;align-items:center;justify-content:center;
   background:var(--army-dark);color:var(--text);
   font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
