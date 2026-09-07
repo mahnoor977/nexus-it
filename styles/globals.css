@@ -1,17 +1,17 @@
 html{scroll-behavior:smooth;}
 :root{
-  --black:#FAF8F5;
+  --black:#FDFBF7;
   --panel:#FFFFFF;
-  --panel-2:#F3F0EA;
-  --army:#D8C9A8;
-  --army-dark:#B8A87E;
-  --army-light:#E8DCC0;
-  --tea:#B8863E;
-  --tea-bright:#A3752F;
-  --muted:#7A756A;
-  --text:#1A1815;
-  --line:#EDEBE6;
-  --radius:10px;
+  --panel-2:#F7F4EE;
+  --army:#E5E0D8;
+  --army-dark:#C5A059;
+  --army-light:#F5E9C8;
+  --tea:#C5A059;
+  --tea-bright:#D4AF37;
+  --muted:#6B6558;
+  --text:#1A1A1A;
+  --line:#E5E0D8;
+  --radius:12px;
 }
 [data-theme="dark"]{
   --black:#17140F;
@@ -527,7 +527,7 @@ h1.dash-welcome span{color:var(--tea);}
 .sidebar{
   position:fixed;top:0;left:0;bottom:0;
   width:76px;
-  background:#1A1815;
+  background:#2A2620;
   display:flex;flex-direction:column;align-items:center;
   padding:22px 0;
   z-index:150;
