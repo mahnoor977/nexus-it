@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
-import Avatar from '../components/Avatar';
 
 export default function Search() {
   const router = useRouter();
@@ -17,7 +16,7 @@ export default function Search() {
     async function loadUser() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+        setNickname(session.user.user_metadata?.nickname || 'Builder');
       }
     }
     loadUser();
@@ -57,71 +56,126 @@ export default function Search() {
   return (
     <>
       <Head>
-        <title>Search — NEXUS-IT</title>
+        <title>Search · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="search-page-content page-shell wide">
-            <h1 style={{ marginBottom: '20px' }}>Search</h1>
 
-            <div className="search-input-wrap">
-              <i className="ti ti-search"></i>
-              <input
-                type="text"
-                placeholder="Search projects, tech stacks, or people..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                autoFocus
-              />
+      <Sidebar nickname={nickname} />
+
+      <div className="app-main">
+        <div style={{ padding: '36px 48px', maxWidth: '800px' }}>
+          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: '36px', color: '#1A1A1A', marginBottom: '24px' }}>
+            Search
+          </h1>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: '#FFFFFF',
+            border: '1px solid #E5E0D8',
+            borderRadius: '14px',
+            padding: '14px 18px',
+            marginBottom: '36px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+          }}>
+            <i className="ti ti-search" style={{ color: '#C5A059', fontSize: '18px' }}></i>
+            <input
+              type="text"
+              placeholder="Search projects, tech stacks, or people..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '15px', background: 'transparent', color: '#1A1A1A' }}
+            />
+          </div>
+
+          {searching && <div style={{ color: '#6B6558' }}>Searching…</div>}
+
+          {!searching && query.trim() && peopleResults.length === 0 && projectResults.length === 0 && (
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #E5E0D8',
+              borderRadius: '14px',
+              padding: '40px',
+              textAlign: 'center',
+              color: '#6B6558'
+            }}>
+              No results for “{query}”
             </div>
+          )}
 
-            {searching && <div className="projects-empty">Searching…</div>}
-
-            {!searching && query.trim() && peopleResults.length === 0 && projectResults.length === 0 && (
-              <div className="projects-empty">No results for "{query}"</div>
-            )}
-
-            {peopleResults.length > 0 && (
-              <>
-                <div className="search-section-label">People</div>
+          {peopleResults.length > 0 && (
+            <div style={{ marginBottom: '36px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#6B6558', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                People
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {peopleResults.map((p) => (
                   <div
-                    className="search-person-row"
                     key={p.id}
                     onClick={() => router.push(`/user/${p.id}`)}
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #E5E0D8',
+                      borderRadius: '12px',
+                      padding: '14px 18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <Avatar url={p.avatar_url} nickname={p.nickname} size={36} />
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: '#C5A059',
+                      color: '#1A1A1A',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 600,
+                      fontSize: '14px'
+                    }}>
+                      {(p.nickname || 'B').slice(0, 2).toUpperCase()}
+                    </div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 500 }}>{p.nickname}</div>
-                      {p.bio && <div style={{ fontSize: '12px', color: 'var(--muted)' }}>{p.bio}</div>}
+                      <div style={{ fontWeight: 500, color: '#1A1A1A' }}>{p.nickname}</div>
+                      {p.bio && <div style={{ fontSize: '13px', color: '#6B6558' }}>{p.bio.slice(0, 80)}</div>}
                     </div>
                   </div>
                 ))}
-              </>
-            )}
+              </div>
+            </div>
+          )}
 
-            {projectResults.length > 0 && (
-              <>
-                <div className="search-section-label">Projects</div>
-                <div className="projects-list">
-                  {projectResults.map((p) => (
-                    <div
-                      className="project-card project-card-link"
-                      key={p.id}
-                      onClick={() => router.push(`/project/${p.id}`)}
-                    >
-                      <div className="project-card-top">
-                        <h3>{p.title}</h3>
-                        <span className="project-author">by {p.author_nickname}</span>
-                      </div>
-                      <p className="project-desc">{p.description}</p>
+          {projectResults.length > 0 && (
+            <div>
+              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#6B6558', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Projects
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {projectResults.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => router.push(`/project/${p.id}`)}
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #E5E0D8',
+                      borderRadius: '12px',
+                      padding: '18px 20px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, color: '#1A1A1A', marginBottom: '6px' }}>{p.title}</div>
+                    <div style={{ fontSize: '14px', color: '#6B6558' }}>
+                      {p.description?.slice(0, 120)}{p.description?.length > 120 ? '…' : ''}
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

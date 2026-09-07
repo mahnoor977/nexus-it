@@ -60,7 +60,7 @@ export default function Projects() {
         commentCounts[c.project_id] = (commentCounts[c.project_id] || 0) + 1;
       });
 
-      const withScores = projectsData.map((p) => ({
+      const withScores = (projectsData || []).map((p) => ({
         ...p,
         likeCount: likeCounts[p.id] || 0,
         commentCount: commentCounts[p.id] || 0,
@@ -91,17 +91,23 @@ export default function Projects() {
       const newLiked = new Set(likedIds);
       newLiked.delete(projectId);
       setLikedIds(newLiked);
-      setAllProjects(allProjects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount - 1 } : p));
+      setAllProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, likeCount: p.likeCount - 1 } : p))
+      );
     } else {
       await supabase.from('project_likes').insert({ project_id: projectId, user_id: currentUserId });
       const newLiked = new Set(likedIds);
       newLiked.add(projectId);
       setLikedIds(newLiked);
-      setAllProjects(allProjects.map((p) => p.id === projectId ? { ...p, likeCount: p.likeCount + 1 } : p));
+      setAllProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, likeCount: p.likeCount + 1 } : p))
+      );
     }
   }
 
-  let visibleProjects = allProjects;
+  // Filter projects based on active tab
+  let visibleProjects = [...allProjects];
+
   if (activeTab === 'trending') {
     visibleProjects = [...allProjects].sort((a, b) => b.score - a.score);
   } else if (activeTab === 'following') {
@@ -111,91 +117,241 @@ export default function Projects() {
   return (
     <>
       <Head>
-        <title>Projects — NEXUS-IT</title>
+        <title>Projects · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="page-shell wide">
-            <div className="projects-header" style={{ margin: '0 0 24px' }}>
-              <h1>Projects</h1>
+
+      <Sidebar nickname={nickname} />
+
+      <div className="app-main">
+        <div style={{ padding: '36px 48px', maxWidth: '1100px' }}>
+          
+          {/* Header */}
+          <h1 style={{ 
+            fontFamily: "'Newsreader', serif", 
+            fontSize: '36px', 
+            color: '#1A1A1A',
+            marginBottom: '8px' 
+          }}>
+            Projects
+          </h1>
+
+          {/* Tabs */}
+          <div style={{ 
+            display: 'flex', 
+            gap: '28px', 
+            marginBottom: '36px',
+            borderBottom: '1px solid #E5E0D8',
+            paddingBottom: '12px'
+          }}>
+            {['recent', 'trending', 'following'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '15px',
+                  fontWeight: activeTab === tab ? 600 : 400,
+                  color: activeTab === tab ? '#C5A059' : '#6B6558',
+                  cursor: 'pointer',
+                  paddingBottom: '10px',
+                  borderBottom: activeTab === tab ? '2px solid #C5A059' : '2px solid transparent',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div style={{ color: '#c0392b', marginBottom: '20px' }}>
+              {error}
             </div>
+          )}
 
-            <div style={{ display: 'flex', gap: '20px', borderBottom: '1px solid var(--line)', marginBottom: '24px' }}>
-              {['recent', 'trending', 'following'].map((tab) => (
-                <span
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    fontSize: '13px', cursor: 'pointer', paddingBottom: '10px', textTransform: 'capitalize',
-                    color: activeTab === tab ? 'var(--text)' : 'var(--muted)',
-                    fontWeight: activeTab === tab ? 500 : 400,
-                    borderBottom: activeTab === tab ? '2px solid var(--tea)' : '2px solid transparent',
-                  }}
-                >
-                  {tab}
-                </span>
-              ))}
+          {/* Loading */}
+          {loading && (
+            <div style={{ color: '#6B6558', padding: '40px 0' }}>
+              Loading projects...
             </div>
+          )}
 
-            {loading && <div className="projects-empty">Loading projects…</div>}
-            {error && <div className="projects-empty">Couldn't load projects: {error}</div>}
-
-            {!loading && !error && visibleProjects.length === 0 && (
-              <div className="projects-empty">
-                {activeTab === 'following'
-                  ? "You're not following anyone with projects yet — follow builders from their profile."
-                  : "No projects yet — be the first to post one."}
+          {/* Empty State */}
+          {!loading && visibleProjects.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <i className="ti ti-folder-off" style={{ fontSize: '42px' }}></i>
               </div>
-            )}
+              <h3>No projects yet</h3>
+              <p>
+                {activeTab === 'following'
+                  ? "People you follow haven't posted any projects yet."
+                  : "Be the first to share what you're building."}
+              </p>
+              <button 
+                className="btn-primary"
+                onClick={() => router.push('/new-project')}
+              >
+                + Post a project
+              </button>
+            </div>
+          )}
 
-            {!loading && visibleProjects.length > 0 && (
-              <div className="projects-list">
-                {visibleProjects.map((p) => (
-                  <div
-                    className="project-card project-card-link"
-                    key={p.id}
-                    onClick={() => router.push(`/project/${p.id}`)}
-                  >
-                    {p.isTop && <span className="top-ranked-badge">Top ranked</span>}
-                    <div className="project-card-top">
-                      <h3>{p.title}</h3>
-                      <span
-                        className="project-author"
-                        onClick={(e) => { e.stopPropagation(); router.push(`/user/${p.user_id}`); }}
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                      >
-                        by {p.author_nickname}
-                      </span>
+          {/* Projects List */}
+          {!loading && visibleProjects.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {visibleProjects.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => router.push(`/project/${p.id}`)}
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E0D8',
+                    borderRadius: '14px',
+                    padding: '24px 28px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.03)',
+                    transition: 'box-shadow 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.07)'}
+                  onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.03)'}
+                >
+                  {/* Top ranked badge */}
+                  {p.isTop && (
+                    <span style={{
+                      display: 'inline-block',
+                      background: '#F5E9C8',
+                      color: '#8B6914',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      marginBottom: '12px'
+                    }}>
+                      Top ranked
+                    </span>
+                  )}
+
+                  {/* Title + Author */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                    <h3 style={{ 
+                      fontSize: '20px', 
+                      fontWeight: 600, 
+                      color: '#1A1A1A',
+                      margin: 0 
+                    }}>
+                      {p.title}
+                    </h3>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/user/${p.user_id}`);
+                      }}
+                      style={{ 
+                        color: '#C5A059', 
+                        fontSize: '14px',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        marginLeft: '16px'
+                      }}
+                    >
+                      by {p.author_nickname || 'Builder'}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p style={{ 
+                    color: '#6B6558', 
+                    fontSize: '15px', 
+                    lineHeight: 1.6,
+                    marginBottom: '16px' 
+                  }}>
+                    {p.description}
+                  </p>
+
+                  {/* Tech tags */}
+                  {p.tech_stack && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px' }}>
+                      {p.tech_stack.split(',').map((tag, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            background: '#F7F4EE',
+                            color: '#6B6558',
+                            fontSize: '12px',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #E5E0D8'
+                          }}
+                        >
+                          {tag.trim()}
+                        </span>
+                      ))}
                     </div>
-                    <p className="project-desc">{p.description}</p>
-                    {p.tech_stack && (
-                      <div className="project-tags">
-                        {p.tech_stack.split(',').map((tag, i) => (
-                          <span className="project-tag" key={i}>{tag.trim()}</span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="project-card-footer">
-                      <button
-                        className={`like-btn ${likedIds.has(p.id) ? 'liked' : ''}`}
-                        onClick={(e) => handleLike(e, p.id)}
-                      >
-                        <i className="ti ti-heart"></i> {p.likeCount}
-                      </button>
-                      <span className="like-btn" style={{ cursor: 'default' }}>
-                        <i className="ti ti-message-circle"></i> {p.commentCount}
-                      </span>
-                      <div className="project-links" style={{ marginLeft: 'auto' }}>
-                        {p.github_url && <a href={p.github_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>GitHub →</a>}
-                        {p.demo_url && <a href={p.demo_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Live demo →</a>}
-                      </div>
+                  )}
+
+                  {/* Footer */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '16px',
+                    borderTop: '1px solid #F0EBE3',
+                    paddingTop: '14px'
+                  }}>
+                    <button
+                      onClick={(e) => handleLike(e, p.id)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: likedIds.has(p.id) ? '#C5A059' : '#6B6558',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <i className={`ti ${likedIds.has(p.id) ? 'ti-heart-filled' : 'ti-heart'}`}></i>
+                      {p.likeCount}
+                    </button>
+
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6B6558', fontSize: '14px' }}>
+                      <i className="ti ti-message-circle"></i>
+                      {p.commentCount}
+                    </span>
+
+                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '16px' }}>
+                      {p.github_url && (
+                        <a
+                          href={p.github_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ color: '#C5A059', fontSize: '14px', textDecoration: 'none' }}
+                        >
+                          GitHub →
+                        </a>
+                      )}
+                      {p.demo_url && (
+                        <a
+                          href={p.demo_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ color: '#C5A059', fontSize: '14px', textDecoration: 'none' }}
+                        >
+                          Live demo →
+                        </a>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -17,8 +17,9 @@ export default function Messages() {
         router.replace('/');
         return;
       }
+
       const myId = session.user.id;
-      setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+      setNickname(session.user.user_metadata?.nickname || 'Builder');
 
       const { data, error } = await supabase
         .from('messages')
@@ -31,59 +32,186 @@ export default function Messages() {
         data.forEach((m) => {
           const otherId = m.sender_id === myId ? m.receiver_id : m.sender_id;
           const otherNickname = m.sender_id === myId ? m.receiver_nickname : m.sender_nickname;
+
           if (!seen.has(otherId)) {
             seen.set(otherId, {
               userId: otherId,
-              nickname: otherNickname,
+              nickname: otherNickname || 'Builder',
               lastMessage: m.content,
+              createdAt: m.created_at,
             });
           }
         });
         setConversations(Array.from(seen.values()));
       }
+
       setLoading(false);
     }
+
     load();
   }, [router]);
 
   if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#FDFBF7',
+        color: '#6B6558'
+      }}>
+        Loading messages…
+      </div>
+    );
   }
 
   return (
     <>
       <Head>
-        <title>Messages — NEXUS-IT</title>
+        <title>Messages · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="page-shell wide">
-            <div className="projects-header" style={{ margin: '0 0 40px' }}>
-              <h1>Messages</h1>
-            </div>
 
-            {conversations.length === 0 ? (
-              <div className="projects-empty">
-                No conversations yet — message someone from their project page to start one.
+      <Sidebar nickname={nickname} />
+
+      <div className="app-main">
+        <div style={{ padding: '36px 48px', maxWidth: '800px' }}>
+
+          {/* Header */}
+          <h1 style={{
+            fontFamily: "'Newsreader', serif",
+            fontSize: '36px',
+            color: '#1A1A1A',
+            marginBottom: '8px'
+          }}>
+            Messages
+          </h1>
+          <p style={{ color: '#6B6558', marginBottom: '36px', fontSize: '15px' }}>
+            Conversations with other builders
+          </p>
+
+          {/* Empty State */}
+          {conversations.length === 0 ? (
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #E5E0D8',
+              borderRadius: '16px',
+              padding: '64px 40px',
+              textAlign: 'center',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ fontSize: '42px', color: '#C5A059', marginBottom: '20px' }}>
+                <i className="ti ti-message-circle"></i>
               </div>
-            ) : (
-              <div className="projects-list">
-                {conversations.map((c) => (
-                  <div
-                    className="project-card project-card-link"
-                    key={c.userId}
-                    onClick={() => router.push(`/messages/${c.userId}?nickname=${encodeURIComponent(c.nickname)}`)}
-                  >
-                    <div className="project-card-top">
-                      <h3>{c.nickname}</h3>
-                    </div>
-                    <p className="project-desc">{c.lastMessage}</p>
+              <h3 style={{
+                fontFamily: "'Newsreader', serif",
+                fontSize: '24px',
+                color: '#1A1A1A',
+                marginBottom: '10px'
+              }}>
+                No conversations yet
+              </h3>
+              <p style={{
+                color: '#6B6558',
+                fontSize: '15px',
+                lineHeight: 1.6,
+                marginBottom: '28px',
+                maxWidth: '360px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
+              }}>
+                Message someone from their project page to start a conversation.
+              </p>
+              <button
+                onClick={() => router.push('/projects')}
+                style={{
+                  background: '#C5A059',
+                  color: '#1A1A1A',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Browse projects
+              </button>
+            </div>
+          ) : (
+            /* Conversation List */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {conversations.map((c) => (
+                <div
+                  key={c.userId}
+                  onClick={() =>
+                    router.push(
+                      `/messages/${c.userId}?nickname=${encodeURIComponent(c.nickname)}`
+                    )
+                  }
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E0D8',
+                    borderRadius: '14px',
+                    padding: '18px 22px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    transition: 'box-shadow 0.2s ease',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.06)')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.02)')
+                  }
+                >
+                  {/* Avatar */}
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: '#C5A059',
+                    color: '#1A1A1A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    flexShrink: 0
+                  }}>
+                    {(c.nickname || 'B').slice(0, 2).toUpperCase()}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+
+                  {/* Content */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontWeight: 600,
+                      fontSize: '16px',
+                      color: '#1A1A1A',
+                      marginBottom: '4px'
+                    }}>
+                      {c.nickname}
+                    </div>
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#6B6558',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      {c.lastMessage}
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <i className="ti ti-chevron-right" style={{ color: '#C5A059', fontSize: '18px' }}></i>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

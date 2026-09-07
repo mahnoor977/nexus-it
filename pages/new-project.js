@@ -26,7 +26,7 @@ export default function NewProject() {
         return;
       }
       setUserId(session.user.id);
-      setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+      setNickname(session.user.user_metadata?.nickname || 'Builder');
       setLoading(false);
     }
     checkAuth();
@@ -39,11 +39,11 @@ export default function NewProject() {
       preview: URL.createObjectURL(file),
       type: file.type.startsWith('video') ? 'video' : 'image',
     }));
-    setMediaFiles([...mediaFiles, ...withPreviews].slice(0, 6));
+    setMediaFiles((prev) => [...prev, ...withPreviews].slice(0, 6));
   }
 
   function removeMediaFile(index) {
-    setMediaFiles(mediaFiles.filter((_, i) => i !== index));
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e) {
@@ -77,6 +77,7 @@ export default function NewProject() {
       return;
     }
 
+    // Upload media if any
     for (const item of mediaFiles) {
       const filePath = `${userId}/${projectData.id}/${Date.now()}-${item.file.name}`;
       const { error: uploadError } = await supabase.storage
@@ -84,10 +85,12 @@ export default function NewProject() {
         .upload(filePath, item.file);
 
       if (!uploadError) {
-        const { data: urlData } = supabase.storage.from('project-media').getPublicUrl(filePath);
+        const { data: urlData } = supabase.storage
+          .from('project-media')
+          .getPublicUrl(filePath);
+
         await supabase.from('project_media').insert({
           project_id: projectData.id,
-          user_id: userId,
           media_url: urlData.publicUrl,
           media_type: item.type,
         });
@@ -99,78 +102,240 @@ export default function NewProject() {
   }
 
   if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#FDFBF7',
+        color: '#6B6558'
+      }}>
+        Loading…
+      </div>
+    );
   }
 
   return (
     <>
       <Head>
-        <title>New Project — NEXUS-IT</title>
+        <title>Post a project · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          
-            <h1>Post a project</h1><form className="new-project-form page-shell narrow" onSubmit={handleSubmit}>
 
-            <div className="field">
-              <label>Title</label>
+      <Sidebar nickname={nickname} />
+
+      <div className="app-main">
+        <div style={{ padding: '36px 48px', maxWidth: '640px' }}>
+
+          <h1 style={{
+            fontFamily: "'Newsreader', serif",
+            fontSize: '32px',
+            color: '#1A1A1A',
+            marginBottom: '8px'
+          }}>
+            Post a project
+          </h1>
+          <p style={{ color: '#6B6558', fontSize: '15px', marginBottom: '36px' }}>
+            Share what you built and get feedback from other builders.
+          </p>
+
+          <form onSubmit={handleSubmit}>
+
+            {/* Title */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Title
+              </label>
               <input
                 type="text"
                 placeholder="e.g. Real-time chat app with WebSockets"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  background: '#FFFFFF',
+                  color: '#1A1A1A',
+                  outline: 'none'
+                }}
               />
             </div>
 
-            <div className="field">
-              <label>Description</label>
+            {/* Description */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Description
+              </label>
               <textarea
-                className="form-textarea"
                 placeholder="What does it do? What did you learn building it? What feedback are you looking for?"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  background: '#FFFFFF',
+                  color: '#1A1A1A',
+                  outline: 'none',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.5
+                }}
               />
             </div>
 
-            <div className="field">
-              <label>Tech stack</label>
+            {/* Tech Stack */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Tech Stack
+              </label>
               <input
                 type="text"
                 placeholder="e.g. React, Node.js, PostgreSQL (comma separated)"
                 value={techStack}
                 onChange={(e) => setTechStack(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  background: '#FFFFFF',
+                  color: '#1A1A1A',
+                  outline: 'none'
+                }}
               />
             </div>
 
-            <div className="field">
-              <label>GitHub link (optional)</label>
+            {/* GitHub */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                GitHub Link (optional)
+              </label>
               <input
                 type="url"
                 placeholder="https://github.com/you/project"
                 value={githubUrl}
                 onChange={(e) => setGithubUrl(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  background: '#FFFFFF',
+                  color: '#1A1A1A',
+                  outline: 'none'
+                }}
               />
             </div>
 
-            <div className="field">
-              <label>Live demo link (optional)</label>
+            {/* Live Demo */}
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Live Demo Link (optional)
+              </label>
               <input
                 type="url"
                 placeholder="https://your-demo.vercel.app"
                 value={demoUrl}
                 onChange={(e) => setDemoUrl(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  background: '#FFFFFF',
+                  color: '#1A1A1A',
+                  outline: 'none'
+                }}
               />
             </div>
 
-            <div className="field">
-              <label>Screenshots or short videos (optional, up to 6)</label>
-              <label className="media-upload-area" htmlFor="media-input">
-                <i className="ti ti-photo-plus" style={{ fontSize: '22px', color: 'var(--muted)' }}></i>
-                <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '8px' }}>
+            {/* Media Upload */}
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: '#6B6558',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
+                Screenshots or short videos (optional, up to 6)
+              </label>
+
+              <label
+                htmlFor="media-input"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1.5px dashed #E5E0D8',
+                  borderRadius: '14px',
+                  padding: '36px 20px',
+                  cursor: 'pointer',
+                  background: '#FFFFFF',
+                  transition: 'border-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#C5A059'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#E5E0D8'}
+              >
+                <i className="ti ti-photo-plus" style={{ fontSize: '28px', color: '#C5A059', marginBottom: '10px' }}></i>
+                <div style={{ fontSize: '14px', color: '#6B6558' }}>
                   Click to add images or short video clips
                 </div>
               </label>
+
               <input
                 id="media-input"
                 type="file"
@@ -181,18 +346,56 @@ export default function NewProject() {
               />
 
               {mediaFiles.length > 0 && (
-                <div className="media-preview-grid">
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  marginTop: '16px'
+                }}>
                   {mediaFiles.map((item, i) => (
-                    <div className="media-preview-item" key={i}>
+                    <div key={i} style={{ position: 'relative' }}>
                       {item.type === 'video' ? (
-                        <video src={item.preview} muted />
+                        <video
+                          src={item.preview}
+                          muted
+                          style={{
+                            width: '100px',
+                            height: '100px',
+                            objectFit: 'cover',
+                            borderRadius: '10px'
+                          }}
+                        />
                       ) : (
-                        <img src={item.preview} alt="" />
+                        <img
+                          src={item.preview}
+                          alt=""
+                          style={{
+                            width: '100px',
+                            height: '100px',
+                            objectFit: 'cover',
+                            borderRadius: '10px'
+                          }}
+                        />
                       )}
                       <button
                         type="button"
-                        className="media-preview-remove"
                         onClick={() => removeMediaFile(i)}
+                        style={{
+                          position: 'absolute',
+                          top: '4px',
+                          right: '4px',
+                          background: 'rgba(0,0,0,0.65)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '22px',
+                          height: '22px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
                       >
                         ×
                       </button>
@@ -202,9 +405,28 @@ export default function NewProject() {
               )}
             </div>
 
-            {error && <div className="form-error" style={{ display: 'block', color: '#e35d5d', marginBottom: '16px' }}>{error}</div>}
+            {/* Error */}
+            {error && (
+              <div style={{ color: '#c0392b', fontSize: '14px', marginBottom: '16px' }}>
+                {error}
+              </div>
+            )}
 
-            <button className="btn btn-solid" type="submit" disabled={saving} style={{ padding: '13px 30px' }}>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                background: saving ? '#E5E0D8' : '#C5A059',
+                color: '#1A1A1A',
+                border: 'none',
+                padding: '14px 32px',
+                borderRadius: '12px',
+                fontWeight: 500,
+                fontSize: '15px',
+                cursor: saving ? 'not-allowed' : 'pointer'
+              }}
+            >
               {saving ? 'Posting…' : 'Post project'}
             </button>
           </form>

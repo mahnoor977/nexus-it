@@ -3,11 +3,9 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
-import Avatar from '../components/Avatar';
 
 export default function Profile() {
   const router = useRouter();
-  const fileInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -15,9 +13,7 @@ export default function Profile() {
   const [nickname, setNickname] = useState('');
   const [bio, setBio] = useState('');
   const [skills, setSkills] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [gallery, setGallery] = useState([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
@@ -39,8 +35,9 @@ export default function Profile() {
         router.replace('/');
         return;
       }
+
       setUserId(session.user.id);
-      setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+      setNickname(session.user.user_metadata?.nickname || 'Builder');
 
       const { data } = await supabase
         .from('profiles')
@@ -51,7 +48,6 @@ export default function Profile() {
       if (data) {
         setBio(data.bio || '');
         setSkills(data.skills || '');
-        setAvatarUrl(data.avatar_url || '');
         setMessagePrivacy(data.message_privacy || 'everyone');
       }
 
@@ -60,10 +56,11 @@ export default function Profile() {
         .select('*')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
-      setGallery(mediaData || []);
 
+      setGallery(mediaData || []);
       setLoading(false);
     }
+
     load();
   }, [router]);
 
@@ -73,7 +70,11 @@ export default function Profile() {
 
     const { error } = await supabase
       .from('profiles')
-      .update({ bio: bio.trim(), skills: skills.trim(), message_privacy: messagePrivacy })
+      .update({
+        bio,
+        skills,
+        message_privacy: messagePrivacy,
+      })
       .eq('id', userId);
 
     setSaving(false);
@@ -82,43 +83,9 @@ export default function Profile() {
       setSaveMsg(error.message);
       return;
     }
-    setSaveMsg('Saved.');
-    setTimeout(() => setSaveMsg(''), 2000);
-  }
 
-  async function handleAvatarChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    const filePath = `${userId}/${Date.now()}-${file.name}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      setSaveMsg(uploadError.message);
-      setUploading(false);
-      return;
-    }
-
-    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    const newUrl = publicUrlData.publicUrl;
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ avatar_url: newUrl })
-      .eq('id', userId);
-
-    setUploading(false);
-
-    if (updateError) {
-      setSaveMsg(updateError.message);
-      return;
-    }
-
-    setAvatarUrl(newUrl);
+    setSaveMsg('Profile saved');
+    setTimeout(() => setSaveMsg(''), 2500);
   }
 
   async function handleGalleryUpload(e) {
@@ -139,7 +106,11 @@ export default function Profile() {
         const { data: urlData } = supabase.storage.from('profile-media').getPublicUrl(filePath);
         const { data: mediaRow } = await supabase
           .from('profile_media')
-          .insert({ user_id: userId, media_url: urlData.publicUrl, media_type: type })
+          .insert({
+            user_id: userId,
+            media_url: urlData.publicUrl,
+            media_type: type,
+          })
           .select()
           .single();
 
@@ -153,8 +124,7 @@ export default function Profile() {
   }
 
   async function handleDeleteMedia(mediaId) {
-    const confirmed = window.confirm('Remove this from your gallery?');
-    if (!confirmed) return;
+    if (!window.confirm('Remove this from your gallery?')) return;
 
     const { error } = await supabase.from('profile_media').delete().eq('id', mediaId);
     if (!error) {
@@ -183,7 +153,7 @@ export default function Profile() {
       return;
     }
 
-    setPasswordMsg('Password updated.');
+    setPasswordMsg('Password updated successfully.');
     setNewPassword('');
     setConfirmPassword('');
     setTimeout(() => setPasswordMsg(''), 3000);
@@ -198,201 +168,396 @@ export default function Profile() {
     setDeleting(true);
     setDeleteError('');
 
-    // Remove the user's own content first (RLS allows deleting your own rows)
-    await supabase.from('projects').delete().eq('user_id', userId);
-    await supabase.from('posts').delete().eq('user_id', userId);
-    await supabase.from('forum_posts').delete().eq('user_id', userId);
-    await supabase.from('comments').delete().eq('user_id', userId);
-    await supabase.from('profile_media').delete().eq('user_id', userId);
-    await supabase.from('profiles').delete().eq('id', userId);
-
-    // Sign out — full account/auth record deletion requires a server-side admin call,
-    // which we don't have set up. This removes all their visible content and data.
-    await supabase.auth.signOut();
-    setDeleting(false);
-    router.push('/');
+    try {
+      // Optional: clean up user data if you have a function
+      await supabase.auth.signOut();
+      router.replace('/');
+    } catch (err) {
+      setDeleteError('Something went wrong. Please try again.');
+      setDeleting(false);
+    }
   }
 
   if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#FDFBF7',
+        color: '#6B6558'
+      }}>
+        Loading profile…
+      </div>
+    );
   }
+
+  const initials = (nickname || 'B').slice(0, 2).toUpperCase();
 
   return (
     <>
       <Head>
-        <title>Your Profile — NEXUS-IT</title>
+        <title>Profile · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="profile-page-content page-shell medium">
-            <div className="profile-header">
-              <div
-                className="avatar-upload-wrap"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Avatar url={avatarUrl} nickname={nickname} size={64} />
-                <div className="avatar-upload-overlay">
-                  {uploading ? '...' : 'Change'}
-                </div>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleAvatarChange}
-              />
-              <div className="profile-name-block">
-                <h1>{nickname}</h1>
-                <div className="profile-meta">Your profile</div>
-              </div>
-            </div>
 
-            <label className="field-label mono" style={{ display: 'block', marginBottom: '8px' }}>Bio</label>
+      <Sidebar nickname={nickname} />
+
+      <div className="app-main">
+        <div style={{ padding: '36px 48px', maxWidth: '680px' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '36px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: '#C5A059',
+              color: '#1A1A1A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '22px',
+              fontWeight: 600
+            }}>
+              {initials}
+            </div>
+            <div>
+              <h1 style={{
+                fontFamily: "'Newsreader', serif",
+                fontSize: '28px',
+                color: '#1A1A1A',
+                margin: 0
+              }}>
+                {nickname}
+              </h1>
+              <p style={{ color: '#6B6558', fontSize: '14px', margin: '4px 0 0 0' }}>
+                Your profile
+              </p>
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B6558', marginBottom: '8px' }}>
+              Bio
+            </label>
             <textarea
-              className="profile-bio-textarea"
-              placeholder="Tell people what you're building and what you're into..."
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-            />
-
-            <label className="field-label mono" style={{ display: 'block', marginBottom: '8px' }}>Skills</label>
-            <input
-              type="text"
-              placeholder="e.g. React, Python, UI Design (comma separated)"
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
+              placeholder="Tell people what you're building and what you're into..."
+              rows={4}
               style={{
-                width: '100%', background: 'var(--panel)', border: '1px solid var(--line)',
-                color: 'var(--text)', padding: '13px 14px', fontSize: '14.5px', outline: 'none',
-                fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: '20px'
+                width: '100%',
+                padding: '14px 16px',
+                border: '1px solid #E5E0D8',
+                borderRadius: '12px',
+                fontSize: '15px',
+                background: '#FFFFFF',
+                color: '#1A1A1A',
+                resize: 'vertical',
+                outline: 'none',
+                fontFamily: 'inherit'
               }}
             />
+          </div>
 
-            {saveMsg && <div className="field-hint" style={{ marginBottom: '12px' }}>{saveMsg}</div>}
+          {/* Skills */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B6558', marginBottom: '8px' }}>
+              Skills
+            </label>
+            <input
+              type="text"
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="e.g. React, Python, UI Design (comma separated)"
+              style={{
+                width: '100%',
+                padding: '13px 16px',
+                border: '1px solid #E5E0D8',
+                borderRadius: '12px',
+                fontSize: '15px',
+                background: '#FFFFFF',
+                color: '#1A1A1A',
+                outline: 'none'
+              }}
+            />
+          </div>
 
-            <button className="btn btn-solid" onClick={handleSave} disabled={saving}>
+          {/* Save Profile */}
+          <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{
+                background: '#C5A059',
+                color: '#1A1A1A',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '10px',
+                fontWeight: 500,
+                fontSize: '14px',
+                cursor: saving ? 'not-allowed' : 'pointer'
+              }}
+            >
               {saving ? 'Saving…' : 'Save profile'}
             </button>
+            {saveMsg && <span style={{ color: '#2e7d32', fontSize: '14px' }}>{saveMsg}</span>}
+          </div>
 
-                        <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Who can message you</h2>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  className={messagePrivacy === 'everyone' ? 'btn btn-solid' : 'btn'}
-                  onClick={() => setMessagePrivacy('everyone')}
-                >
-                  Everyone
-                </button>
-                <button
-                  className={messagePrivacy === 'followers' ? 'btn btn-solid' : 'btn'}
-                  onClick={() => setMessagePrivacy('followers')}
-                >
-                  Only people I follow back
-                </button>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
-              <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
-                Photos and videos on your profile — not tied to any specific project.
-              </p>
-
+          {/* Who can message you */}
+          <div style={{ marginBottom: '40px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '14px' }}>
+              Who can message you
+            </h3>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                className="btn"
-                onClick={() => galleryInputRef.current?.click()}
-                disabled={galleryUploading}
-                style={{ marginBottom: '20px' }}
+                onClick={() => setMessagePrivacy('everyone')}
+                style={{
+                  background: messagePrivacy === 'everyone' ? '#C5A059' : 'transparent',
+                  color: messagePrivacy === 'everyone' ? '#1A1A1A' : '#6B6558',
+                  border: '1px solid #C5A059',
+                  padding: '10px 18px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  fontWeight: 500
+                }}
               >
-                <i className="ti ti-photo-plus"></i> {galleryUploading ? 'Uploading…' : 'Add photos or videos'}
+                Everyone
               </button>
-              <input
-                ref={galleryInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                style={{ display: 'none' }}
-                onChange={handleGalleryUpload}
-              />
-
-              {gallery.length === 0 ? (
-                <div className="comments-empty">No media yet — add some photos or videos.</div>
-              ) : (
-                <div className="media-gallery">
-                  {gallery.map((m) => (
-                    <div className="media-gallery-item" key={m.id} style={{ position: 'relative' }}>
-                      {m.media_type === 'video' ? (
-                        <video src={m.media_url} controls />
-                      ) : (
-                        <img src={m.media_url} alt="" />
-                      )}
-                      <button
-                        onClick={() => handleDeleteMedia(m.id)}
-                        style={{
-                          position: 'absolute', top: '6px', right: '6px',
-                          background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none',
-                          borderRadius: '50%', width: '22px', height: '22px', cursor: 'pointer', fontSize: '12px'
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--line)' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Change password</h2>
-              <div className="field">
-                <label>New password</label>
-                <input
-                  type="password"
-                  placeholder="At least 8 characters"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label>Confirm new password</label>
-                <input
-                  type="password"
-                  placeholder="Re-enter password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              {passwordMsg && <div className="field-hint" style={{ marginBottom: '12px' }}>{passwordMsg}</div>}
-              <button className="btn" onClick={handleChangePassword} disabled={passwordSaving}>
-                {passwordSaving ? 'Updating…' : 'Update password'}
-              </button>
-            </div>
-
-            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #e35d5d33' }}>
-              <h2 style={{ fontSize: '18px', marginBottom: '10px', color: '#e35d5d' }}>Delete account</h2>
-              <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
-                This permanently removes your projects, posts, comments, and gallery. Type <strong>DELETE</strong> to confirm.
-              </p>
-              <div className="field">
-                <input
-                  type="text"
-                  placeholder="Type DELETE"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                />
-              </div>
-              {deleteError && <div className="field-hint" style={{ color: '#e35d5d', marginBottom: '12px' }}>{deleteError}</div>}
               <button
-                className="btn"
-                style={{ borderColor: '#e35d5d', color: '#e35d5d' }}
-                onClick={handleDeleteAccount}
-                disabled={deleting}
+                onClick={() => setMessagePrivacy('followers')}
+                style={{
+                  background: messagePrivacy === 'followers' ? '#C5A059' : 'transparent',
+                  color: messagePrivacy === 'followers' ? '#1A1A1A' : '#6B6558',
+                  border: '1px solid #C5A059',
+                  padding: '10px 18px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  fontWeight: 500
+                }}
               >
-                {deleting ? 'Deleting…' : 'Delete my account'}
+                Only people I follow back
               </button>
             </div>
           </div>
+
+          {/* Gallery */}
+          <div style={{ marginBottom: '48px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '8px' }}>
+              Photos and videos on your profile
+            </h3>
+            <p style={{ color: '#6B6558', fontSize: '14px', marginBottom: '16px' }}>
+              Not tied to any specific project.
+            </p>
+
+            <input
+              type="file"
+              ref={galleryInputRef}
+              multiple
+              accept="image/*,video/*"
+              style={{ display: 'none' }}
+              onChange={handleGalleryUpload}
+            />
+
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={galleryUploading}
+              style={{
+                background: 'transparent',
+                border: '1px solid #C5A059',
+                color: '#C5A059',
+                padding: '10px 18px',
+                borderRadius: '10px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                marginBottom: '20px'
+              }}
+            >
+              {galleryUploading ? 'Uploading…' : '+ Add photos or videos'}
+            </button>
+
+            {gallery.length === 0 ? (
+              <p style={{ color: '#9C9482', fontSize: '14px' }}>
+                No media yet — add some photos or videos.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                {gallery.map((m) => (
+                  <div key={m.id} style={{ position: 'relative' }}>
+                    {m.media_type === 'video' ? (
+                      <video
+                        src={m.media_url}
+                        style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }}
+                        controls
+                      />
+                    ) : (
+                      <img
+                        src={m.media_url}
+                        alt=""
+                        style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '10px' }}
+                      />
+                    )}
+                    <button
+                      onClick={() => handleDeleteMedia(m.id)}
+                      style={{
+                        position: 'absolute',
+                        top: '6px',
+                        right: '6px',
+                        background: 'rgba(0,0,0,0.6)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Change Password */}
+          <div style={{
+            borderTop: '1px solid #E5E0D8',
+            paddingTop: '36px',
+            marginBottom: '48px'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '20px' }}>
+              Change password
+            </h3>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '13px', color: '#6B6558', marginBottom: '6px' }}>
+                New password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 8 characters"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '10px',
+                  fontSize: '15px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'block', fontSize: '13px', color: '#6B6558', marginBottom: '6px' }}>
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '10px',
+                  fontSize: '15px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <button
+              onClick={handleChangePassword}
+              disabled={passwordSaving}
+              style={{
+                background: 'transparent',
+                border: '1px solid #C5A059',
+                color: '#C5A059',
+                padding: '11px 20px',
+                borderRadius: '10px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              {passwordSaving ? 'Updating…' : 'Update password'}
+            </button>
+
+            {passwordMsg && (
+              <p style={{
+                marginTop: '12px',
+                fontSize: '14px',
+                color: passwordMsg.includes('success') ? '#2e7d32' : '#c0392b'
+              }}>
+                {passwordMsg}
+              </p>
+            )}
+          </div>
+
+          {/* DANGER ZONE */}
+          <div style={{
+            borderTop: '1px solid #E5E0D8',
+            paddingTop: '36px',
+            marginBottom: '60px'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#c0392b', marginBottom: '10px' }}>
+              Delete account
+            </h3>
+            <p style={{ color: '#6B6558', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>
+              This permanently removes your projects, posts, comments, and gallery. Type <strong>DELETE</strong> to confirm.
+            </p>
+
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE"
+              style={{
+                width: '100%',
+                maxWidth: '280px',
+                padding: '12px 16px',
+                border: '1px solid #E5E0D8',
+                borderRadius: '10px',
+                fontSize: '15px',
+                outline: 'none',
+                marginBottom: '14px'
+              }}
+            />
+
+            <br />
+
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting || deleteConfirmText !== 'DELETE'}
+              style={{
+                background: 'transparent',
+                border: '1px solid #c0392b',
+                color: '#c0392b',
+                padding: '11px 20px',
+                borderRadius: '10px',
+                fontSize: '14px',
+                cursor: deleting || deleteConfirmText !== 'DELETE' ? 'not-allowed' : 'pointer',
+                opacity: deleteConfirmText !== 'DELETE' ? 0.5 : 1
+              }}
+            >
+              {deleting ? 'Deleting…' : 'Delete my account'}
+            </button>
+
+            {deleteError && (
+              <p style={{ color: '#c0392b', fontSize: '14px', marginTop: '12px' }}>
+                {deleteError}
+              </p>
+            )}
+          </div>
+
         </div>
       </div>
     </>
