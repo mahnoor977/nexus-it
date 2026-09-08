@@ -33,20 +33,57 @@ const bodyHtml = `
         <div class="hero-note">// email-verified accounts · free to join · open worldwide</div>
   </div>
 
-    <div class="hero-mockup glass-card" style="position:relative;z-index:1;">
-    <div class="hero-mockup-bar"><span></span><span></span><span></span></div>
-    <div class="hero-mockup-body">
-      <div class="hero-mockup-card">
-        <span class="hero-mockup-badge">Top ranked</span>
-        <div class="hero-mockup-title">Weather dashboard</div>
-        <div class="hero-mockup-meta">by Aisha Rahman · 24 likes · 9 comments</div>
-      </div>
-      <div class="hero-mockup-card">
-        <div class="hero-mockup-title">Real-time chat app</div>
-        <div class="hero-mockup-meta">by Kwame Owusu · React, Node.js</div>
-      </div>
+    <div class="mock-window" style="position:relative;z-index:1;">
+  <div class="mock-topbar">
+    <div class="mock-brand"><span class="dot"></span>NEXUS-IT</div>
+    <div class="mock-search"><i class="ti ti-search"></i>Search projects... <span class="mock-kbd">⌘K</span></div>
+    <i class="ti ti-bell mock-icon-btn"></i>
+    <div class="mock-avatar"></div>
+  </div>
+  <div class="mock-section-head">
+    <span>Top shipped this week</span>
+    <a href="#">View all →</a>
+  </div>
+  <div class="mock-row">
+    <span class="mock-rank">1</span>
+    <div class="mock-icon" style="background:#8B5CF6;"><i class="ti ti-sparkles"></i></div>
+    <div class="mock-row-text">
+      <div class="mock-row-title">LaunchFlow</div>
+      <div class="mock-row-sub">AI-powered release orchestration</div>
+    </div>
+    <span class="mock-tag" style="background:#EFE9FB;color:#6D4FC4;">DevTools</span>
+    <div class="mock-row-meta">
+      <span class="mock-count"><i class="ti ti-star"></i>1.2k</span>
+      <span class="mock-time">Shipped 2d ago</span>
     </div>
   </div>
+  <div class="mock-row">
+    <span class="mock-rank">2</span>
+    <div class="mock-icon" style="background:#22A06B;"><i class="ti ti-chart-bar"></i></div>
+    <div class="mock-row-text">
+      <div class="mock-row-title">Metricly</div>
+      <div class="mock-row-sub">Real-time analytics for modern teams</div>
+    </div>
+    <span class="mock-tag" style="background:#E4F5EC;color:#1D7A54;">Analytics</span>
+    <div class="mock-row-meta">
+      <span class="mock-count"><i class="ti ti-star"></i>948</span>
+      <span class="mock-time">Shipped 3d ago</span>
+    </div>
+  </div>
+  <div class="mock-row">
+    <span class="mock-rank">3</span>
+    <div class="mock-icon" style="background:#2563EB;"><i class="ti ti-shield-check"></i></div>
+    <div class="mock-row-text">
+      <div class="mock-row-title">ShieldStack</div>
+      <div class="mock-row-sub">Infrastructure security, simplified</div>
+    </div>
+    <span class="mock-tag" style="background:#E6EEFD;color:#1D4ED8;">Security</span>
+    <div class="mock-row-meta">
+      <span class="mock-count"><i class="ti ti-star"></i>723</span>
+      <span class="mock-time">Shipped 4d ago</span>
+    </div>
+  </div>
+</div>
 
   <div class="scroll-cue"><div class="bar"></div>SCROLL</div>
 </section>
