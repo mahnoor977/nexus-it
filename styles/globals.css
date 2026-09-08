@@ -1293,3 +1293,26 @@ body.sidebar-expanded .app-main {
     display: none; /* You can later replace with a mobile bottom nav or hamburger */
   }
 }
+.app-main {
+  margin-left: 240px !important;
+  min-height: 100vh;
+  background: #FDFBF7;
+}
+/* ===== FORCE FIX FOR LAYOUT ===== */
+nav {
+  display: none !important;
+}
+
+.topbar {
+  display: none !important;
+}
+
+.app-main {
+  margin-left: 240px !important;
+  min-height: 100vh;
+  background: #FDFBF7 !important;
+}
+
+body {
+  background: #FDFBF7 !important;
+}
