@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar({ nickname }) {
   const router = useRouter();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    // Update main content margin when sidebar expands/collapses
-    const main = document.querySelector('.app-main');
-    if (main) {
-      main.style.marginLeft = expanded ? '240px' : '72px';
-    }
+    document.body.classList.toggle('sidebar-expanded', expanded);
+    return () => document.body.classList.remove('sidebar-expanded');
   }, [expanded]);
 
   async function handleLogout() {
@@ -19,205 +17,81 @@ export default function Sidebar({ nickname }) {
     router.replace('/');
   }
 
-  const initials = (nickname || 'MA').slice(0, 2).toUpperCase();
+  const initials = (nickname || '?').slice(0, 2).toUpperCase();
 
   const navItems = [
-    { path: '/projects', icon: '📁', label: 'Projects' },
-    { path: '/posts', icon: '📰', label: 'Posts' },
-    { path: '/messages', icon: '💬', label: 'Messages' },
-    { path: '/forum', icon: '💭', label: 'Forum' },
-    { path: '/search', icon: '🔍', label: 'Search' },
-    { path: '/advisor', icon: '✨', label: 'AI Advisor' },
-    { path: '/new-project', icon: '➕', label: 'Create' },
+    { path: '/projects', icon: 'ti-home', label: 'Home' },
+    { path: '/dashboard', icon: 'ti-layout-dashboard', label: 'Dashboard' },
+    { path: '/posts', icon: 'ti-news', label: 'Posts' },
+    { path: '/new-project', icon: 'ti-plus', label: 'New project' },
+    { path: '/advisor', icon: 'ti-sparkles', label: 'Advisor' },
+    { path: '/messages', icon: 'ti-message', label: 'Messages' },
+    { path: '/forum', icon: 'ti-messages', label: 'Community' },
+    { path: '/tech-stack', icon: 'ti-stack-2', label: 'Tech Stack' },
+    { path: '/resources', icon: 'ti-books', label: 'Resources' },
+    { path: '/docs', icon: 'ti-file-text', label: 'Docs' },
   ];
 
   return (
-    <aside
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: expanded ? '240px' : '72px',
-        height: '100vh',
-        background: '#1A1A1A',
-        color: '#F5F0E8',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: expanded ? '24px 16px' : '24px 12px',
-        zIndex: 50,
-        borderRight: '1px solid #2A2A2A',
-        transition: 'width 0.25s ease, padding 0.25s ease',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Brand + Toggle */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: expanded ? 'space-between' : 'center',
-          marginBottom: '28px',
-        }}
-      >
-        <div
-          onClick={() => router.push('/projects')}
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-        >
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
-              background: '#C5A059',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1A1A1A',
-              fontWeight: 700,
-              fontSize: '16px',
-              flexShrink: 0,
-            }}
-          >
-            N
-          </div>
-          {expanded && (
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '15px', color: '#FDFBF7' }}>NEXUS-IT</div>
-              <div style={{ fontSize: '10px', color: '#C5A059', letterSpacing: '0.08em' }}>
-                BUILDERS PLATFORM
-              </div>
-            </div>
-          )}
-        </div>
-
-        {expanded && (
-          <button
-            onClick={() => setExpanded(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#9C9482',
-              cursor: 'pointer',
-              fontSize: '18px',
-              padding: '4px',
-            }}
-            title="Collapse sidebar"
-          >
-            ←
-          </button>
-        )}
+    <div className={`sidebar ${expanded ? 'expanded' : ''}`}>
+      <div className="sidebar-item-row" onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
+        <button className="sidebar-icon-btn">
+          <i className="ti ti-menu-2"></i>
+        </button>
       </div>
 
-      {/* Expand button when collapsed */}
-      {!expanded && (
-        <button
-          onClick={() => setExpanded(true)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: '#9C9482',
-            cursor: 'pointer',
-            fontSize: '18px',
-            marginBottom: '20px',
-            width: '100%',
-            textAlign: 'center',
-          }}
-          title="Expand sidebar"
-        >
-          →
-        </button>
-      )}
+      <div className="sidebar-item-row" onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer' }}>
+        <div className="sidebar-icon-btn"><i className="ti ti-hexagon"></i></div>
+        {expanded && <span className="sidebar-label">NEXUS-IT</span>}
+      </div>
 
-      {/* Navigation */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-        {navItems.map((item) => {
-          const isActive = router.pathname.startsWith(item.path);
-          return (
-            <button
-              key={item.path}
-              onClick={() => router.push(item.path)}
-              title={!expanded ? item.label : undefined}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                width: '100%',
-                padding: expanded ? '11px 14px' : '11px 0',
-                justifyContent: expanded ? 'flex-start' : 'center',
-                border: 'none',
-                borderRadius: '10px',
-                background: isActive ? '#C5A059' : 'transparent',
-                color: isActive ? '#1A1A1A' : '#B8B0A0',
-                fontSize: '14px',
-                fontWeight: isActive ? 500 : 400,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>{item.icon}</span>
-              {expanded && item.label}
+      <div className="sidebar-item-row" onClick={() => router.push('/search')} style={{ cursor: 'pointer' }}>
+        <button className={`sidebar-icon-btn ${router.pathname === '/search' ? 'active' : ''}`}>
+          <i className="ti ti-search"></i>
+        </button>
+        {expanded && <span className="sidebar-label">Search</span>}
+      </div>
+
+      <div className="sidebar-nav">
+        {navItems.map((item) => (
+          <div
+            key={item.path}
+            className="sidebar-item-row"
+            onClick={() => router.push(item.path)}
+            style={{ cursor: 'pointer' }}
+          >
+            <button className={`sidebar-icon-btn ${router.pathname.startsWith(item.path) ? 'active' : ''}`}>
+              <i className={`ti ${item.icon}`}></i>
             </button>
-          );
-        })}
-      </nav>
-
-      {/* User + Logout */}
-      <div style={{ borderTop: '1px solid #2A2A2A', paddingTop: '16px' }}>
-        <div
-          onClick={() => router.push('/profile')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '12px',
-            cursor: 'pointer',
-            justifyContent: expanded ? 'flex-start' : 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: '#C5A059',
-              color: '#1A1A1A',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 600,
-              fontSize: '13px',
-              flexShrink: 0,
-            }}
-          >
-            {initials}
+            {expanded && <span className="sidebar-label">{item.label}</span>}
           </div>
-          {expanded && (
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 500, color: '#FDFBF7' }}>
-                {nickname || 'Builder'}
-              </div>
-              <div style={{ fontSize: '11px', color: '#9C9482' }}>Level 4 Architect</div>
-            </div>
-          )}
+        ))}
+      </div>
+
+      <div className="sidebar-footer">
+        <div className="sidebar-item-row">
+          <ThemeToggle expanded={expanded} />
         </div>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            width: '100%',
-            padding: expanded ? '10px 14px' : '10px 0',
-            border: 'none',
-            borderRadius: '8px',
-            background: 'transparent',
-            color: '#E57373',
-            fontSize: '13px',
-            cursor: 'pointer',
-            textAlign: expanded ? 'left' : 'center',
-          }}
-        >
-          {expanded ? 'Log out' : '🚪'}
-        </button>
+        <div className="sidebar-item-row" onClick={() => router.push('/profile')} style={{ cursor: 'pointer' }}>
+          <button className="sidebar-icon-btn">
+            <i className="ti ti-settings"></i>
+          </button>
+          {expanded && <span className="sidebar-label">Settings</span>}
+        </div>
+
+        <div className="sidebar-item-row" onClick={() => router.push('/profile')} style={{ cursor: 'pointer' }}>
+          <div className="sidebar-avatar">{initials}</div>
+          {expanded && <span className="sidebar-label">Profile</span>}
+        </div>
+
+        <div className="sidebar-item-row" onClick={handleLogout} style={{ cursor: 'pointer' }}>
+          <button className="sidebar-icon-btn sidebar-logout">
+            <i className="ti ti-logout"></i>
+          </button>
+          {expanded && <span className="sidebar-label">Log out</span>}
+        </div>
       </div>
-    </aside>
+    </div>
   );
 }
