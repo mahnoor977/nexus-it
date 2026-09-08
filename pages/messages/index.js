@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
@@ -9,6 +9,10 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [nickname, setNickname] = useState('');
   const [conversations, setConversations] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const notifRef = useRef(null);
+  const helpRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -50,6 +54,19 @@ export default function Messages() {
 
     load();
   }, [router]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+      if (helpRef.current && !helpRef.current.contains(e.target)) {
+        setShowHelp(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (loading) {
     return (
@@ -96,28 +113,140 @@ export default function Messages() {
               <div style={{ width: '48px', height: '3px', background: '#C5A059', borderRadius: '999px' }} />
             </div>
 
-            {/* Decorative header icons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '18px', paddingTop: '6px' }}>
-              <div style={{ position: 'relative', cursor: 'pointer' }}>
-                <i className="ti ti-bell" style={{ fontSize: '20px', color: '#1A1A1A' }}></i>
-                <span style={{
-                  position: 'absolute', top: '-2px', right: '-2px',
-                  width: '7px', height: '7px', borderRadius: '50%',
-                  background: '#C5A059'
-                }} />
+
+              <div ref={notifRef} style={{ position: 'relative' }}>
+                <div
+                  onClick={() => { setShowNotifications(!showNotifications); setShowHelp(false); }}
+                  style={{ position: 'relative', cursor: 'pointer' }}
+                >
+                  <i className="ti ti-bell" style={{ fontSize: '20px', color: '#1A1A1A' }}></i>
+                  {conversations.length > 0 && (
+                    <span style={{
+                      position: 'absolute', top: '-2px', right: '-2px',
+                      width: '7px', height: '7px', borderRadius: '50%',
+                      background: '#C5A059'
+                    }} />
+                  )}
+                </div>
+
+                {showNotifications && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 14px)',
+                    right: 0,
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E0D8',
+                    borderRadius: '14px',
+                    width: '300px',
+                    maxHeight: '360px',
+                    overflowY: 'auto',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    zIndex: 200
+                  }}>
+                    <div style={{
+                      padding: '14px 18px',
+                      borderBottom: '1px solid #E5E0D8',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: '#1A1A1A'
+                    }}>
+                      Conversations
+                    </div>
+                    {conversations.length === 0 ? (
+                      <div style={{ padding: '20px 18px', fontSize: '13.5px', color: '#6B6558' }}>
+                        Nothing here yet.
+                      </div>
+                    ) : (
+                      conversations.slice(0, 8).map((c) => (
+                        <div
+                          key={c.userId}
+                          onClick={() => {
+                            setShowNotifications(false);
+                            router.push(`/messages/${c.userId}?nickname=${encodeURIComponent(c.nickname)}`);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '12px 18px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid #F0EBE3'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#F7F4EE'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <div style={{
+                            width: '32px', height: '32px', borderRadius: '50%',
+                            background: '#C5A059', color: '#1A1A1A',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '12px', fontWeight: 600, flexShrink: 0
+                          }}>
+                            {(c.nickname || 'B').slice(0, 2).toUpperCase()}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: '13.5px', fontWeight: 500, color: '#1A1A1A' }}>
+                              {c.nickname}
+                            </div>
+                            <div style={{
+                              fontSize: '12px', color: '#6B6558',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                            }}>
+                              {c.lastMessage}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
-              <div style={{
-                width: '30px', height: '30px', borderRadius: '50%',
-                border: '1px solid #E5E0D8',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer'
-              }}>
-                <i className="ti ti-help" style={{ fontSize: '15px', color: '#6B6558' }}></i>
+
+              <div ref={helpRef} style={{ position: 'relative' }}>
+                <div
+                  onClick={() => { setShowHelp(!showHelp); setShowNotifications(false); }}
+                  style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    border: '1px solid #E5E0D8',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <i className="ti ti-help" style={{ fontSize: '15px', color: '#6B6558' }}></i>
+                </div>
+
+                {showHelp && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 14px)',
+                    right: 0,
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E0D8',
+                    borderRadius: '14px',
+                    width: '260px',
+                    padding: '18px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                    zIndex: 200
+                  }}>
+                    <h4 style={{ fontSize: '14px', color: '#1A1A1A', marginBottom: '8px' }}>
+                      About messages
+                    </h4>
+                    <p style={{ fontSize: '13px', color: '#6B6558', lineHeight: 1.6, marginBottom: '14px' }}>
+                      Start a conversation from any project page. You can edit or delete your own
+                      messages, and delete an entire conversation from within the chat.
+                    </p>
+                    <a
+                      href="mailto:support@nexus-it.dev"
+                      style={{ fontSize: '13px', color: '#C5A059', fontWeight: 500 }}
+                    >
+                      Need more help? Contact support →
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Empty State */}
           {conversations.length === 0 ? (
             <div style={{
               background: '#FFFFFF',
@@ -127,7 +256,6 @@ export default function Messages() {
               textAlign: 'center',
               boxShadow: '0 4px 24px rgba(0,0,0,0.03)'
             }}>
-              {/* Illustration cluster */}
               <div style={{
                 position: 'relative',
                 width: '180px',
@@ -216,7 +344,6 @@ export default function Messages() {
               </button>
             </div>
           ) : (
-            /* Conversation List */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {conversations.map((c) => (
                 <div
@@ -245,7 +372,6 @@ export default function Messages() {
                     (e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.02)')
                   }
                 >
-                  {/* Avatar */}
                   <div style={{
                     width: '48px',
                     height: '48px',
@@ -262,7 +388,6 @@ export default function Messages() {
                     {(c.nickname || 'B').slice(0, 2).toUpperCase()}
                   </div>
 
-                  {/* Content */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontWeight: 600,
@@ -283,7 +408,6 @@ export default function Messages() {
                     </div>
                   </div>
 
-                  {/* Arrow */}
                   <i className="ti ti-chevron-right" style={{ color: '#C5A059', fontSize: '18px' }}></i>
                 </div>
               ))}

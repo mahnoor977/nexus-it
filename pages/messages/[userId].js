@@ -23,6 +23,7 @@ export default function Conversation() {
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [blockedState, setBlockedState] = useState(null); // 'you-blocked-them' | 'they-blocked-you' | null
   const [sendError, setSendError] = useState('');
+  const [deletingConvo, setDeletingConvo] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -176,6 +177,33 @@ export default function Conversation() {
     }
   }
 
+  async function handleDeleteConversation() {
+    if (!currentUserId || !userId) return;
+
+    const confirmed = window.confirm(
+      `Delete this entire conversation with ${otherNickname || 'this person'}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingConvo(true);
+
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .or(
+        `and(sender_id.eq.${currentUserId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentUserId})`
+      );
+
+    setDeletingConvo(false);
+
+    if (error) {
+      window.alert('Could not delete this conversation. Try again.');
+      return;
+    }
+
+    router.push('/messages');
+  }
+
   if (loading) {
     return <div className="dash-loading mono">Loading…</div>;
   }
@@ -189,8 +217,37 @@ export default function Conversation() {
         <Sidebar nickname={myNickname} />
         <div className="app-main">
           <div className="advisor-chat page-shell medium">
-            <div className="eyebrow mono" style={{ marginBottom: '10px' }}>
-              // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '10px'
+            }}>
+              <div className="eyebrow mono">
+                // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
+              </div>
+
+              <button
+                onClick={handleDeleteConversation}
+                disabled={deletingConvo}
+                title="Delete conversation"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'none',
+                  border: '1px solid #E5E0D8',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  fontSize: '12.5px',
+                  color: deletingConvo ? '#9C9482' : '#c0392b',
+                  cursor: deletingConvo ? 'not-allowed' : 'pointer',
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}
+              >
+                <i className="ti ti-trash" style={{ fontSize: '14px' }}></i>
+                {deletingConvo ? 'Deleting…' : 'Delete conversation'}
+              </button>
             </div>
 
             {blockedState === 'you-blocked-them' && (
