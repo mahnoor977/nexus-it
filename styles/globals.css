@@ -1316,3 +1316,9 @@ nav {
 body {
   background: #FDFBF7 !important;
 }
+.app-main {
+  margin-left: 240px;
+  min-height: 100vh;
+  background: #FDFBF7;
+  transition: margin-left 0.25s ease;
+}
