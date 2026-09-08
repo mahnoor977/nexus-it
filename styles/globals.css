@@ -1015,6 +1015,7 @@ body.sidebar-expanded .app-main{
   z-index: 100;
   transition: width 0.25s ease;
   border-right: 1px solid #2A2A2A;
+  overflow: hidden;
 }
 
 .sidebar.expanded {
@@ -1087,6 +1088,19 @@ body.sidebar-expanded .app-main{
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 4px;
 }
 
 .nav-item {
