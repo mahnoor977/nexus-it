@@ -549,13 +549,15 @@ h1.dash-welcome span{color:var(--tea);}
   flex:1;
 }
 .sidebar-icon-btn{
-  width:44px;height:44px;
-  border-radius:999px;
+  width:24px;height:24px;
+  flex-shrink:0;
+  border-radius:6px;
   border:none;
   background:transparent;
   color:rgba(250,248,245,0.5);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
+  font-size:18px;
   transition:background .2s, color .2s;
 }
 .sidebar-icon-btn:hover{
@@ -952,13 +954,6 @@ p, .body-text{font-size:15px;line-height:1.6;}
   padding-right:16px;
 }
 .sidebar-hamburger{margin-bottom:10px;}
-.sidebar.expanded .sidebar-icon-btn,
-.sidebar.expanded .sidebar-logo{
-  width:100%;
-  justify-content:flex-start;
-  gap:12px;
-  padding-left:10px;
-}
 .sidebar-label{
   font-size:13px;
   font-family:'IBM Plex Sans',sans-serif;
