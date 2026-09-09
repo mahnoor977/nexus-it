@@ -4,7 +4,7 @@ import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
 import Sidebar from '../../components/Sidebar';
 import Avatar from '../../components/Avatar';
-import ReportBlockMenu from '../../components/ReportBlockMenu';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export default function PublicProfile() {
   const { loading: authLoading } = useRequireAuth();
