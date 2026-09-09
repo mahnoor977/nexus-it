@@ -3,8 +3,11 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function Projects() {
+  const { loading: authLoading } = useRequireAuth();
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);

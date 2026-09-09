@@ -7,6 +7,8 @@ import Avatar from '../../components/Avatar';
 import ReportBlockMenu from '../../components/ReportBlockMenu';
 
 export default function PublicProfile() {
+  const { loading: authLoading } = useRequireAuth();
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const { id } = router.query;
 

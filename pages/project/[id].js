@@ -4,8 +4,11 @@ import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
 import Sidebar from '../../components/Sidebar';
 import ReportBlockMenu from '../../components/ReportBlockMenu';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export default function ProjectDetail() {
+  const { loading: authLoading } = useRequireAuth();
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const { id } = router.query;
 

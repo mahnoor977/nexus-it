@@ -4,8 +4,12 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function TechStack() {
+  const { loading: authLoading } = useRequireAuth();
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
+
   const router = useRouter();
   const [nickname, setNickname] = useState('');
   const [projects, setProjects] = useState([]);

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 const DOCS = [
   { q: 'How do I post a project?', a: 'Click the "+ New project" icon in the sidebar. Add a title, description, tech stack, and optionally attach screenshots or videos and links to your GitHub/live demo.' },
@@ -15,6 +16,8 @@ const DOCS = [
 ];
 
 export default function Docs() {
+  const { loading } = useRequireAuth();
+  if (loading) return <div className="dash-loading mono">Loading...</div>;
   const [nickname, setNickname] = useState('');
   const [openIndex, setOpenIndex] = useState(null);
 

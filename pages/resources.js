@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 const RESOURCES = [
   { category: 'Web Development', links: [
@@ -20,6 +21,8 @@ const RESOURCES = [
 ];
 
 export default function Resources() {
+  const { loading } = useRequireAuth();
+  if (loading) return <div className="dash-loading mono">Loading...</div>;
   const [nickname, setNickname] = useState('');
   const [openIndex, setOpenIndex] = useState(null);
 
