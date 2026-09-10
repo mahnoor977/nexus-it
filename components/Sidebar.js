@@ -1,97 +1,167 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import ThemeToggle from './ThemeToggle';
 
-export default function Sidebar({ nickname }) {
+export default function Sidebar({ nickname = 'Builder' }) {
   const router = useRouter();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
-    document.body.classList.toggle('sidebar-expanded', expanded);
-    return () => document.body.classList.remove('sidebar-expanded');
+    const main = document.querySelector('.app-main');
+    if (main) {
+      main.style.marginLeft = expanded ? '240px' : '72px';
+    }
   }, [expanded]);
 
-  async function handleLogout() {
+  const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace('/');
-  }
+  };
 
-  const initials = (nickname || '?').slice(0, 2).toUpperCase();
+  const initials = (nickname || 'B').slice(0, 2).toUpperCase();
 
   const navItems = [
-    { path: '/projects', icon: 'ti-home', label: 'Home' },
-    { path: '/dashboard', icon: 'ti-layout-dashboard', label: 'Dashboard' },
-    { path: '/posts', icon: 'ti-news', label: 'Posts' },
-    { path: '/new-project', icon: 'ti-plus', label: 'New project' },
-    { path: '/advisor', icon: 'ti-sparkles', label: 'Advisor' },
-    { path: '/messages', icon: 'ti-message', label: 'Messages' },
-    { path: '/forum', icon: 'ti-messages', label: 'Community' },
-    { path: '/tech-stack', icon: 'ti-stack-2', label: 'Tech Stack' },
-    { path: '/resources', icon: 'ti-books', label: 'Resources' },
-    { path: '/docs', icon: 'ti-file-text', label: 'Docs' },
+    { path: '/projects', label: 'Projects' },
+    { path: '/posts', label: 'Posts' },
+    { path: '/messages', label: 'Messages' },
+    { path: '/forum', label: 'Forum' },
+    { path: '/search', label: 'Search' },
+    { path: '/advisor', label: 'AI Advisor' },
+    { path: '/new-project', label: 'Create' },
+    { path: '/dashboard', label: 'Dashboard' },
   ];
 
   return (
-    <div className={`sidebar ${expanded ? 'expanded' : ''}`}>
-      <div className="sidebar-item-row" onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
-        <button className="sidebar-icon-btn">
-          <i className="ti ti-menu-2"></i>
-        </button>
-      </div>
-
-      <div className="sidebar-item-row" onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer' }}>
-        <div className="sidebar-icon-btn"><i className="ti ti-hexagon"></i></div>
-        {expanded && <span className="sidebar-label">NEXUS-IT</span>}
-      </div>
-
-      <div className="sidebar-item-row" onClick={() => router.push('/search')} style={{ cursor: 'pointer' }}>
-        <button className={`sidebar-icon-btn ${router.pathname === '/search' ? 'active' : ''}`}>
-          <i className="ti ti-search"></i>
-        </button>
-        {expanded && <span className="sidebar-label">Search</span>}
-      </div>
-
-      <div className="sidebar-nav">
-        {navItems.map((item) => (
+    <aside
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: expanded ? '240px' : '72px',
+        height: '100vh',
+        background: '#1A1A1A',
+        color: '#F5F0E8',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px 12px',
+        zIndex: 50,
+        transition: 'width 0.25s ease',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div
+          onClick={() => router.push('/projects')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+        >
           <div
-            key={item.path}
-            className="sidebar-item-row"
-            onClick={() => router.push(item.path)}
-            style={{ cursor: 'pointer' }}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: '#C5A059',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1A1A1A',
+              fontWeight: 700,
+              fontSize: '14px',
+            }}
           >
-            <button className={`sidebar-icon-btn ${router.pathname.startsWith(item.path) ? 'active' : ''}`}>
-              <i className={`ti ${item.icon}`}></i>
-            </button>
-            {expanded && <span className="sidebar-label">{item.label}</span>}
+            N
           </div>
-        ))}
+          {expanded && (
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '14px' }}>NEXUS-IT</div>
+              <div style={{ fontSize: '10px', color: '#C5A059' }}>BUILDERS PLATFORM</div>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#C5A059',
+            fontSize: '20px',
+            cursor: 'pointer',
+          }}
+        >
+          ☰
+        </button>
       </div>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-item-row">
-          <ThemeToggle expanded={expanded} />
+      {/* Navigation */}
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+        {navItems.map((item) => {
+          const active = router.pathname.startsWith(item.path);
+          return (
+            <button
+              key={item.path}
+              onClick={() => router.push(item.path)}
+              style={{
+                padding: '10px 12px',
+                border: 'none',
+                borderRadius: '8px',
+                background: active ? '#C5A059' : 'transparent',
+                color: active ? '#1A1A1A' : '#B8B0A0',
+                textAlign: 'left',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}
+            >
+              {expanded ? item.label : item.label.charAt(0)}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div style={{ borderTop: '1px solid #333', paddingTop: '12px' }}>
+        <div
+          onClick={() => router.push('/profile')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '8px' }}
+        >
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: '#C5A059',
+              color: '#1A1A1A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 600,
+            }}
+          >
+            {initials}
+          </div>
+          {expanded && (
+            <div>
+              <div style={{ fontSize: '13px' }}>{nickname}</div>
+              <div style={{ fontSize: '11px', color: '#888' }}>Level 4 Architect</div>
+            </div>
+          )}
         </div>
 
-        <div className="sidebar-item-row" onClick={() => router.push('/profile')} style={{ cursor: 'pointer' }}>
-          <button className="sidebar-icon-btn">
-            <i className="ti ti-settings"></i>
-          </button>
-          {expanded && <span className="sidebar-label">Settings</span>}
-        </div>
-
-        <div className="sidebar-item-row" onClick={() => router.push('/profile')} style={{ cursor: 'pointer' }}>
-          <div className="sidebar-avatar">{initials}</div>
-          {expanded && <span className="sidebar-label">Profile</span>}
-        </div>
-
-        <div className="sidebar-item-row" onClick={handleLogout} style={{ cursor: 'pointer' }}>
-          <button className="sidebar-icon-btn sidebar-logout">
-            <i className="ti ti-logout"></i>
-          </button>
-          {expanded && <span className="sidebar-label">Log out</span>}
-        </div>
+        <button
+          onClick={handleLogout}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#E57373',
+            cursor: 'pointer',
+            fontSize: '13px',
+            padding: '6px 0',
+          }}
+        >
+          {expanded ? 'Log out' : '×'}
+        </button>
       </div>
-    </div>
+    </aside>
   );
 }
