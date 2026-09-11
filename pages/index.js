@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 const bodyHtml = `
 `.replace('${new Date().getFullYear()}', '') + `
 <nav>
-  <div class="logo"><span class="dot"></span>NEXUS-IT</div>
+  <div class="logo"><img src="/logo.png" alt="NEXUS-IT" style="width:26px;height:26px;object-fit:contain;vertical-align:middle;margin-right:8px;" />NEXUS-IT</div>
   <div class="nav-links">
     <a class="link" href="#problem">Why</a>
     <a class="link" href="#features">What you get</a>
@@ -47,7 +47,7 @@ const bodyHtml = `
 
     <div class="mock-window" style="position:relative;z-index:1;">
   <div class="mock-topbar">
-    <div class="mock-brand"><span class="dot"></span>NEXUS-IT</div>
+    <div class="mock-brand"><img src="/logo.png" alt="NEXUS-IT" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:6px;" />NEXUS-IT</div>
     <div class="mock-search"><i class="ti ti-search"></i>Search projects... <span class="mock-kbd">⌘K</span></div>
     <i class="ti ti-bell mock-icon-btn"></i>
     <div class="mock-avatar"></div>
@@ -223,7 +223,7 @@ const bodyHtml = `
 <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-col">
-      <div class="logo" style="margin-bottom:14px;"><span class="dot"></span>NEXUS-IT</div>
+      <div class="logo" style="margin-bottom:14px;"><img src="/logo.png" alt="NEXUS-IT" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;margin-right:8px;" />NEXUS-IT</div>
       <p style="color:var(--muted);font-size:13px;line-height:1.6;max-width:280px;">
         Where IT builders showcase projects, find collaborators, and get real feedback open to everyone, everywhere.
       </p>

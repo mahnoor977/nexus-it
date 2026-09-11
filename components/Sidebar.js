@@ -58,7 +58,7 @@ export default function Sidebar({ nickname }) {
         </button>
 
         <div className="mobile-topbar-brand" onClick={() => handleNav('/projects')}>
-          <i className="ti ti-hexagon"></i>
+          <img src="/logo.png" alt="NEXUS-IT" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
           <span>NEXUS-IT</span>
         </div>
 
@@ -115,7 +115,9 @@ export default function Sidebar({ nickname }) {
           onClick={() => handleNav('/dashboard')}
           style={{ cursor: 'pointer' }}
         >
-          <div className="sidebar-icon-btn"><i className="ti ti-hexagon"></i></div>
+          <div className="sidebar-icon-btn">
+            <img src="/logo.png" alt="NEXUS-IT" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+          </div>
           <span className="sidebar-label brand-name-label">NEXUS-IT</span>
         </div>
 
