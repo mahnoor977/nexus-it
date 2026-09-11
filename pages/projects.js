@@ -158,7 +158,7 @@ export default function Projects() {
               Projects
             </h1>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 240px', maxWidth: '100%' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -167,7 +167,8 @@ export default function Projects() {
                 border: '1px solid #E5E0D8',
                 borderRadius: '10px',
                 padding: '10px 14px',
-                minWidth: '220px'
+                flex: 1,
+                minWidth: '0'
               }}>
                 <i className="ti ti-search" style={{ color: '#6B6558', fontSize: '15px' }}></i>
                 <input

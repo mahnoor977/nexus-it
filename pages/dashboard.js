@@ -102,7 +102,8 @@ export default function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             gap: '20px',
-            marginBottom: '32px'
+            marginBottom: '32px',
+            flexWrap: 'wrap'
           }}>
             <div style={{
               width: '72px',
@@ -120,7 +121,7 @@ export default function Dashboard() {
               {initials}
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: '160px' }}>
               <h1 style={{
                 fontFamily: "'Newsreader', serif",
                 fontSize: '28px',
@@ -179,7 +180,7 @@ export default function Dashboard() {
           )}
 
           {/* Stats */}
-          <div style={{
+          <div className="stats-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '16px',

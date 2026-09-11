@@ -14,7 +14,19 @@ const bodyHtml = `
     <button class="btn" onclick="openModal('login')">Log in</button>
     <button class="btn btn-solid" onclick="openModal('signup')">Create account</button>
   </div>
+  <button class="nav-mobile-toggle" id="nav-mobile-toggle" aria-label="Toggle navigation" onclick="toggleMobileNav()">
+    <i class="ti ti-menu-2"></i>
+  </button>
 </nav>
+<div class="mobile-nav-panel" id="mobile-nav-panel">
+  <a href="#problem" onclick="closeMobileNav()">Why</a>
+  <a href="#features" onclick="closeMobileNav()">What you get</a>
+  <a href="#how" onclick="closeMobileNav()">How it works</a>
+  <div class="mobile-nav-btns">
+    <button class="btn" onclick="closeMobileNav(); openModal('login')">Log in</button>
+    <button class="btn btn-solid" onclick="closeMobileNav(); openModal('signup')">Create account</button>
+  </div>
+</div>
 
 <section class="hero">
   <div class="gradient-mesh">
@@ -572,12 +584,24 @@ export default function Home() {
     router.push('/projects');
   }
 
+  function toggleMobileNav() {
+    const panel = document.getElementById('mobile-nav-panel');
+    if (panel) panel.classList.toggle('open');
+  }
+
+  function closeMobileNav() {
+    const panel = document.getElementById('mobile-nav-panel');
+    if (panel) panel.classList.remove('open');
+  }
+
   window.openModal = openModal;
   window.closeModal = closeModal;
   window.goToVerify = goToVerify;
   window.verifySuccess = verifySuccess;
   window.resendCode = resendCode;
   window.continueToDashboard = continueToDashboard;
+  window.toggleMobileNav = toggleMobileNav;
+  window.closeMobileNav = closeMobileNav;
   document.getElementById('resend-link').addEventListener('click', (e) => { e.preventDefault(); resendCode(); });
   document.getElementById('login-submit-btn').addEventListener('click', handleLogin);
   document.getElementById('github-signup-btn').addEventListener('click', handleGitHubLogin);

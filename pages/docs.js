@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
-import Avatar from '../../components/Avatar';
-import { useRequireAuth } from '../../hooks/useRequireAuth';
+import { supabase } from '../lib/supabaseClient';
+import Sidebar from '../components/Sidebar';
+import Avatar from '../components/Avatar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function PublicProfile() {
   const { loading: authLoading } = useRequireAuth();
