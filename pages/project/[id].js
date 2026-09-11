@@ -8,7 +8,6 @@ import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export default function ProjectDetail() {
   const { loading: authLoading } = useRequireAuth();
-  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const { id } = router.query;
 
@@ -169,6 +168,8 @@ export default function ProjectDetail() {
   const isOwner = project.user_id === currentUserId;
   const approvedCollabs = collabRequests.filter((r) => r.status === 'approved');
   const pendingCollabs = collabRequests.filter((r) => r.status === 'pending');
+
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>

@@ -1,58 +1,188 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
-import { useRequireAuth } from '../hooks/useRequireAuth';
+import { supabase } from '../../lib/supabaseClient';
+import Sidebar from '../../components/Sidebar';
+import Avatar from '../../components/Avatar';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
-const DOCS = [
-  { q: 'How do I post a project?', a: 'Click the "+ New project" icon in the sidebar. Add a title, description, tech stack, and optionally attach screenshots or videos and links to your GitHub/live demo.' },
-  { q: 'How does the AI Advisor work?', a: 'The Advisor is a chat assistant that can suggest project ideas, review your approach, or help you get unstuck. Just ask it anything from the Advisor page.' },
-  { q: 'How do likes and ranking work?', a: 'Projects earn points from likes and comments. The highest-scoring project each period gets featured as "Top ranked" on the dashboard and feed.' },
-  { q: 'How do I message someone?', a: 'Visit their profile or project page and click "Message." You can control who can message you from Settings.' },
-  { q: 'How does collaboration work?', a: 'On someone else\'s project, click "Request to join." The project owner can approve or decline your request from their project page.' },
-  { q: 'How do I report or block someone?', a: 'Click the "···" menu next to any profile, project, or post to report content or block a user.' },
-];
+export default function PublicProfile() {
+  const { loading: authLoading } = useRequireAuth();
+  const router = useRouter();
+  const { id } = router.query;
 
-export default function Docs() {
-  const { loading } = useRequireAuth();
-  if (loading) return <div className="dash-loading mono">Loading...</div>;
-  const [nickname, setNickname] = useState('');
-  const [openIndex, setOpenIndex] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [myNickname, setMyNickname] = useState('');
+  const [error, setError] = useState('');
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
+
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+      if (session) {
+        setCurrentUserId(session.user.id);
+        setMyNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (profileError) {
+        setError('Profile not found.');
+        setLoading(false);
+        return;
+      }
+      setProfile(profileData);
+
+      const { data: projectsData } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+      setProjects(projectsData || []);
+
+      const { data: followersData } = await supabase
+        .from('follows')
+        .select('follower_id')
+        .eq('following_id', id);
+      setFollowerCount((followersData || []).length);
+      if (session) {
+        setIsFollowing((followersData || []).some((f) => f.follower_id === session.user.id));
+      }
+
+      const { data: followingData } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', id);
+      setFollowingCount((followingData || []).length);
+
+      setLoading(false);
     }
+
     load();
-  }, []);
+  }, [id]);
+
+  async function handleFollowToggle() {
+    if (!currentUserId) {
+      router.push('/');
+      return;
+    }
+
+    setFollowBusy(true);
+
+    if (isFollowing) {
+      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', id);
+      setIsFollowing(false);
+      setFollowerCount((c) => c - 1);
+    } else {
+      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: id });
+      setIsFollowing(true);
+      setFollowerCount((c) => c + 1);
+    }
+
+    setFollowBusy(false);
+  }
+
+  if (loading) {
+    return <div className="dash-loading mono">Loading…</div>;
+  }
+
+  if (error || !profile) {
+    return <div className="dash-loading mono">{error}</div>;
+  }
+
+  const isOwnProfile = currentUserId === id;
+
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>
-      <Head><title>Docs — NEXUS-IT</title></Head>
+      <Head>
+        <title>{profile.nickname || 'Profile'} — NEXUS-IT</title>
+      </Head>
       <div className="app-shell">
-        <Sidebar nickname={nickname} />
+        <Sidebar nickname={myNickname} />
         <div className="app-main">
-          <Topbar nickname={nickname} />
-          <div className="page-shell medium">
-            <h1 style={{ marginBottom: '10px' }}>Docs</h1>
-            <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
-              How to use NEXUS-IT.
-            </p>
-            <div className="faq-section" style={{ padding: 0 }}>
-              {DOCS.map((item, i) => (
-                <div
-                  key={i}
-                  className={`faq-item ${openIndex === i ? 'open' : ''}`}
-                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                >
-                  <div className="faq-question">{item.q} <span className="faq-icon">+</span></div>
-                  <div className="faq-answer">{item.a}</div>
+          <div className="profile-page-content page-shell medium">
+            <div className="profile-header">
+              <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
+              <div className="profile-name-block">
+                <h1>{profile.nickname || 'Unnamed builder'}</h1>
+                <div className="profile-meta">
+                  {followerCount} follower{followerCount !== 1 ? 's' : ''} · {followingCount} following · {projects.length} project{projects.length !== 1 ? 's' : ''}
                 </div>
-              ))}
+              </div>
+              {isOwnProfile ? (
+                
+                <button
+                  className="btn"
+                  style={{ marginLeft: 'auto' }}
+                  onClick={() => router.push('/profile')}
+                >
+                  Edit profile
+                </button>
+              ) : (
+                currentUserId && (
+                  <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                    <button
+                      className={isFollowing ? 'btn' : 'btn btn-solid'}
+                      onClick={handleFollowToggle}
+                      disabled={followBusy}
+                    >
+                      {isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={() => router.push(`/messages/${id}?nickname=${encodeURIComponent(profile.nickname || '')}`)}
+                    >
+                      Message
+                    </button>
+                  </div>
+                )
+              )}
             </div>
+
+            {profile.bio && <p className="project-desc" style={{ marginBottom: '18px' }}>{profile.bio}</p>}
+
+            {profile.skills && (
+              <div className="profile-tags-display">
+                {profile.skills.split(',').map((skill, i) => (
+                  <span className="project-tag" key={i}>{skill.trim()}</span>
+                ))}
+              </div>
+            )}
+
+            <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Projects</h2>
+
+            {projects.length === 0 ? (
+              <div className="comments-empty">No projects posted yet.</div>
+            ) : (
+              <div className="projects-list">
+                {projects.map((p) => (
+                  <div
+                    className="project-card project-card-link"
+                    key={p.id}
+                    onClick={() => router.push(`/project/${p.id}`)}
+                  >
+                    <div className="project-card-top">
+                      <h3>{p.title}</h3>
+                    </div>
+                    <p className="project-desc">{p.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

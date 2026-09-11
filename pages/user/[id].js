@@ -8,7 +8,6 @@ import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export default function PublicProfile() {
   const { loading: authLoading } = useRequireAuth();
-  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const { id } = router.query;
 
@@ -104,6 +103,8 @@ export default function PublicProfile() {
   }
 
   const isOwnProfile = currentUserId === id;
+
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>

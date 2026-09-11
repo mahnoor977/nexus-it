@@ -7,7 +7,6 @@ import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function Search() {
   const { loading } = useRequireAuth();
-  if (loading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const [nickname, setNickname] = useState('');
   const [query, setQuery] = useState('');
@@ -55,6 +54,8 @@ export default function Search() {
 
     return () => clearTimeout(timeout);
   }, [query]);
+
+  if (loading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>

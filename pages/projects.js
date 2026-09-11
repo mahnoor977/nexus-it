@@ -7,7 +7,6 @@ import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function Projects() {
   const { loading: authLoading } = useRequireAuth();
-  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
   const router = useRouter();
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +108,6 @@ export default function Projects() {
     }
   }
 
-  // Filter projects based on active tab
   let visibleProjects = [...allProjects];
 
   if (activeTab === 'trending') {
@@ -118,7 +116,6 @@ export default function Projects() {
     visibleProjects = allProjects.filter((p) => followingIds.has(p.user_id));
   }
 
-  // Apply search filter on top of tab filter
   if (searchQuery.trim()) {
     const q = searchQuery.trim().toLowerCase();
     visibleProjects = visibleProjects.filter(
@@ -131,6 +128,8 @@ export default function Projects() {
 
   const tagColors = ['#C5A059', '#8CA88C', '#B08CA8', '#8CA0C4', '#C48C8C'];
 
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
+
   return (
     <>
       <Head>
@@ -142,7 +141,6 @@ export default function Projects() {
       <div className="app-main">
         <div style={{ padding: '36px 48px', maxWidth: '1200px' }}>
 
-          {/* Header row */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -218,7 +216,6 @@ export default function Projects() {
             </div>
           </div>
 
-          {/* Tabs */}
           <div style={{
             display: 'flex',
             gap: '28px',
@@ -247,21 +244,18 @@ export default function Projects() {
             ))}
           </div>
 
-          {/* Error */}
           {error && (
             <div style={{ color: '#c0392b', marginBottom: '20px' }}>
               {error}
             </div>
           )}
 
-          {/* Loading */}
           {loading && (
             <div style={{ color: '#6B6558', padding: '40px 0' }}>
               Loading projects...
             </div>
           )}
 
-          {/* Empty State */}
           {!loading && visibleProjects.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon">
@@ -284,7 +278,6 @@ export default function Projects() {
             </div>
           )}
 
-          {/* Projects Grid */}
           {!loading && visibleProjects.length > 0 && (
             <div style={{
               display: 'grid',
@@ -315,7 +308,6 @@ export default function Projects() {
                     onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.07)'}
                     onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.03)'}
                   >
-                    {/* Top ranked badge */}
                     {p.isTop && (
                       <span style={{
                         display: 'inline-flex',
@@ -335,7 +327,6 @@ export default function Projects() {
                       </span>
                     )}
 
-                    {/* Title */}
                     <h3 style={{
                       fontSize: '19px',
                       fontWeight: 600,
@@ -346,7 +337,6 @@ export default function Projects() {
                       {p.title}
                     </h3>
 
-                    {/* Description */}
                     <p style={{
                       color: '#6B6558',
                       fontSize: '14px',
@@ -360,7 +350,6 @@ export default function Projects() {
                       {p.description}
                     </p>
 
-                    {/* Tech tags */}
                     {tags.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px' }}>
                         {tags.map((tag, i) => (
@@ -388,7 +377,6 @@ export default function Projects() {
                       </div>
                     )}
 
-                    {/* Author + stats */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -445,7 +433,6 @@ export default function Projects() {
                       </div>
                     </div>
 
-                    {/* Action buttons */}
                     <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
                       {p.github_url ? (
                         <a

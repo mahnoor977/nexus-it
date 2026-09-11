@@ -8,7 +8,6 @@ import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function TechStack() {
   const { loading: authLoading } = useRequireAuth();
-  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   const router = useRouter();
   const [nickname, setNickname] = useState('');
@@ -41,6 +40,8 @@ export default function TechStack() {
   const filteredProjects = activeTag
     ? projects.filter((p) => p.tech_stack && p.tech_stack.split(',').map((t) => t.trim()).includes(activeTag))
     : [];
+
+  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>

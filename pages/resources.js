@@ -22,7 +22,6 @@ const RESOURCES = [
 
 export default function Resources() {
   const { loading } = useRequireAuth();
-  if (loading) return <div className="dash-loading mono">Loading...</div>;
   const [nickname, setNickname] = useState('');
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -33,6 +32,8 @@ export default function Resources() {
     }
     load();
   }, []);
+
+  if (loading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>
