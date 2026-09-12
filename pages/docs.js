@@ -1,186 +1,128 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 import AppLayout from '../components/AppLayout';
-import Avatar from '../components/Avatar';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 
-export default function PublicProfile() {
-  const { loading: authLoading } = useRequireAuth();
-  const router = useRouter();
-  const { id } = router.query;
+const SECTIONS = [
+  {
+    title: 'Getting started',
+    items: [
+      {
+        q: 'What is NEXUS-IT?',
+        a: 'A place to post what you\'re building, find people to build with, and get feedback from other builders.',
+      },
+      {
+        q: 'How do I set up my profile?',
+        a: 'Go to Settings from the sidebar to add your nickname, bio, and skills. A complete profile shows up better in People search.',
+      },
+    ],
+  },
+  {
+    title: 'Projects',
+    items: [
+      {
+        q: 'How do I post a project?',
+        a: 'Click the + icon in the top navbar, or "New project" in the sidebar. Add a title, description, tech stack, and an optional live link.',
+      },
+      {
+        q: 'Can I edit or delete a project after posting?',
+        a: 'Yes — open the project from your Dashboard and use the edit/delete options there.',
+      },
+    ],
+  },
+  {
+    title: 'AI Advisor',
+    items: [
+      {
+        q: 'What can the Advisor help with?',
+        a: 'Ask it for project ideas, feedback on your approach, or help getting unstuck on something you\'re building.',
+      },
+      {
+        q: 'Does it remember past conversations?',
+        a: 'Each conversation in the Advisor is independent for now — start a new one anytime from the sidebar.',
+      },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      {
+        q: 'What is the Forum for?',
+        a: 'Longer-form discussions, questions, and ideas — things that don\'t fit neatly into a single project.',
+      },
+      {
+        q: 'What are the community guidelines?',
+        a: 'Be respectful, give constructive feedback, and don\'t post spam or unrelated promotions. Reports are reviewed by moderators.',
+      },
+    ],
+  },
+];
 
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [myNickname, setMyNickname] = useState('');
-  const [error, setError] = useState('');
-  const [followerCount, setFollowerCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followBusy, setFollowBusy] = useState(false);
+export default function Docs() {
+  const { loading: authLoading } = useRequireAuth();
+  const [nickname, setNickname] = useState('');
 
   useEffect(() => {
-    if (!id) return;
-
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setCurrentUserId(session.user.id);
-        setMyNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
-      }
-
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (profileError) {
-        setError('Profile not found.');
-        setLoading(false);
-        return;
-      }
-      setProfile(profileData);
-
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', id)
-        .order('created_at', { ascending: false });
-      setProjects(projectsData || []);
-
-      const { data: followersData } = await supabase
-        .from('follows')
-        .select('follower_id')
-        .eq('following_id', id);
-      setFollowerCount((followersData || []).length);
-      if (session) {
-        setIsFollowing((followersData || []).some((f) => f.follower_id === session.user.id));
-      }
-
-      const { data: followingData } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', id);
-      setFollowingCount((followingData || []).length);
-
-      setLoading(false);
+      if (session) setNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
     }
-
     load();
-  }, [id]);
-
-  async function handleFollowToggle() {
-    if (!currentUserId) {
-      router.push('/');
-      return;
-    }
-
-    setFollowBusy(true);
-
-    if (isFollowing) {
-      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', id);
-      setIsFollowing(false);
-      setFollowerCount((c) => c - 1);
-    } else {
-      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: id });
-      setIsFollowing(true);
-      setFollowerCount((c) => c + 1);
-    }
-
-    setFollowBusy(false);
-  }
-
-  if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
-  }
-
-  if (error || !profile) {
-    return <div className="dash-loading mono">{error}</div>;
-  }
-
-  const isOwnProfile = currentUserId === id;
+  }, []);
 
   if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>
       <Head>
-        <title>{profile.nickname || 'Profile'} — NEXUS-IT</title>
+        <title>Docs · NEXUS-IT</title>
       </Head>
-      <AppLayout nickname={myNickname}>
-        <div className="profile-page-content page-shell medium">
-          <div className="profile-header">
-            <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
-            <div className="profile-name-block">
-              <h1>{profile.nickname || 'Unnamed builder'}</h1>
-              <div className="profile-meta">
-                {followerCount} follower{followerCount !== 1 ? 's' : ''} · {followingCount} following · {projects.length} project{projects.length !== 1 ? 's' : ''}
-              </div>
-            </div>
-            {isOwnProfile ? (
 
-              <button
-                className="btn"
-                style={{ marginLeft: 'auto' }}
-                onClick={() => router.push('/profile')}
-              >
-                Edit profile
-              </button>
-            ) : (
-              currentUserId && (
-                <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                  <button
-                    className={isFollowing ? 'btn' : 'btn btn-solid'}
-                    onClick={handleFollowToggle}
-                    disabled={followBusy}
+      <AppLayout nickname={nickname}>
+        <div className="page-shell medium">
+          <h1 className="page-title">Docs</h1>
+          <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
+            Everything you need to know about using NEXUS-IT.
+          </p>
+
+          <div className="faq-section" style={{ padding: 0 }}>
+            {SECTIONS.map((section) => (
+              <div key={section.title} style={{ marginBottom: '32px' }}>
+                <h3 style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: 'var(--muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  marginBottom: '14px',
+                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}>
+                  {section.title}
+                </h3>
+
+                {section.items.map((item) => (
+                  <div
+                    key={item.q}
+                    style={{
+                      background: 'var(--panel)',
+                      border: '1px solid var(--line)',
+                      borderRadius: '12px',
+                      padding: '16px 18px',
+                      marginBottom: '10px'
+                    }}
                   >
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                  <button
-                    className="btn"
-                    onClick={() => router.push(`/messages/${id}?nickname=${encodeURIComponent(profile.nickname || '')}`)}
-                  >
-                    Message
-                  </button>
-                </div>
-              )
-            )}
-          </div>
-
-          {profile.bio && <p className="project-desc" style={{ marginBottom: '18px' }}>{profile.bio}</p>}
-
-          {profile.skills && (
-            <div className="profile-tags-display">
-              {profile.skills.split(',').map((skill, i) => (
-                <span className="project-tag" key={i}>{skill.trim()}</span>
-              ))}
-            </div>
-          )}
-
-          <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Projects</h2>
-
-          {projects.length === 0 ? (
-            <div className="comments-empty">No projects posted yet.</div>
-          ) : (
-            <div className="projects-list">
-              {projects.map((p) => (
-                <div
-                  className="project-card project-card-link"
-                  key={p.id}
-                  onClick={() => router.push(`/project/${p.id}`)}
-                >
-                  <div className="project-card-top">
-                    <h3>{p.title}</h3>
+                    <div style={{ fontWeight: 500, color: 'var(--text)', marginBottom: '6px' }}>
+                      {item.q}
+                    </div>
+                    <div style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.5 }}>
+                      {item.a}
+                    </div>
                   </div>
-                  <p className="project-desc">{p.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </AppLayout>
     </>
