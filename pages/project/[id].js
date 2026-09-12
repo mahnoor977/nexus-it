@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 import ReportBlockMenu from '../../components/ReportBlockMenu';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 
@@ -176,170 +176,167 @@ export default function ProjectDetail() {
       <Head>
         <title>{project.title} — NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="project-detail page-shell medium">
-            <div className="project-detail-top">
-              <h1>{project.title}</h1>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span
-                    className="project-author"
-                    onClick={() => router.push(`/user/${project.user_id}`)}
-                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    by {project.author_nickname}
-                  </span>
-                  <ReportBlockMenu
-                    targetUserId={project.user_id}
-                    contentType="project"
-                    contentId={project.id}
-                    currentUserId={currentUserId}
-                  />
-                </div>
-                {isOwner ? (
-                  <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
-                    {deleting ? 'deleting…' : 'delete project'}
-                  </button>
-                ) : (
-                  currentUserId && (
-                    <button
-                      className="btn"
-                      style={{ padding: '6px 14px', fontSize: '12px' }}
-                      onClick={() => router.push(`/messages/${project.user_id}?nickname=${encodeURIComponent(project.author_nickname)}`)}
-                    >
-                      Message {project.author_nickname}
-                    </button>
-                  )
-                )}
+      <AppLayout nickname={nickname}>
+        <div className="project-detail page-shell medium">
+          <div className="project-detail-top">
+            <h1>{project.title}</h1>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  className="project-author"
+                  onClick={() => router.push(`/user/${project.user_id}`)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  by {project.author_nickname}
+                </span>
+                <ReportBlockMenu
+                  targetUserId={project.user_id}
+                  contentType="project"
+                  contentId={project.id}
+                  currentUserId={currentUserId}
+                />
               </div>
+              {isOwner ? (
+                <button className="comment-delete" onClick={handleDeleteProject} disabled={deleting}>
+                  {deleting ? 'deleting…' : 'delete project'}
+                </button>
+              ) : (
+                currentUserId && (
+                  <button
+                    className="btn"
+                    style={{ padding: '6px 14px', fontSize: '12px' }}
+                    onClick={() => router.push(`/messages/${project.user_id}?nickname=${encodeURIComponent(project.author_nickname)}`)}
+                  >
+                    Message {project.author_nickname}
+                  </button>
+                )
+              )}
             </div>
+          </div>
 
-            {media.length > 0 && (
-              <div className="media-gallery">
-                {media.map((m) => (
-                  <div className="media-gallery-item" key={m.id}>
-                    {m.media_type === 'video' ? (
-                      <video src={m.media_url} controls />
-                    ) : (
-                      <img src={m.media_url} alt={project.title} />
-                    )}
+          {media.length > 0 && (
+            <div className="media-gallery">
+              {media.map((m) => (
+                <div className="media-gallery-item" key={m.id}>
+                  {m.media_type === 'video' ? (
+                    <video src={m.media_url} controls />
+                  ) : (
+                    <img src={m.media_url} alt={project.title} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="project-desc">{project.description}</p>
+
+          {project.tech_stack && (
+            <div className="project-tags">
+              {project.tech_stack.split(',').map((tag, i) => (
+                <span className="project-tag" key={i}>{tag.trim()}</span>
+              ))}
+            </div>
+          )}
+
+          <div className="project-card-footer" style={{ marginBottom: '10px' }}>
+            <button className={`like-btn ${liked ? 'liked' : ''}`} onClick={handleLike}>
+              <i className="ti ti-heart"></i> {likeCount}
+            </button>
+          </div>
+
+          <div className="project-links">
+            {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}
+            {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo →</a>}
+          </div>
+
+          <div className="collab-section">
+            <h3>Collaborators {approvedCollabs.length > 0 && `(${approvedCollabs.length})`}</h3>
+
+            {approvedCollabs.length > 0 && (
+              <div style={{ marginBottom: '12px' }}>
+                {approvedCollabs.map((c) => (
+                  <div key={c.id} className="collab-request-row">
+                    <span>{c.requester_nickname}</span>
+                    <span className="collab-badge approved">Collaborator</span>
                   </div>
                 ))}
               </div>
             )}
 
-            <p className="project-desc">{project.description}</p>
-
-            {project.tech_stack && (
-              <div className="project-tags">
-                {project.tech_stack.split(',').map((tag, i) => (
-                  <span className="project-tag" key={i}>{tag.trim()}</span>
+            {isOwner && pendingCollabs.length > 0 && (
+              <div style={{ marginBottom: '12px' }}>
+                {pendingCollabs.map((c) => (
+                  <div key={c.id} className="collab-request-row">
+                    <span>{c.requester_nickname} wants to join</span>
+                    <div className="collab-actions">
+                      <button className="btn btn-solid" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'approved')}>Approve</button>
+                      <button className="btn" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'declined')}>Decline</button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
 
-            <div className="project-card-footer" style={{ marginBottom: '10px' }}>
-              <button className={`like-btn ${liked ? 'liked' : ''}`} onClick={handleLike}>
-                <i className="ti ti-heart"></i> {likeCount}
+            {!isOwner && currentUserId && (
+              myRequestStatus === 'pending' ? (
+                <span className="collab-badge pending">Request pending</span>
+              ) : myRequestStatus === 'approved' ? (
+                <span className="collab-badge approved">You're a collaborator</span>
+              ) : myRequestStatus === 'declined' ? (
+                <span className="collab-badge pending">Request declined</span>
+              ) : (
+                <button className="btn" onClick={handleRequestCollab} disabled={requesting}>
+                  {requesting ? 'Requesting…' : 'Request to join'}
+                </button>
+              )
+            )}
+          </div>
+
+          <div className="comments-section">
+            <h2>Feedback ({comments.length})</h2>
+
+            <div className="comment-form">
+              <input
+                type="text"
+                placeholder={currentUserId ? "Leave feedback..." : "Log in to leave feedback"}
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePostComment()}
+                disabled={!currentUserId || posting}
+              />
+              <button onClick={handlePostComment} disabled={!currentUserId || posting || !commentText.trim()}>
+                {posting ? 'Posting…' : 'Post'}
               </button>
             </div>
 
-            <div className="project-links">
-              {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer">GitHub →</a>}
-              {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo →</a>}
-            </div>
-
-            <div className="collab-section">
-              <h3>Collaborators {approvedCollabs.length > 0 && `(${approvedCollabs.length})`}</h3>
-
-              {approvedCollabs.length > 0 && (
-                <div style={{ marginBottom: '12px' }}>
-                  {approvedCollabs.map((c) => (
-                    <div key={c.id} className="collab-request-row">
-                      <span>{c.requester_nickname}</span>
-                      <span className="collab-badge approved">Collaborator</span>
+            {comments.length === 0 ? (
+              <div className="comments-empty">No feedback yet — be the first to comment.</div>
+            ) : (
+              <div className="comment-list">
+                {comments.map((c) => (
+                  <div className="comment-item" key={c.id}>
+                    <div className="comment-item-top">
+                      <span
+                        className="comment-author"
+                        onClick={() => router.push(`/user/${c.user_id}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {c.author_nickname}
+                      </span>
+                      {c.user_id === currentUserId && (
+                        <button className="comment-delete" onClick={() => handleDeleteComment(c.id)}>
+                          delete
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {isOwner && pendingCollabs.length > 0 && (
-                <div style={{ marginBottom: '12px' }}>
-                  {pendingCollabs.map((c) => (
-                    <div key={c.id} className="collab-request-row">
-                      <span>{c.requester_nickname} wants to join</span>
-                      <div className="collab-actions">
-                        <button className="btn btn-solid" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'approved')}>Approve</button>
-                        <button className="btn" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => handleUpdateRequest(c.id, 'declined')}>Decline</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {!isOwner && currentUserId && (
-                myRequestStatus === 'pending' ? (
-                  <span className="collab-badge pending">Request pending</span>
-                ) : myRequestStatus === 'approved' ? (
-                  <span className="collab-badge approved">You're a collaborator</span>
-                ) : myRequestStatus === 'declined' ? (
-                  <span className="collab-badge pending">Request declined</span>
-                ) : (
-                  <button className="btn" onClick={handleRequestCollab} disabled={requesting}>
-                    {requesting ? 'Requesting…' : 'Request to join'}
-                  </button>
-                )
-              )}
-            </div>
-
-            <div className="comments-section">
-              <h2>Feedback ({comments.length})</h2>
-
-              <div className="comment-form">
-                <input
-                  type="text"
-                  placeholder={currentUserId ? "Leave feedback..." : "Log in to leave feedback"}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handlePostComment()}
-                  disabled={!currentUserId || posting}
-                />
-                <button onClick={handlePostComment} disabled={!currentUserId || posting || !commentText.trim()}>
-                  {posting ? 'Posting…' : 'Post'}
-                </button>
+                    <div className="comment-content">{c.content}</div>
+                  </div>
+                ))}
               </div>
-
-              {comments.length === 0 ? (
-                <div className="comments-empty">No feedback yet — be the first to comment.</div>
-              ) : (
-                <div className="comment-list">
-                  {comments.map((c) => (
-                    <div className="comment-item" key={c.id}>
-                      <div className="comment-item-top">
-                        <span
-                          className="comment-author"
-                          onClick={() => router.push(`/user/${c.user_id}`)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          {c.author_nickname}
-                        </span>
-                        {c.user_id === currentUserId && (
-                          <button className="comment-delete" onClick={() => handleDeleteComment(c.id)}>
-                            delete
-                          </button>
-                        )}
-                      </div>
-                      <div className="comment-content">{c.content}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

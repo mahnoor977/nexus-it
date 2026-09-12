@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 
 export default function Profile() {
   const router = useRouter();
@@ -201,10 +201,8 @@ export default function Profile() {
         <title>Profile · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '680px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '680px' }}>
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '36px' }}>
@@ -223,12 +221,7 @@ export default function Profile() {
               {initials}
             </div>
             <div>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '28px',
-                color: '#1A1A1A',
-                margin: 0
-              }}>
+              <h1 className="page-title">
                 {nickname}
               </h1>
               <p style={{ color: '#6B6558', fontSize: '14px', margin: '4px 0 0 0' }}>
@@ -559,7 +552,7 @@ export default function Profile() {
           </div>
 
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

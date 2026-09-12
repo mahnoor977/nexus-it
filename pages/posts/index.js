@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function Posts() {
   const router = useRouter();
@@ -158,105 +158,102 @@ export default function Posts() {
       <Head>
         <title>Posts — NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="page-shell narrow">
-            <h1 style={{ marginBottom: '24px' }}>Posts</h1>
+      <AppLayout nickname={nickname}>
+        <div className="page-shell narrow">
+          <h1 className="page-title">Posts</h1>
 
-            {userId && (
-              <div className="post-compose-box">
-                <textarea
-                  placeholder="Share an update, a thought, or what you're working on... use #hashtags"
-                  value={composeText}
-                  onChange={(e) => setComposeText(e.target.value)}
-                />
-                {composeFiles.length > 0 && (
-                  <div className="media-preview-grid">
-                    {composeFiles.map((item, i) => (
-                      <div className="media-preview-item" key={i}>
-                        {item.type === 'video' ? <video src={item.preview} muted /> : <img src={item.preview} alt="" />}
-                        <button
-                          type="button"
-                          className="media-preview-remove"
-                          onClick={() => setComposeFiles(composeFiles.filter((_, idx) => idx !== i))}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="post-compose-actions">
-                  <button
-                    type="button"
-                    className="btn"
-                    style={{ padding: '6px 12px', fontSize: '12px' }}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <i className="ti ti-photo-plus"></i> Media
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    style={{ display: 'none' }}
-                    onChange={handleFileSelect}
-                  />
-                  <button
-                    className="btn btn-solid"
-                    style={{ padding: '8px 20px', fontSize: '13px' }}
-                    onClick={handlePost}
-                    disabled={posting || !composeText.trim()}
-                  >
-                    {posting ? 'Posting…' : 'Post'}
-                  </button>
+          {userId && (
+            <div className="post-compose-box">
+              <textarea
+                placeholder="Share an update, a thought, or what you're working on... use #hashtags"
+                value={composeText}
+                onChange={(e) => setComposeText(e.target.value)}
+              />
+              {composeFiles.length > 0 && (
+                <div className="media-preview-grid">
+                  {composeFiles.map((item, i) => (
+                    <div className="media-preview-item" key={i}>
+                      {item.type === 'video' ? <video src={item.preview} muted /> : <img src={item.preview} alt="" />}
+                      <button
+                        type="button"
+                        className="media-preview-remove"
+                        onClick={() => setComposeFiles(composeFiles.filter((_, idx) => idx !== i))}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
-
-            {loading && <div className="projects-empty">Loading posts…</div>}
-
-            {!loading && posts.length === 0 && (
-              <div className="projects-empty">No posts yet — share the first update.</div>
-            )}
-
-            {posts.map((p) => (
-              <div className="post-card" key={p.id}>
-                <div className="post-card-header">
-                  <span
-                    className="post-author-name"
-                    onClick={() => router.push(`/user/${p.user_id}`)}
-                  >
-                    {p.author_nickname}
-                  </span>
-                  <span className="post-time">{timeAgo(p.created_at)}</span>
-                </div>
-
-                <div className="post-content">{renderContentWithHashtags(p.content)}</div>
-
-                {p.media.length > 0 && (
-                  <div className={`post-media-grid count-${p.media.length === 1 ? '1' : p.media.length === 2 ? '2' : '3plus'}`}>
-                    {p.media.map((m) => (
-                      m.media_type === 'video'
-                        ? <video src={m.media_url} controls key={m.id} />
-                        : <img src={m.media_url} alt="" key={m.id} />
-                    ))}
-                  </div>
-                )}
-
+              )}
+              <div className="post-compose-actions">
                 <button
-                  className={`like-btn ${likedIds.has(p.id) ? 'liked' : ''}`}
-                  onClick={() => handleLike(p.id)}
+                  type="button"
+                  className="btn"
+                  style={{ padding: '6px 12px', fontSize: '12px' }}
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  <i className="ti ti-heart"></i> {p.likeCount}
+                  <i className="ti ti-photo-plus"></i> Media
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={handleFileSelect}
+                />
+                <button
+                  className="btn btn-solid"
+                  style={{ padding: '8px 20px', fontSize: '13px' }}
+                  onClick={handlePost}
+                  disabled={posting || !composeText.trim()}
+                >
+                  {posting ? 'Posting…' : 'Post'}
                 </button>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {loading && <div className="projects-empty">Loading posts…</div>}
+
+          {!loading && posts.length === 0 && (
+            <div className="projects-empty">No posts yet — share the first update.</div>
+          )}
+
+          {posts.map((p) => (
+            <div className="post-card" key={p.id}>
+              <div className="post-card-header">
+                <span
+                  className="post-author-name"
+                  onClick={() => router.push(`/user/${p.user_id}`)}
+                >
+                  {p.author_nickname}
+                </span>
+                <span className="post-time">{timeAgo(p.created_at)}</span>
+              </div>
+
+              <div className="post-content">{renderContentWithHashtags(p.content)}</div>
+
+              {p.media.length > 0 && (
+                <div className={`post-media-grid count-${p.media.length === 1 ? '1' : p.media.length === 2 ? '2' : '3plus'}`}>
+                  {p.media.map((m) => (
+                    m.media_type === 'video'
+                      ? <video src={m.media_url} controls key={m.id} />
+                      : <img src={m.media_url} alt="" key={m.id} />
+                  ))}
+                </div>
+              )}
+
+              <button
+                className={`like-btn ${likedIds.has(p.id) ? 'liked' : ''}`}
+                onClick={() => handleLike(p.id)}
+              >
+                <i className="ti ti-heart"></i> {p.likeCount}
+              </button>
+            </div>
+          ))}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

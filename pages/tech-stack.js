@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
+import AppLayout from '../components/AppLayout';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function TechStack() {
@@ -46,66 +45,62 @@ export default function TechStack() {
   return (
     <>
       <Head><title>Tech Stack — NEXUS-IT</title></Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <Topbar nickname={nickname} />
-          <div className="page-shell wide">
-            <h1 style={{ marginBottom: '10px' }}>Tech Stack</h1>
-            <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
-              Browse projects by technology across the whole platform.
-            </p>
+      <AppLayout nickname={nickname}>
+        <div className="page-shell wide">
+          <h1 className="page-title">Tech Stack</h1>
+          <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
+            Browse projects by technology across the whole platform.
+          </p>
 
-            {loading ? (
-              <div className="projects-empty">Loading…</div>
-            ) : (
-              <>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '30px' }}>
-                  {sortedTags.map(([tag, count]) => (
-                    <button
-                      key={tag}
-                      onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                      className={activeTag === tag ? 'btn btn-solid' : 'btn'}
-                      style={{ fontSize: '12.5px' }}
-                    >
-                      {tag} <span style={{ opacity: 0.7 }}>({count})</span>
-                    </button>
-                  ))}
-                </div>
+          {loading ? (
+            <div className="projects-empty">Loading…</div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '30px' }}>
+                {sortedTags.map(([tag, count]) => (
+                  <button
+                    key={tag}
+                    onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                    className={activeTag === tag ? 'btn btn-solid' : 'btn'}
+                    style={{ fontSize: '12.5px' }}
+                  >
+                    {tag} <span style={{ opacity: 0.7 }}>({count})</span>
+                  </button>
+                ))}
+              </div>
 
-                {activeTag && (
-                  <>
-                    <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Projects using {activeTag}</h2>
-                    {filteredProjects.length === 0 ? (
-                      <div className="projects-empty">No projects found.</div>
-                    ) : (
-                      <div className="projects-list">
-                        {filteredProjects.map((p) => (
-                          <div
-                            className="project-card project-card-link"
-                            key={p.id}
-                            onClick={() => router.push(`/project/${p.id}`)}
-                          >
-                            <div className="project-card-top">
-                              <h3>{p.title}</h3>
-                              <span className="project-author">by {p.author_nickname}</span>
-                            </div>
-                            <p className="project-desc">{p.description}</p>
+              {activeTag && (
+                <>
+                  <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Projects using {activeTag}</h2>
+                  {filteredProjects.length === 0 ? (
+                    <div className="projects-empty">No projects found.</div>
+                  ) : (
+                    <div className="projects-list">
+                      {filteredProjects.map((p) => (
+                        <div
+                          className="project-card project-card-link"
+                          key={p.id}
+                          onClick={() => router.push(`/project/${p.id}`)}
+                        >
+                          <div className="project-card-top">
+                            <h3>{p.title}</h3>
+                            <span className="project-author">by {p.author_nickname}</span>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
+                          <p className="project-desc">{p.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
 
-                {!activeTag && (
-                  <div className="projects-empty">Click a technology above to see projects using it.</div>
-                )}
-              </>
-            )}
-          </div>
+              {!activeTag && (
+                <div className="projects-empty">Click a technology above to see projects using it.</div>
+              )}
+            </>
+          )}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

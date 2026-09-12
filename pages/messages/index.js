@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function Messages() {
   const router = useRouter();
@@ -89,10 +89,8 @@ export default function Messages() {
         <title>Messages · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '800px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '800px' }}>
 
           {/* Header */}
           <div style={{
@@ -102,12 +100,7 @@ export default function Messages() {
             marginBottom: '36px'
           }}>
             <div>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '38px',
-                color: '#1A1A1A',
-                marginBottom: '10px'
-              }}>
+              <h1 className="page-title">
                 Messages
               </h1>
               <div style={{ width: '48px', height: '3px', background: '#C5A059', borderRadius: '999px' }} />
@@ -414,7 +407,7 @@ export default function Messages() {
             </div>
           )}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function Forum() {
   const router = useRouter();
@@ -39,10 +39,8 @@ export default function Forum() {
         <title>Forum · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '900px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '900px' }}>
 
           {/* Header */}
           <div style={{
@@ -52,12 +50,7 @@ export default function Forum() {
             marginBottom: '36px'
           }}>
             <div>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '36px',
-                color: '#1A1A1A',
-                margin: '0 0 6px 0'
-              }}>
+              <h1 className="page-title">
                 Forum
               </h1>
               <p style={{ color: '#6B6558', fontSize: '15px', margin: 0 }}>
@@ -211,7 +204,7 @@ export default function Forum() {
             </div>
           )}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

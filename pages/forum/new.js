@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function NewForumPost() {
   const router = useRouter();
@@ -69,11 +69,9 @@ export default function NewForumPost() {
         <title>New Discussion · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '640px' }}>
-          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: '32px', color: '#1A1A1A', marginBottom: '8px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '640px' }}>
+          <h1 className="page-title">
             Start a discussion
           </h1>
           <p style={{ color: '#6B6558', fontSize: '15px', marginBottom: '32px' }}>
@@ -118,7 +116,7 @@ export default function NewForumPost() {
             </button>
           </form>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

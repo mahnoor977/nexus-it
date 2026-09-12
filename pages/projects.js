@@ -267,8 +267,8 @@ export default function Projects() {
                 {searchQuery.trim()
                   ? 'No projects match your search.'
                   : activeTab === 'following'
-                  ? "People you follow haven't posted any projects yet."
-                  : "Be the first to share what you're building."}
+                    ? "People you follow haven't posted any projects yet."
+                    : "Be the first to share what you're building."}
               </p>
               <button
                 className="btn-primary"
