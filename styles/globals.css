@@ -2,6 +2,21 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal,
+  .mesh-blob,
+  .eyebrow::before {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 :root {
   --black: #FDFBF7;
   --panel: #FFFFFF;
@@ -11,7 +26,8 @@ html {
   --army-light: #F5E9C8;
   --tea: #C5A059;
   --tea-bright: #D4AF37;
-  --muted: #6B6558;
+  --muted: #5C564A;
+  /* raised contrast from #6B6558 for WCAG AA */
   --text: #1A1A1A;
   --line: #E5E0D8;
   --radius: 12px;
@@ -3574,6 +3590,29 @@ body.sidebar-expanded .app-main {
     padding: 12px;
   }
 
+  :focus-visible {
+    outline: 2px solid var(--tea);
+    outline-offset: 3px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--tea);
+    outline-offset: 2px;
+  }
+
+  /* Ensure reveal content is readable even before JS runs */
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal:not(.in) {
+    opacity: 0.92;
+    /* never fully invisible */
+  }
+
   .hero {
     padding: 84px 16px 40px !important;
     min-height: auto !important;
@@ -4086,18 +4125,19 @@ body.sidebar-expanded .app-main {
   }
 
   .sidebar-item-row {
-    padding: 9px 12px;
+    padding: 6px 12px;
     justify-content: flex-start;
   }
 
   .sidebar-icon-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 21px;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
   }
 
   .sidebar-nav {
-    gap: 3px;
+    gap: 1px;
+    margin-top: 4px;
   }
 
   .sidebar-footer {

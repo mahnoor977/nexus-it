@@ -6,12 +6,17 @@ export default function Privacy() {
     <>
       <Head>
         <title>Privacy Policy — NEXUS-IT</title>
+        <meta name="description" content="How NEXUS-IT collects, uses, and protects your data. We do not sell your information." />
+        <meta property="og:title" content="Privacy Policy — NEXUS-IT" />
+        <meta property="og:description" content="How NEXUS-IT collects, uses, and protects your data." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
       </Head>
-      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '60px 5vw', color: 'var(--text)' }}>
+      <main style={{ maxWidth: '720px', margin: '0 auto', padding: '60px 5vw', color: 'var(--text)' }}>
         <Link href="/" style={{ color: 'var(--tea)', fontSize: '13px' }}>&larr; Back to home</Link>
         <h1 style={{ marginTop: '20px', marginBottom: '20px' }}>Privacy Policy</h1>
         <p style={{ color: 'var(--muted)', marginBottom: '20px', lineHeight: 1.7 }}>
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: September 13, 2026
         </p>
 
         <h2 style={{ fontSize: '18px', margin: '30px 0 10px' }}>What we collect</h2>
@@ -44,7 +49,7 @@ export default function Privacy() {
         <p style={{ color: 'var(--muted)', lineHeight: 1.7 }}>
           Questions about this policy? Reach out to the team behind NEXUS-IT directly through the platform.
         </p>
-      </div>
+      </main>
     </>
   );
 }

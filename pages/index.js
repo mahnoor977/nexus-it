@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 const bodyHtml = `
-`.replace('${new Date().getFullYear()}', '') + `
 <nav>
   <div class="logo"><img src="/logo.png" alt="NEXUS-IT" style="width:26px;height:26px;object-fit:contain;vertical-align:middle;margin-right:8px;" />NEXUS-IT</div>
   <div class="nav-links">
@@ -342,287 +341,287 @@ export default function Home() {
     let rafId;
     let bootTimeoutId;
 
-      // ---------- Boot text typing effect ----------
-  const bootMessages = ["INITIALIZING_IT_COLLECTIVE","CONNECTING_BUILDERS","NETWORK_ONLINE"];
-  let bootIdx = 0;
-  const bootEl = document.getElementById('boot-text');
-  function typeBoot(){
-    const msg = bootMessages[bootIdx % bootMessages.length];
-    let i = 0;
-    const iv = setInterval(()=>{
-      requestAnimationFrame(() => {
-        bootEl.textContent = msg.slice(0,i);
-      });
-      i++;
-      if(i > msg.length){
-        clearInterval(iv);
-        setTimeout(()=>{ bootIdx++; typeBoot(); }, 2200);
+    // ---------- Boot text typing effect ----------
+    const bootMessages = ["INITIALIZING_IT_COLLECTIVE", "CONNECTING_BUILDERS", "NETWORK_ONLINE"];
+    let bootIdx = 0;
+    const bootEl = document.getElementById('boot-text');
+    function typeBoot() {
+      const msg = bootMessages[bootIdx % bootMessages.length];
+      let i = 0;
+      const iv = setInterval(() => {
+        requestAnimationFrame(() => {
+          bootEl.textContent = msg.slice(0, i);
+        });
+        i++;
+        if (i > msg.length) {
+          clearInterval(iv);
+          setTimeout(() => { bootIdx++; typeBoot(); }, 2200);
+        }
+      }, 45);
+    }
+    typeBoot();
+    //   // ---------- Custom cursor ----------
+    // const cursor = document.getElementById('custom-cursor');
+    // function moveCursor(e){
+    //   cursor.style.left = e.clientX + 'px';
+    //   cursor.style.top = e.clientY + 'px';
+    // }
+    // document.addEventListener('mousemove', moveCursor);
+
+    // const hoverTargets = document.querySelectorAll('a, button, .feature-card, .problem-card');
+    // hoverTargets.forEach((el) => {
+    //   el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    //   el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    // });
+
+    // ---------- Magnetic hover ----------
+    // const magneticEls = document.querySelectorAll('.btn, .btn-solid');
+    // magneticEls.forEach((el) => {
+    //   el.classList.add('magnetic');
+    //   el.addEventListener('mousemove', (e) => {
+    //     const rect = el.getBoundingClientRect();
+    //     const x = e.clientX - rect.left - rect.width / 2;
+    //     const y = e.clientY - rect.top - rect.height / 2;
+    //     el.style.transform = `translate(${x * 0.2}px, ${y * 0.3}px)`;
+    //   });
+    //   el.addEventListener('mouseleave', () => {
+    //     el.style.transform = 'translate(0,0)';
+    //   });
+    // });
+    // ---------- Reveal on scroll ----------
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.15 });
+    revealEls.forEach(el => io.observe(el));
+
+    // ---------- Modal logic ----------
+    const overlay = document.getElementById('modal-overlay');
+    const signupModal = document.getElementById('signup-modal');
+    const loginModal = document.getElementById('login-modal');
+    const verifyModal = document.getElementById('verify-modal');
+    const successModal = document.getElementById('success-modal');
+
+    function hideAllModals() {
+      signupModal.style.display = 'none';
+      loginModal.style.display = 'none';
+      verifyModal.style.display = 'none';
+      successModal.style.display = 'none';
+    }
+
+    function openModal(type) {
+      overlay.classList.add('open');
+      hideAllModals();
+      if (type === 'login') {
+        loginModal.style.display = 'block';
+      } else {
+        signupModal.style.display = 'block';
+        const heroEmail = document.getElementById('hero-email').value;
+        if (heroEmail) document.getElementById('signup-email').value = heroEmail;
       }
-    }, 45);
-  }
-  typeBoot();
-  //   // ---------- Custom cursor ----------
-  // const cursor = document.getElementById('custom-cursor');
-  // function moveCursor(e){
-  //   cursor.style.left = e.clientX + 'px';
-  //   cursor.style.top = e.clientY + 'px';
-  // }
-  // document.addEventListener('mousemove', moveCursor);
-
-  // const hoverTargets = document.querySelectorAll('a, button, .feature-card, .problem-card');
-  // hoverTargets.forEach((el) => {
-  //   el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
-  //   el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
-  // });
-
-  // ---------- Magnetic hover ----------
-  // const magneticEls = document.querySelectorAll('.btn, .btn-solid');
-  // magneticEls.forEach((el) => {
-  //   el.classList.add('magnetic');
-  //   el.addEventListener('mousemove', (e) => {
-  //     const rect = el.getBoundingClientRect();
-  //     const x = e.clientX - rect.left - rect.width / 2;
-  //     const y = e.clientY - rect.top - rect.height / 2;
-  //     el.style.transform = `translate(${x * 0.2}px, ${y * 0.3}px)`;
-  //   });
-  //   el.addEventListener('mouseleave', () => {
-  //     el.style.transform = 'translate(0,0)';
-  //   });
-  // });
-  // ---------- Reveal on scroll ----------
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
-  }, {threshold:0.15});
-  revealEls.forEach(el=>io.observe(el));
-
-  // ---------- Modal logic ----------
-  const overlay = document.getElementById('modal-overlay');
-  const signupModal = document.getElementById('signup-modal');
-  const loginModal = document.getElementById('login-modal');
-  const verifyModal = document.getElementById('verify-modal');
-  const successModal = document.getElementById('success-modal');
-
-  function hideAllModals(){
-    signupModal.style.display = 'none';
-    loginModal.style.display = 'none';
-    verifyModal.style.display = 'none';
-    successModal.style.display = 'none';
-  }
-
-  function openModal(type){
-    overlay.classList.add('open');
-    hideAllModals();
-    if(type === 'login'){
-      loginModal.style.display = 'block';
-    } else {
-      signupModal.style.display = 'block';
-      const heroEmail = document.getElementById('hero-email').value;
-      if(heroEmail) document.getElementById('signup-email').value = heroEmail;
     }
-  }
-  function closeModal(){
-    overlay.classList.remove('open');
-  }
-  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
-
-  document.getElementById('switch-to-login').addEventListener('click', (e)=>{
-    e.preventDefault();
-    openModal('login');
-  });
-  document.getElementById('switch-to-signup').addEventListener('click', (e)=>{
-    e.preventDefault();
-    openModal('signup');
-  });
-
-  let pendingEmail = '';
-
-    function showError(elId, message){
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.textContent = message;
-    el.style.color = '#e35d5d';
-    el.style.display = 'block';
-  }
-  function hideError(elId){
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.style.display = 'none';
-  }
-  function setBtnLoading(btnId, loading, defaultText){
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.disabled = loading;
-    btn.textContent = loading ? 'Please wait…' : defaultText;
-  }
-
-  async function goToVerify(){
-    const email = document.getElementById('signup-email').value.trim();
-    const password = document.getElementById('signup-password').value;
-    const nickname = document.getElementById('signup-nickname').value.trim();
-    hideError('signup-error');
-
-    if(!email || !password || !nickname){
-      showError('signup-error', 'Please fill in email, password, and a nickname.');
-      return;
+    function closeModal() {
+      overlay.classList.remove('open');
     }
-    if(password.length < 8){
-      showError('signup-error', 'Password must be at least 8 characters.');
-      return;
-    }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
 
-    setBtnLoading('signup-submit-btn', true, 'Create account');
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { nickname } },
+    document.getElementById('switch-to-login').addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('login');
     });
-    setBtnLoading('signup-submit-btn', false, 'Create account');
+    document.getElementById('switch-to-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('signup');
+    });
 
-    if(error){
-      showError('signup-error', error.message);
-      return;
+    let pendingEmail = '';
+
+    function showError(elId, message) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.textContent = message;
+      el.style.color = '#e35d5d';
+      el.style.display = 'block';
     }
+    function hideError(elId) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.style.display = 'none';
+    }
+    function setBtnLoading(btnId, loading, defaultText) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Please wait…' : defaultText;
+    }
+
+    async function goToVerify() {
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const nickname = document.getElementById('signup-nickname').value.trim();
+      hideError('signup-error');
+
+      if (!email || !password || !nickname) {
+        showError('signup-error', 'Please fill in email, password, and a nickname.');
+        return;
+      }
+      if (password.length < 8) {
+        showError('signup-error', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      setBtnLoading('signup-submit-btn', true, 'Create account');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nickname } },
+      });
+      setBtnLoading('signup-submit-btn', false, 'Create account');
+
+      if (error) {
+        showError('signup-error', error.message);
+        return;
+      }
 
       pendingEmail = email;
-    const verifyDisplay = document.getElementById('verify-email-display');
-    if (verifyDisplay) verifyDisplay.textContent = email;
-    hideAllModals();
-    if (verifyModal) verifyModal.style.display = 'block';
-    const firstDigit = document.querySelector('.code-digit');
-    if (firstDigit) firstDigit.focus();
-  }
-
-  async function verifySuccess(){
-    hideError('verify-error');
-    const digits = Array.from(document.querySelectorAll('.code-digit')).map(d => d.value).join('');
-
-    if(digits.length !== 6){
-      showError('verify-error', 'Enter all 6 digits from your email.');
-      return;
+      const verifyDisplay = document.getElementById('verify-email-display');
+      if (verifyDisplay) verifyDisplay.textContent = email;
+      hideAllModals();
+      if (verifyModal) verifyModal.style.display = 'block';
+      const firstDigit = document.querySelector('.code-digit');
+      if (firstDigit) firstDigit.focus();
     }
 
-    setBtnLoading('verify-submit-btn', true, 'Verify & continue');
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: pendingEmail,
-      token: digits,
-      type: 'signup',
-    });
-    setBtnLoading('verify-submit-btn', false, 'Verify & continue');
+    async function verifySuccess() {
+      hideError('verify-error');
+      const digits = Array.from(document.querySelectorAll('.code-digit')).map(d => d.value).join('');
 
-    if(error){
-      showError('verify-error', error.message);
-      return;
-    }
-
-    if (verifyModal) verifyModal.style.display = 'none';
-    if (successModal) successModal.style.display = 'block';
-    // localStorage.setItem('nexus-returning-user', 'true');
-  }
-
-  async function resendCode(){
-    if(!pendingEmail) return;
-    hideError('verify-error');
-    const { error } = await supabase.auth.resend({ type: 'signup', email: pendingEmail });
-    if(error){
-      showError('verify-error', error.message);
-      } else {
-      showError('verify-error', 'Code resent — check your inbox.');
-      const verifyErrorEl = document.getElementById('verify-error');
-      if (verifyErrorEl) verifyErrorEl.style.color = 'var(--tea, #A3752F)';
-    }
-  }
-
-  async function handleGitHubLogin(){
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'github',
-    options: { redirectTo: `${window.location.origin}/projects` }
-  });
-  if(error){
-    console.error('GitHub login error:', error);
-  }
-}
-  async function handleGoogleLogin(){
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: `${window.location.origin}/projects` }
-  });
-  if(error){
-    console.error('Google login error:', error);
-  }
-}
-  async function handleLogin(){
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    hideError('login-error');
-
-    if(!email || !password){
-      showError('login-error', 'Please enter both your email and password.');
-      return;
-    }
-
-    setBtnLoading('login-submit-btn', true, 'Log in');
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setBtnLoading('login-submit-btn', false, 'Log in');
-
-    if(error){
-      if(error.message.toLowerCase().includes('email not confirmed')){
-        showError('login-error', 'Please verify your email first. Check your inbox for the code.');
-      } else {
-        showError('login-error', error.message);
+      if (digits.length !== 6) {
+        showError('verify-error', 'Enter all 6 digits from your email.');
+        return;
       }
-      return;
+
+      setBtnLoading('verify-submit-btn', true, 'Verify & continue');
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: pendingEmail,
+        token: digits,
+        type: 'signup',
+      });
+      setBtnLoading('verify-submit-btn', false, 'Verify & continue');
+
+      if (error) {
+        showError('verify-error', error.message);
+        return;
+      }
+
+      if (verifyModal) verifyModal.style.display = 'none';
+      if (successModal) successModal.style.display = 'block';
+      // localStorage.setItem('nexus-returning-user', 'true');
     }
 
-        // localStorage.setItem('nexus-returning-user', 'true');
-    closeModal();
-    router.push('/projects');
-  }
+    async function resendCode() {
+      if (!pendingEmail) return;
+      hideError('verify-error');
+      const { error } = await supabase.auth.resend({ type: 'signup', email: pendingEmail });
+      if (error) {
+        showError('verify-error', error.message);
+      } else {
+        showError('verify-error', 'Code resent — check your inbox.');
+        const verifyErrorEl = document.getElementById('verify-error');
+        if (verifyErrorEl) verifyErrorEl.style.color = 'var(--tea, #A3752F)';
+      }
+    }
 
-    function continueToDashboard(){
-    closeModal();
-    router.push('/projects');
-  }
+    async function handleGitHubLogin() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: { redirectTo: `${window.location.origin}/projects` }
+      });
+      if (error) {
+        console.error('GitHub login error:', error);
+      }
+    }
+    async function handleGoogleLogin() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/projects` }
+      });
+      if (error) {
+        console.error('Google login error:', error);
+      }
+    }
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      hideError('login-error');
 
-  function toggleMobileNav() {
-    const panel = document.getElementById('mobile-nav-panel');
-    if (panel) panel.classList.toggle('open');
-  }
+      if (!email || !password) {
+        showError('login-error', 'Please enter both your email and password.');
+        return;
+      }
 
-  function closeMobileNav() {
-    const panel = document.getElementById('mobile-nav-panel');
-    if (panel) panel.classList.remove('open');
-  }
+      setBtnLoading('login-submit-btn', true, 'Log in');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      setBtnLoading('login-submit-btn', false, 'Log in');
 
-  window.openModal = openModal;
-  window.closeModal = closeModal;
-  window.goToVerify = goToVerify;
-  window.verifySuccess = verifySuccess;
-  window.resendCode = resendCode;
-  window.continueToDashboard = continueToDashboard;
-  window.toggleMobileNav = toggleMobileNav;
-  window.closeMobileNav = closeMobileNav;
-  document.getElementById('resend-link').addEventListener('click', (e) => { e.preventDefault(); resendCode(); });
-  document.getElementById('login-submit-btn').addEventListener('click', handleLogin);
-  document.getElementById('github-signup-btn').addEventListener('click', handleGitHubLogin);
-  document.getElementById('github-login-btn').addEventListener('click', handleGitHubLogin);
-  document.getElementById('google-signup-btn').addEventListener('click', handleGoogleLogin);
-  document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin); 
+      if (error) {
+        if (error.message.toLowerCase().includes('email not confirmed')) {
+          showError('login-error', 'Please verify your email first. Check your inbox for the code.');
+        } else {
+          showError('login-error', error.message);
+        }
+        return;
+      }
 
-  const digits = document.querySelectorAll('.code-digit');
-  digits.forEach((d,idx)=>{
-    d.addEventListener('input', ()=>{
-      if(d.value && idx<digits.length-1) digits[idx+1].focus();
+      // localStorage.setItem('nexus-returning-user', 'true');
+      closeModal();
+      router.push('/projects');
+    }
+
+    function continueToDashboard() {
+      closeModal();
+      router.push('/projects');
+    }
+
+    function toggleMobileNav() {
+      const panel = document.getElementById('mobile-nav-panel');
+      if (panel) panel.classList.toggle('open');
+    }
+
+    function closeMobileNav() {
+      const panel = document.getElementById('mobile-nav-panel');
+      if (panel) panel.classList.remove('open');
+    }
+
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.goToVerify = goToVerify;
+    window.verifySuccess = verifySuccess;
+    window.resendCode = resendCode;
+    window.continueToDashboard = continueToDashboard;
+    window.toggleMobileNav = toggleMobileNav;
+    window.closeMobileNav = closeMobileNav;
+    document.getElementById('resend-link').addEventListener('click', (e) => { e.preventDefault(); resendCode(); });
+    document.getElementById('login-submit-btn').addEventListener('click', handleLogin);
+    document.getElementById('github-signup-btn').addEventListener('click', handleGitHubLogin);
+    document.getElementById('github-login-btn').addEventListener('click', handleGitHubLogin);
+    document.getElementById('google-signup-btn').addEventListener('click', handleGoogleLogin);
+    document.getElementById('google-login-btn').addEventListener('click', handleGoogleLogin);
+
+    const digits = document.querySelectorAll('.code-digit');
+    digits.forEach((d, idx) => {
+      d.addEventListener('input', () => {
+        if (d.value && idx < digits.length - 1) digits[idx + 1].focus();
+      });
+      d.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !d.value && idx > 0) digits[idx - 1].focus();
+      });
     });
-    d.addEventListener('keydown', (e)=>{
-      if(e.key==='Backspace' && !d.value && idx>0) digits[idx-1].focus();
-    });
-  });
 
-      return () => {};
+    return () => { };
   }, [checkingAuth]);
 
-    if (checkingAuth) {
+  if (checkingAuth) {
     return null;
   }
 

@@ -25,10 +25,11 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#17140F" />
+        <meta name="description" content="A verified space for IT builders to showcase projects, find collaborators, and get real feedback." />
       </Head>
-        <div className={transitioning ? 'page-transitioning' : ''}>
+      <div className={transitioning ? 'page-transitioning' : ''}>
         <Component {...pageProps} />
       </div>
     </>
