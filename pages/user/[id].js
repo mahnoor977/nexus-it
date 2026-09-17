@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 import Avatar from '../../components/Avatar';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 
@@ -109,11 +109,9 @@ export default function PublicProfile() {
   return (
     <>
       <Head>
-        <title>{profile.nickname || 'Profile'} — NEXUS-IT</title>
+        <title>{profile.nickname || 'Profile'} · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={myNickname} />
-        <div className="app-main">
+      <AppLayout nickname={myNickname}>
           <div className="profile-page-content page-shell medium">
             <div className="profile-header">
               <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
@@ -184,8 +182,7 @@ export default function PublicProfile() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </AppLayout>
     </>
   );
 }

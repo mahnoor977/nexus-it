@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
-import Topbar from '../components/Topbar';
+import AppLayout from '../components/AppLayout';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function TechStack() {
@@ -45,19 +44,32 @@ export default function TechStack() {
 
   return (
     <>
-      <Head><title>Tech Stack — NEXUS-IT</title></Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <Topbar nickname={nickname} />
+      <Head><title>Tech Stack · NEXUS-IT</title></Head>
+      <AppLayout nickname={nickname}>
           <div className="page-shell wide">
-            <h1 style={{ marginBottom: '10px' }}>Tech Stack</h1>
+            <h1 className="page-title">Tech Stack</h1>
             <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
               Browse projects by technology across the whole platform.
             </p>
 
+            <div className="posts-layout posts-layout-fill">
+            <div>
             {loading ? (
               <div className="projects-empty">Loading…</div>
+            ) : sortedTags.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <i className="ti ti-stack-2" style={{ fontSize: '42px' }}></i>
+                </div>
+                <h3>No tech tags yet</h3>
+                <p>
+                  Tags appear here automatically when builders post projects with their
+                  tech stack: React, Python, Docker, whatever they build with.
+                </p>
+                <button className="btn-primary" onClick={() => router.push('/new-project')}>
+                  + Post the first project
+                </button>
+              </div>
             ) : (
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '30px' }}>
@@ -103,9 +115,31 @@ export default function TechStack() {
                 )}
               </>
             )}
+            </div>
+
+            <aside className="posts-side">
+              <div className="side-card">
+                <h3><i className="ti ti-stack-2"></i> Stacks builders love</h3>
+                <ul className="side-tips">
+                  <li><i className="ti ti-check"></i><span><strong>Next.js + Supabase</strong>: full-stack apps, fast</span></li>
+                  <li><i className="ti ti-check"></i><span><strong>MERN</strong>: Mongo, Express, React, Node</span></li>
+                  <li><i className="ti ti-check"></i><span><strong>Python + FastAPI</strong>: APIs and ML backends</span></li>
+                  <li><i className="ti ti-check"></i><span><strong>Flutter + Firebase</strong>: cross-platform mobile</span></li>
+                </ul>
+              </div>
+
+              <div className="side-card">
+                <h3><i className="ti ti-info-circle"></i> How this page works</h3>
+                <ul className="side-tips">
+                  <li><i className="ti ti-check"></i>Every project&apos;s tech stack becomes clickable tags here.</li>
+                  <li><i className="ti ti-check"></i>Tap a tag to see every project using that technology.</li>
+                  <li><i className="ti ti-check"></i>Perfect for finding collaborators who use your tools.</li>
+                </ul>
+              </div>
+            </aside>
+            </div>
           </div>
-        </div>
-      </div>
+        </AppLayout>
     </>
   );
 }

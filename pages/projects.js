@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export default function Projects() {
@@ -17,6 +17,30 @@ export default function Projects() {
   const [followingIds, setFollowingIds] = useState(new Set());
   const [activeTab, setActiveTab] = useState('recent');
   const [searchQuery, setSearchQuery] = useState('');
+  const [peopleResults, setPeopleResults] = useState([]);
+
+  // Seed search from navbar (/projects?q=...)
+  useEffect(() => {
+    if (typeof router.query.q === 'string') setSearchQuery(router.query.q);
+  }, [router.query.q]);
+
+  // People search (debounced) alongside the project filter
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setPeopleResults([]);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`nickname.ilike.%${trimmed}%,bio.ilike.%${trimmed}%,skills.ilike.%${trimmed}%`)
+        .limit(6);
+      setPeopleResults(data || []);
+    }, 350);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   useEffect(() => {
     async function load() {
@@ -126,7 +150,7 @@ export default function Projects() {
     );
   }
 
-  const tagColors = ['#C5A059', '#8CA88C', '#B08CA8', '#8CA0C4', '#C48C8C'];
+  const tagColors = ['var(--tea)', '#8CA88C', '#B08CA8', '#8CA0C4', '#C48C8C'];
 
   if (authLoading) return <div className="dash-loading mono">Loading...</div>;
 
@@ -136,10 +160,8 @@ export default function Projects() {
         <title>Projects · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '1200px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '1200px' }}>
 
           <div style={{
             display: 'flex',
@@ -149,12 +171,7 @@ export default function Projects() {
             gap: '16px',
             marginBottom: '18px'
           }}>
-            <h1 style={{
-              fontFamily: "'Newsreader', serif",
-              fontSize: '38px',
-              color: '#1A1A1A',
-              margin: 0
-            }}>
+            <h1 className="page-title">
               Projects
             </h1>
 
@@ -163,14 +180,14 @@ export default function Projects() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: '#FFFFFF',
-                border: '1px solid #E5E0D8',
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
                 borderRadius: '10px',
                 padding: '10px 14px',
                 flex: 1,
                 minWidth: '0'
               }}>
-                <i className="ti ti-search" style={{ color: '#6B6558', fontSize: '15px' }}></i>
+                <i className="ti ti-search" style={{ color: 'var(--muted)', fontSize: '15px' }}></i>
                 <input
                   type="text"
                   placeholder="Search projects..."
@@ -181,20 +198,10 @@ export default function Projects() {
                     outline: 'none',
                     background: 'transparent',
                     fontSize: '14px',
-                    color: '#1A1A1A',
+                    color: 'var(--text)',
                     flex: 1
                   }}
                 />
-                <span style={{
-                  fontSize: '11px',
-                  color: '#9C9482',
-                  border: '1px solid #E5E0D8',
-                  borderRadius: '4px',
-                  padding: '1px 6px',
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}>
-                  ⌘K
-                </span>
               </div>
 
               <button
@@ -203,8 +210,8 @@ export default function Projects() {
                   width: '38px',
                   height: '38px',
                   borderRadius: '10px',
-                  border: '1px solid #E5E0D8',
-                  background: '#FFFFFF',
+                  border: '1px solid var(--line)',
+                  background: 'var(--panel)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -212,7 +219,7 @@ export default function Projects() {
                   flexShrink: 0
                 }}
               >
-                <i className="ti ti-adjustments-horizontal" style={{ color: '#6B6558', fontSize: '17px' }}></i>
+                <i className="ti ti-adjustments-horizontal" style={{ color: 'var(--muted)', fontSize: '17px' }}></i>
               </button>
             </div>
           </div>
@@ -221,7 +228,7 @@ export default function Projects() {
             display: 'flex',
             gap: '28px',
             marginBottom: '32px',
-            borderBottom: '1px solid #E5E0D8',
+            borderBottom: '1px solid var(--line)',
             paddingBottom: '12px'
           }}>
             {['recent', 'trending', 'following'].map((tab) => (
@@ -233,10 +240,10 @@ export default function Projects() {
                   border: 'none',
                   fontSize: '15px',
                   fontWeight: activeTab === tab ? 600 : 400,
-                  color: activeTab === tab ? '#C5A059' : '#6B6558',
+                  color: activeTab === tab ? 'var(--tea)' : 'var(--muted)',
                   cursor: 'pointer',
                   paddingBottom: '10px',
-                  borderBottom: activeTab === tab ? '2px solid #C5A059' : '2px solid transparent',
+                  borderBottom: activeTab === tab ? '2px solid var(--tea)' : '2px solid transparent',
                   textTransform: 'capitalize'
                 }}
               >
@@ -251,8 +258,29 @@ export default function Projects() {
             </div>
           )}
 
+          {searchQuery.trim() && peopleResults.length > 0 && (
+            <div className="people-results">
+              <h3>People</h3>
+              {peopleResults.map((p) => (
+                <div
+                  key={p.id}
+                  className="people-result-row"
+                  onClick={() => router.push(`/user/${p.id}`)}
+                >
+                  <div className="people-result-avatar">
+                    {(p.nickname || 'B').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="people-result-name">{p.nickname}</div>
+                    {p.bio && <div className="people-result-bio">{p.bio.slice(0, 80)}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {loading && (
-            <div style={{ color: '#6B6558', padding: '40px 0' }}>
+            <div style={{ color: 'var(--muted)', padding: '40px 0' }}>
               Loading projects...
             </div>
           )}
@@ -296,8 +324,8 @@ export default function Projects() {
                     key={p.id}
                     onClick={() => router.push(`/project/${p.id}`)}
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E5E0D8',
+                      background: 'var(--panel)',
+                      border: '1px solid var(--line)',
                       borderRadius: '16px',
                       padding: '22px',
                       cursor: 'pointer',
@@ -315,8 +343,8 @@ export default function Projects() {
                         alignItems: 'center',
                         gap: '5px',
                         alignSelf: 'flex-start',
-                        background: '#F5E9C8',
-                        color: '#8B6914',
+                        background: 'var(--army-light)',
+                        color: 'var(--tea-bright)',
                         fontSize: '12px',
                         fontWeight: 500,
                         padding: '4px 10px',
@@ -331,7 +359,7 @@ export default function Projects() {
                     <h3 style={{
                       fontSize: '19px',
                       fontWeight: 600,
-                      color: '#1A1A1A',
+                      color: 'var(--text)',
                       margin: '0 0 8px',
                       lineHeight: 1.3
                     }}>
@@ -339,7 +367,7 @@ export default function Projects() {
                     </h3>
 
                     <p style={{
-                      color: '#6B6558',
+                      color: 'var(--muted)',
                       fontSize: '14px',
                       lineHeight: 1.6,
                       marginBottom: '16px',
@@ -360,12 +388,12 @@ export default function Projects() {
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '5px',
-                              background: '#F7F4EE',
-                              color: '#4A453A',
+                              background: 'var(--panel-2)',
+                              color: 'var(--text)',
                               fontSize: '12px',
                               padding: '5px 10px',
                               borderRadius: '20px',
-                              border: '1px solid #E5E0D8'
+                              border: '1px solid var(--line)'
                             }}
                           >
                             <span style={{
@@ -388,7 +416,7 @@ export default function Projects() {
                         width: '26px',
                         height: '26px',
                         borderRadius: '50%',
-                        background: '#C5A059',
+                        background: 'var(--tea)',
                         color: '#1A1A1A',
                         display: 'flex',
                         alignItems: 'center',
@@ -404,7 +432,7 @@ export default function Projects() {
                           e.stopPropagation();
                           router.push(`/user/${p.user_id}`);
                         }}
-                        style={{ color: '#4A453A', fontSize: '13.5px', cursor: 'pointer' }}
+                        style={{ color: 'var(--text)', fontSize: '13.5px', cursor: 'pointer' }}
                       >
                         by {p.author_nickname || 'Builder'}
                       </span>
@@ -418,7 +446,7 @@ export default function Projects() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
-                            color: likedIds.has(p.id) ? '#C5A059' : '#6B6558',
+                            color: likedIds.has(p.id) ? 'var(--tea)' : 'var(--muted)',
                             cursor: 'pointer',
                             fontSize: '13px',
                             padding: 0
@@ -427,7 +455,7 @@ export default function Projects() {
                           <i className={`ti ${likedIds.has(p.id) ? 'ti-heart-filled' : 'ti-heart'}`}></i>
                           {p.likeCount}
                         </button>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6B6558', fontSize: '13px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--muted)', fontSize: '13px' }}>
                           <i className="ti ti-message-circle"></i>
                           {p.commentCount}
                         </span>
@@ -447,11 +475,11 @@ export default function Projects() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '6px',
-                            border: '1px solid #E5E0D8',
+                            border: '1px solid var(--line)',
                             borderRadius: '10px',
                             padding: '10px',
                             fontSize: '13px',
-                            color: '#1A1A1A',
+                            color: 'var(--text)',
                             textDecoration: 'none',
                             fontWeight: 500
                           }}
@@ -474,7 +502,7 @@ export default function Projects() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '6px',
-                            background: '#C5A059',
+                            background: 'var(--tea)',
                             border: 'none',
                             borderRadius: '10px',
                             padding: '10px',
@@ -495,7 +523,7 @@ export default function Projects() {
             </div>
           )}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 import ReportBlockMenu from '../../components/ReportBlockMenu';
 import { useRequireAuth } from '../../hooks/useRequireAuth';
 
@@ -174,11 +174,9 @@ export default function ProjectDetail() {
   return (
     <>
       <Head>
-        <title>{project.title} — NEXUS-IT</title>
+        <title>{project.title} · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
+      <AppLayout nickname={nickname}>
           <div className="project-detail page-shell medium">
             <div className="project-detail-top">
               <h1>{project.title}</h1>
@@ -312,7 +310,7 @@ export default function ProjectDetail() {
               </div>
 
               {comments.length === 0 ? (
-                <div className="comments-empty">No feedback yet — be the first to comment.</div>
+                <div className="comments-empty">No feedback yet. Be the first to comment.</div>
               ) : (
                 <div className="comment-list">
                   {comments.map((c) => (
@@ -338,8 +336,7 @@ export default function ProjectDetail() {
               )}
             </div>
           </div>
-        </div>
-      </div>
+        </AppLayout>
     </>
   );
 }

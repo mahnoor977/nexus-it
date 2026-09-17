@@ -5,7 +5,7 @@ export default function Privacy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy — NEXUS-IT</title>
+        <title>Privacy Policy · NEXUS-IT</title>
       </Head>
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '60px 5vw', color: 'var(--text)' }}>
         <Link href="/" style={{ color: 'var(--tea)', fontSize: '13px' }}>&larr; Back to home</Link>

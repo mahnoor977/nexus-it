@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function Conversation() {
   const router = useRouter();
@@ -211,11 +211,9 @@ export default function Conversation() {
   return (
     <>
       <Head>
-        <title>{otherNickname || 'Conversation'} — NEXUS-IT</title>
+        <title>{otherNickname || 'Conversation'} · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={myNickname} />
-        <div className="app-main">
+      <AppLayout nickname={myNickname}>
           <div className="advisor-chat page-shell medium">
             <div style={{
               display: 'flex',
@@ -223,8 +221,11 @@ export default function Conversation() {
               alignItems: 'center',
               marginBottom: '10px'
             }}>
-              <div className="eyebrow mono">
-                // CONVERSATION WITH {otherNickname ? otherNickname.toUpperCase() : '...'}
+              <div>
+                <h1 className="page-title">{otherNickname || 'Conversation'}</h1>
+                <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>
+                  Direct conversation
+                </p>
               </div>
 
               <button
@@ -236,11 +237,11 @@ export default function Conversation() {
                   alignItems: 'center',
                   gap: '6px',
                   background: 'none',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '8px',
                   padding: '6px 12px',
                   fontSize: '12.5px',
-                  color: deletingConvo ? '#9C9482' : '#c0392b',
+                  color: deletingConvo ? 'var(--muted)' : '#c0392b',
                   cursor: deletingConvo ? 'not-allowed' : 'pointer',
                   fontFamily: "'IBM Plex Mono', monospace"
                 }}
@@ -263,7 +264,7 @@ export default function Conversation() {
 
             <div className="advisor-messages" ref={scrollRef}>
               {messages.length === 0 && (
-                <div className="advisor-empty">Say hello — this is the start of your conversation.</div>
+                <div className="advisor-empty">Say hello. This is the start of your conversation.</div>
               )}
               {messages.map((m) => {
                 const isMine = m.sender_id === currentUserId;
@@ -374,8 +375,7 @@ export default function Conversation() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </AppLayout>
     </>
   );
 }

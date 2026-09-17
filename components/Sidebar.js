@@ -7,9 +7,23 @@ export default function Sidebar({ nickname }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
 
-  // Close drawer automatically on route changes
+  const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+
+  // Expanded by default on desktop; collapsed drawer on mobile
   useEffect(() => {
-    const handleRouteChange = () => setExpanded(false);
+    if (!isMobile()) setExpanded(true);
+  }, []);
+
+  // Navbar hamburger toggles the sidebar
+  useEffect(() => {
+    const handleToggle = () => setExpanded((v) => !v);
+    window.addEventListener('toggle-sidebar', handleToggle);
+    return () => window.removeEventListener('toggle-sidebar', handleToggle);
+  }, []);
+
+  // Close the drawer on route changes (mobile only)
+  useEffect(() => {
+    const handleRouteChange = () => { if (isMobile()) setExpanded(false); };
     router.events.on('routeChangeStart', handleRouteChange);
     return () => router.events.off('routeChangeStart', handleRouteChange);
   }, [router]);
@@ -20,13 +34,13 @@ export default function Sidebar({ nickname }) {
   }, [expanded]);
 
   async function handleLogout() {
-    setExpanded(false);
+    if (isMobile()) setExpanded(false);
     await supabase.auth.signOut();
     router.replace('/');
   }
 
   function handleNav(path) {
-    setExpanded(false);
+    if (isMobile()) setExpanded(false);
     router.push(path);
   }
 
@@ -58,14 +72,14 @@ export default function Sidebar({ nickname }) {
         </button>
 
         <div className="mobile-topbar-brand" onClick={() => handleNav('/projects')}>
-          <img src="/logo.png" alt="NEXUS-IT" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
           <span>NEXUS-IT</span>
         </div>
 
         <div className="mobile-topbar-actions">
           <button
             className="mobile-topbar-search-btn"
-            onClick={() => handleNav('/search')}
+            onClick={() => handleNav('/projects')}
             aria-label="Search"
           >
             <i className="ti ti-search"></i>
@@ -91,14 +105,15 @@ export default function Sidebar({ nickname }) {
       <aside className={`sidebar ${expanded ? 'expanded' : ''}`}>
         <div className="sidebar-top-controls">
           <div
-            className="sidebar-item-row toggle-row"
-            onClick={() => setExpanded(!expanded)}
+            className="sidebar-item-row brand-row"
+            onClick={() => handleNav('/projects')}
             style={{ cursor: 'pointer' }}
+            title="NEXUS-IT"
           >
-            <button className="sidebar-icon-btn" aria-label="Toggle sidebar">
-              <i className={`ti ${expanded ? 'ti-layout-sidebar-left-collapse' : 'ti-menu-2'}`}></i>
-            </button>
-            {expanded && <span className="sidebar-label close-label">Collapse</span>}
+            <div className="sidebar-icon-btn brand-logo-btn">
+              <img src="/logo.png" alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+            </div>
+            <span className="sidebar-label brand-name-label">NEXUS-IT</span>
           </div>
 
           <button
@@ -108,28 +123,7 @@ export default function Sidebar({ nickname }) {
           >
             <i className="ti ti-x"></i>
           </button>
-        </div>
 
-        <div
-          className="sidebar-item-row brand-row"
-          onClick={() => handleNav('/dashboard')}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="sidebar-icon-btn">
-            <img src="/logo.png" alt="NEXUS-IT" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-          </div>
-          <span className="sidebar-label brand-name-label">NEXUS-IT</span>
-        </div>
-
-        <div
-          className="sidebar-item-row search-row"
-          onClick={() => handleNav('/search')}
-          style={{ cursor: 'pointer' }}
-        >
-          <button className={`sidebar-icon-btn ${router.pathname === '/search' ? 'active' : ''}`}>
-            <i className="ti ti-search"></i>
-          </button>
-          <span className="sidebar-label">Search</span>
         </div>
 
         <div className="sidebar-nav">
@@ -149,20 +143,13 @@ export default function Sidebar({ nickname }) {
         </div>
 
         <div className="sidebar-footer">
-          <div className="sidebar-item-row">
-            <ThemeToggle expanded={expanded} />
-          </div>
+          <ThemeToggle />
 
           <div className="sidebar-item-row" onClick={() => handleNav('/profile')} style={{ cursor: 'pointer' }}>
             <button className="sidebar-icon-btn">
               <i className="ti ti-settings"></i>
             </button>
             <span className="sidebar-label">Settings</span>
-          </div>
-
-          <div className="sidebar-item-row" onClick={() => handleNav('/profile')} style={{ cursor: 'pointer' }}>
-            <div className="sidebar-avatar">{initials}</div>
-            <span className="sidebar-label">Profile</span>
           </div>
 
           <div className="sidebar-item-row" onClick={handleLogout} style={{ cursor: 'pointer' }}>
@@ -173,6 +160,16 @@ export default function Sidebar({ nickname }) {
           </div>
         </div>
       </aside>
+
+      {/* Toggle straddling the sidebar edge, level with the header */}
+      <button
+        className="sidebar-edge-btn"
+        onClick={() => setExpanded(!expanded)}
+        aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+        title={expanded ? 'Collapse' : 'Expand'}
+      >
+        <i className={`ti ${expanded ? 'ti-chevron-left' : 'ti-chevron-right'}`}></i>
+      </button>
     </>
   );
 }

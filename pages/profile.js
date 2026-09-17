@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 
 export default function Profile() {
   const router = useRouter();
@@ -22,6 +22,8 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState('');
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
 
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -68,14 +70,17 @@ export default function Profile() {
     setSaving(true);
     setSaveMsg('');
 
+    // upsert instead of update: creates the row if a new account's
+    // profile row doesn't exist yet, so saving never silently no-ops
     const { error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: userId,
+        nickname,
         bio,
         skills,
         message_privacy: messagePrivacy,
-      })
-      .eq('id', userId);
+      });
 
     setSaving(false);
 
@@ -185,8 +190,8 @@ export default function Profile() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FDFBF7',
-        color: '#6B6558'
+        background: 'var(--black)',
+        color: 'var(--muted)'
       }}>
         Loading profile…
       </div>
@@ -201,10 +206,8 @@ export default function Profile() {
         <title>Profile · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '680px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '680px' }}>
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', marginBottom: '36px' }}>
@@ -212,7 +215,7 @@ export default function Profile() {
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: '#C5A059',
+              background: 'var(--tea)',
               color: '#1A1A1A',
               display: 'flex',
               alignItems: 'center',
@@ -223,15 +226,10 @@ export default function Profile() {
               {initials}
             </div>
             <div>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '28px',
-                color: '#1A1A1A',
-                margin: 0
-              }}>
+              <h1 className="page-title">
                 {nickname}
               </h1>
-              <p style={{ color: '#6B6558', fontSize: '14px', margin: '4px 0 0 0' }}>
+              <p style={{ color: 'var(--muted)', fontSize: '14px', margin: '4px 0 0 0' }}>
                 Your profile
               </p>
             </div>
@@ -239,7 +237,7 @@ export default function Profile() {
 
           {/* Bio */}
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B6558', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--muted)', marginBottom: '8px' }}>
               Bio
             </label>
             <textarea
@@ -250,11 +248,11 @@ export default function Profile() {
               style={{
                 width: '100%',
                 padding: '14px 16px',
-                border: '1px solid #E5E0D8',
+                border: '1px solid var(--line)',
                 borderRadius: '12px',
                 fontSize: '15px',
-                background: '#FFFFFF',
-                color: '#1A1A1A',
+                background: 'var(--panel)',
+                color: 'var(--text)',
                 resize: 'vertical',
                 outline: 'none',
                 fontFamily: 'inherit'
@@ -264,7 +262,7 @@ export default function Profile() {
 
           {/* Skills */}
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B6558', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--muted)', marginBottom: '8px' }}>
               Skills
             </label>
             <input
@@ -275,11 +273,11 @@ export default function Profile() {
               style={{
                 width: '100%',
                 padding: '13px 16px',
-                border: '1px solid #E5E0D8',
+                border: '1px solid var(--line)',
                 borderRadius: '12px',
                 fontSize: '15px',
-                background: '#FFFFFF',
-                color: '#1A1A1A',
+                background: 'var(--panel)',
+                color: 'var(--text)',
                 outline: 'none'
               }}
             />
@@ -291,7 +289,7 @@ export default function Profile() {
               onClick={handleSave}
               disabled={saving}
               style={{
-                background: '#C5A059',
+                background: 'var(--tea)',
                 color: '#1A1A1A',
                 border: 'none',
                 padding: '12px 24px',
@@ -308,16 +306,16 @@ export default function Profile() {
 
           {/* Who can message you */}
           <div style={{ marginBottom: '40px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '14px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '14px' }}>
               Who can message you
             </h3>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => setMessagePrivacy('everyone')}
                 style={{
-                  background: messagePrivacy === 'everyone' ? '#C5A059' : 'transparent',
-                  color: messagePrivacy === 'everyone' ? '#1A1A1A' : '#6B6558',
-                  border: '1px solid #C5A059',
+                  background: messagePrivacy === 'everyone' ? 'var(--tea)' : 'transparent',
+                  color: messagePrivacy === 'everyone' ? 'var(--text)' : 'var(--muted)',
+                  border: '1px solid var(--tea)',
                   padding: '10px 18px',
                   borderRadius: '20px',
                   fontSize: '14px',
@@ -330,9 +328,9 @@ export default function Profile() {
               <button
                 onClick={() => setMessagePrivacy('followers')}
                 style={{
-                  background: messagePrivacy === 'followers' ? '#C5A059' : 'transparent',
-                  color: messagePrivacy === 'followers' ? '#1A1A1A' : '#6B6558',
-                  border: '1px solid #C5A059',
+                  background: messagePrivacy === 'followers' ? 'var(--tea)' : 'transparent',
+                  color: messagePrivacy === 'followers' ? 'var(--text)' : 'var(--muted)',
+                  border: '1px solid var(--tea)',
                   padding: '10px 18px',
                   borderRadius: '20px',
                   fontSize: '14px',
@@ -347,10 +345,10 @@ export default function Profile() {
 
           {/* Gallery */}
           <div style={{ marginBottom: '48px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '8px' }}>
               Photos and videos on your profile
             </h3>
-            <p style={{ color: '#6B6558', fontSize: '14px', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '16px' }}>
               Not tied to any specific project.
             </p>
 
@@ -368,8 +366,8 @@ export default function Profile() {
               disabled={galleryUploading}
               style={{
                 background: 'transparent',
-                border: '1px solid #C5A059',
-                color: '#C5A059',
+                border: '1px solid var(--tea)',
+                color: 'var(--tea)',
                 padding: '10px 18px',
                 borderRadius: '10px',
                 fontSize: '14px',
@@ -381,8 +379,8 @@ export default function Profile() {
             </button>
 
             {gallery.length === 0 ? (
-              <p style={{ color: '#9C9482', fontSize: '14px' }}>
-                No media yet — add some photos or videos.
+              <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
+                No media yet. Add some photos or videos.
               </p>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
@@ -427,52 +425,72 @@ export default function Profile() {
 
           {/* Change Password */}
           <div style={{
-            borderTop: '1px solid #E5E0D8',
+            borderTop: '1px solid var(--line)',
             paddingTop: '36px',
             marginBottom: '48px'
           }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '20px' }}>
               Change password
             </h3>
 
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '13px', color: '#6B6558', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--muted)', marginBottom: '6px' }}>
                 New password
               </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 8 characters"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #E5E0D8',
-                  borderRadius: '10px',
-                  fontSize: '15px',
-                  outline: 'none'
-                }}
-              />
+              <div className="pass-wrap">
+                <input
+                  type={showNewPass ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1px solid var(--line)',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  type="button"
+                  className="pass-eye"
+                  onClick={() => setShowNewPass((v) => !v)}
+                  aria-label={showNewPass ? 'Hide password' : 'Show password'}
+                >
+                  <i className={`ti ${showNewPass ? 'ti-eye-off' : 'ti-eye'}`}></i>
+                </button>
+              </div>
             </div>
 
             <div style={{ marginBottom: '18px' }}>
-              <label style={{ display: 'block', fontSize: '13px', color: '#6B6558', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--muted)', marginBottom: '6px' }}>
                 Confirm new password
               </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #E5E0D8',
-                  borderRadius: '10px',
-                  fontSize: '15px',
-                  outline: 'none'
-                }}
-              />
+              <div className="pass-wrap">
+                <input
+                  type={showConfirmPass ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1px solid var(--line)',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  type="button"
+                  className="pass-eye"
+                  onClick={() => setShowConfirmPass((v) => !v)}
+                  aria-label={showConfirmPass ? 'Hide password' : 'Show password'}
+                >
+                  <i className={`ti ${showConfirmPass ? 'ti-eye-off' : 'ti-eye'}`}></i>
+                </button>
+              </div>
             </div>
 
             <button
@@ -480,8 +498,8 @@ export default function Profile() {
               disabled={passwordSaving}
               style={{
                 background: 'transparent',
-                border: '1px solid #C5A059',
-                color: '#C5A059',
+                border: '1px solid var(--tea)',
+                color: 'var(--tea)',
                 padding: '11px 20px',
                 borderRadius: '10px',
                 fontSize: '14px',
@@ -504,14 +522,14 @@ export default function Profile() {
 
           {/* DANGER ZONE */}
           <div style={{
-            borderTop: '1px solid #E5E0D8',
+            borderTop: '1px solid var(--line)',
             paddingTop: '36px',
             marginBottom: '60px'
           }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#c0392b', marginBottom: '10px' }}>
               Delete account
             </h3>
-            <p style={{ color: '#6B6558', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>
               This permanently removes your projects, posts, comments, and gallery. Type <strong>DELETE</strong> to confirm.
             </p>
 
@@ -524,7 +542,7 @@ export default function Profile() {
                 width: '100%',
                 maxWidth: '280px',
                 padding: '12px 16px',
-                border: '1px solid #E5E0D8',
+                border: '1px solid var(--line)',
                 borderRadius: '10px',
                 fontSize: '15px',
                 outline: 'none',
@@ -559,7 +577,7 @@ export default function Profile() {
           </div>
 
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

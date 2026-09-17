@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function Forum() {
   const router = useRouter();
@@ -39,10 +39,8 @@ export default function Forum() {
         <title>Forum · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '900px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '1100px' }}>
 
           {/* Header */}
           <div style={{
@@ -52,15 +50,10 @@ export default function Forum() {
             marginBottom: '36px'
           }}>
             <div>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '36px',
-                color: '#1A1A1A',
-                margin: '0 0 6px 0'
-              }}>
+              <h1 className="page-title">
                 Forum
               </h1>
-              <p style={{ color: '#6B6558', fontSize: '15px', margin: 0 }}>
+              <p style={{ color: 'var(--muted)', fontSize: '15px', margin: 0 }}>
                 Discussions, questions, and ideas from the community
               </p>
             </div>
@@ -68,7 +61,7 @@ export default function Forum() {
             <button
               onClick={() => router.push('/forum/new')}
               style={{
-                background: '#C5A059',
+                background: 'var(--tea)',
                 color: '#1A1A1A',
                 border: 'none',
                 padding: '12px 20px',
@@ -82,9 +75,12 @@ export default function Forum() {
             </button>
           </div>
 
+          <div className="posts-layout posts-layout-fill">
+          <div>
+
           {/* Loading */}
           {loading && (
-            <div style={{ color: '#6B6558', padding: '40px 0' }}>
+            <div style={{ color: 'var(--muted)', padding: '40px 0' }}>
               Loading discussions…
             </div>
           )}
@@ -99,26 +95,26 @@ export default function Forum() {
           {/* Empty State */}
           {!loading && !error && posts.length === 0 && (
             <div style={{
-              background: '#FFFFFF',
-              border: '1px solid #E5E0D8',
+              background: 'var(--panel)',
+              border: '1px solid var(--line)',
               borderRadius: '16px',
               padding: '64px 40px',
               textAlign: 'center',
               boxShadow: '0 4px 24px rgba(0,0,0,0.03)'
             }}>
-              <div style={{ fontSize: '42px', color: '#C5A059', marginBottom: '20px' }}>
+              <div style={{ fontSize: '42px', color: 'var(--tea)', marginBottom: '20px' }}>
                 <i className="ti ti-messages"></i>
               </div>
               <h3 style={{
                 fontFamily: "'Newsreader', serif",
                 fontSize: '24px',
-                color: '#1A1A1A',
+                color: 'var(--text)',
                 marginBottom: '10px'
               }}>
                 No discussions yet
               </h3>
               <p style={{
-                color: '#6B6558',
+                color: 'var(--muted)',
                 fontSize: '15px',
                 lineHeight: 1.6,
                 marginBottom: '28px',
@@ -131,7 +127,7 @@ export default function Forum() {
               <button
                 onClick={() => router.push('/forum/new')}
                 style={{
-                  background: '#C5A059',
+                  background: 'var(--tea)',
                   color: '#1A1A1A',
                   border: 'none',
                   padding: '12px 24px',
@@ -154,8 +150,8 @@ export default function Forum() {
                   key={p.id}
                   onClick={() => router.push(`/forum/${p.id}`)}
                   style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #E5E0D8',
+                    background: 'var(--panel)',
+                    border: '1px solid var(--line)',
                     borderRadius: '14px',
                     padding: '22px 26px',
                     cursor: 'pointer',
@@ -175,7 +171,7 @@ export default function Forum() {
                     <h3 style={{
                       fontSize: '18px',
                       fontWeight: 600,
-                      color: '#1A1A1A',
+                      color: 'var(--text)',
                       margin: 0,
                       lineHeight: 1.3
                     }}>
@@ -187,7 +183,7 @@ export default function Forum() {
                         router.push(`/user/${p.user_id}`);
                       }}
                       style={{
-                        color: '#C5A059',
+                        color: 'var(--tea)',
                         fontSize: '13px',
                         textDecoration: 'underline',
                         cursor: 'pointer',
@@ -199,7 +195,7 @@ export default function Forum() {
                   </div>
 
                   <p style={{
-                    color: '#6B6558',
+                    color: 'var(--muted)',
                     fontSize: '14px',
                     lineHeight: 1.6,
                     margin: 0
@@ -210,8 +206,33 @@ export default function Forum() {
               ))}
             </div>
           )}
+          </div>
+
+          <aside className="posts-side">
+            <div className="side-card">
+              <h3><i className="ti ti-messages"></i> Conversation starters</h3>
+              <div className="side-tags">
+                {['Show your setup', 'Best resources for…?', 'Code review request', 'Wins of the week', 'Stuck on a bug'].map((t) => (
+                  <button key={t} className="side-tag-chip" onClick={() => router.push('/forum/new')}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <p className="side-hint">Pick one and start the thread.</p>
+            </div>
+
+            <div className="side-card">
+              <h3><i className="ti ti-heart-handshake"></i> Community guidelines</h3>
+              <ul className="side-tips">
+                <li><i className="ti ti-check"></i>Be constructive. Critique the work, not the person.</li>
+                <li><i className="ti ti-check"></i>Credit code and ideas that aren&apos;t yours.</li>
+                <li><i className="ti ti-check"></i>Search first; add to existing threads when one fits.</li>
+              </ul>
+            </div>
+          </aside>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

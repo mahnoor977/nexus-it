@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
+
+const SUGGESTED_TAGS = ['#buildinpublic', '#react', '#ai', '#webdev', '#bugfix', '#launch'];
 
 export default function Posts() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function Posts() {
   const [composeFiles, setComposeFiles] = useState([]);
   const [posting, setPosting] = useState(false);
   const [likedIds, setLikedIds] = useState(new Set());
+  const [activeTag, setActiveTag] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -153,110 +156,198 @@ export default function Posts() {
     return `${Math.floor(diff / 86400)}d ago`;
   }
 
+  function insertTag(tag) {
+    setComposeText((t) => (t ? `${t.replace(/\s+$/, '')} ${tag} ` : `${tag} `));
+  }
+
+  const initials = (nickname || 'B').slice(0, 2).toUpperCase();
+
+  const tagCounts = {};
+  posts.forEach((p) => {
+    (p.hashtags || '').split(/\s+/).forEach((t) => {
+      if (t) tagCounts[t] = (tagCounts[t] || 0) + 1;
+    });
+  });
+  const trendingTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const hasTrending = trendingTags.length > 0;
+
+  const visiblePosts = activeTag
+    ? posts.filter((p) => (p.hashtags || '').includes(activeTag))
+    : posts;
+
   return (
     <>
       <Head>
-        <title>Posts — NEXUS-IT</title>
+        <title>Posts · NEXUS-IT</title>
       </Head>
-      <div className="app-shell">
-        <Sidebar nickname={nickname} />
-        <div className="app-main">
-          <div className="page-shell narrow">
-            <h1 style={{ marginBottom: '24px' }}>Posts</h1>
+      <AppLayout nickname={nickname}>
+        <div className="page-shell wide">
+          <h1 className="page-title">Posts</h1>
+          <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '28px' }}>
+            Quick updates from builders: what&apos;s shipping, breaking, and launching right now.
+          </p>
 
-            {userId && (
-              <div className="post-compose-box">
-                <textarea
-                  placeholder="Share an update, a thought, or what you're working on... use #hashtags"
-                  value={composeText}
-                  onChange={(e) => setComposeText(e.target.value)}
-                />
-                {composeFiles.length > 0 && (
-                  <div className="media-preview-grid">
-                    {composeFiles.map((item, i) => (
-                      <div className="media-preview-item" key={i}>
-                        {item.type === 'video' ? <video src={item.preview} muted /> : <img src={item.preview} alt="" />}
+          <div className="posts-layout posts-layout-fill">
+            <div className="posts-main">
+              {userId && (
+                <div className="post-compose-box">
+                  <div className="compose-top">
+                    <div className="compose-avatar">{initials}</div>
+                    <textarea
+                      placeholder="Share an update, a thought, or what you're working on... use #hashtags"
+                      value={composeText}
+                      onChange={(e) => setComposeText(e.target.value)}
+                    />
+                  </div>
+                  {composeFiles.length > 0 && (
+                    <div className="media-preview-grid">
+                      {composeFiles.map((item, i) => (
+                        <div className="media-preview-item" key={i}>
+                          {item.type === 'video' ? <video src={item.preview} muted /> : <img src={item.preview} alt="" />}
+                          <button
+                            type="button"
+                            className="media-preview-remove"
+                            onClick={() => setComposeFiles(composeFiles.filter((_, idx) => idx !== i))}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="post-compose-actions">
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ padding: '6px 12px', fontSize: '12px' }}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <i className="ti ti-photo-plus"></i> Media
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      style={{ display: 'none' }}
+                      onChange={handleFileSelect}
+                    />
+                    <button
+                      className="btn btn-solid"
+                      style={{ padding: '8px 20px', fontSize: '13px' }}
+                      onClick={handlePost}
+                      disabled={posting || !composeText.trim()}
+                    >
+                      {posting ? 'Posting…' : 'Post'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTag && (
+                <div className="posts-filter-bar">
+                  Showing posts tagged <span className="post-hashtag">{activeTag}</span>
+                  <button onClick={() => setActiveTag(null)}>Clear filter</button>
+                </div>
+              )}
+
+              {loading && <div className="projects-empty">Loading posts…</div>}
+
+              {!loading && visiblePosts.length === 0 && (
+                <div className="empty-state" style={{ margin: '10px 0 0', maxWidth: '100%' }}>
+                  <div className="empty-state-icon">
+                    <i className="ti ti-news" style={{ fontSize: '42px' }}></i>
+                  </div>
+                  <h3>{activeTag ? `No posts tagged ${activeTag} yet` : 'No posts yet'}</h3>
+                  <p>
+                    {activeTag
+                      ? 'Be the first to post with this tag.'
+                      : 'This is where quick updates live. Share what you shipped today, a bug that fought back, or a launch worth celebrating.'}
+                  </p>
+                </div>
+              )}
+
+              {visiblePosts.map((p) => (
+                <div className="post-card" key={p.id}>
+                  <div className="post-card-header">
+                    <span
+                      className="post-author-name"
+                      onClick={() => router.push(`/user/${p.user_id}`)}
+                    >
+                      {p.author_nickname}
+                    </span>
+                    <span className="post-time">{timeAgo(p.created_at)}</span>
+                  </div>
+
+                  <div className="post-content">{renderContentWithHashtags(p.content)}</div>
+
+                  {p.media.length > 0 && (
+                    <div className={`post-media-grid count-${p.media.length === 1 ? '1' : p.media.length === 2 ? '2' : '3plus'}`}>
+                      {p.media.map((m) => (
+                        m.media_type === 'video'
+                          ? <video src={m.media_url} controls key={m.id} />
+                          : <img src={m.media_url} alt="" key={m.id} />
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    className={`like-btn ${likedIds.has(p.id) ? 'liked' : ''}`}
+                    onClick={() => handleLike(p.id)}
+                  >
+                    <i className="ti ti-heart"></i> {p.likeCount}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <aside className="posts-side">
+              <div className="side-card">
+                <h3><i className={`ti ${hasTrending ? 'ti-trending-up' : 'ti-hash'}`}></i> {hasTrending ? 'Trending tags' : 'Suggested tags'}</h3>
+                <div className="side-tags">
+                  {hasTrending
+                    ? trendingTags.map(([tag, count]) => (
                         <button
-                          type="button"
-                          className="media-preview-remove"
-                          onClick={() => setComposeFiles(composeFiles.filter((_, idx) => idx !== i))}
+                          key={tag}
+                          className={`side-tag-chip ${activeTag === tag ? 'active' : ''}`}
+                          onClick={() => setActiveTag(activeTag === tag ? null : tag)}
                         >
-                          ×
+                          {tag} <span className="side-tag-count">{count}</span>
                         </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="post-compose-actions">
-                  <button
-                    type="button"
-                    className="btn"
-                    style={{ padding: '6px 12px', fontSize: '12px' }}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <i className="ti ti-photo-plus"></i> Media
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    style={{ display: 'none' }}
-                    onChange={handleFileSelect}
-                  />
-                  <button
-                    className="btn btn-solid"
-                    style={{ padding: '8px 20px', fontSize: '13px' }}
-                    onClick={handlePost}
-                    disabled={posting || !composeText.trim()}
-                  >
-                    {posting ? 'Posting…' : 'Post'}
-                  </button>
+                      ))
+                    : SUGGESTED_TAGS.map((tag) => (
+                        <button key={tag} className="side-tag-chip" onClick={() => insertTag(tag)}>
+                          {tag}
+                        </button>
+                      ))}
                 </div>
+                {!hasTrending && (
+                  <p className="side-hint">Tap a tag to drop it into your post.</p>
+                )}
               </div>
-            )}
 
-            {loading && <div className="projects-empty">Loading posts…</div>}
+              <div className="side-card">
+                <h3><i className="ti ti-bulb"></i> Make it a good post</h3>
+                <ul className="side-tips">
+                  <li><i className="ti ti-check"></i>Say what you built or fixed. Specifics beat vibes.</li>
+                  <li><i className="ti ti-check"></i>Add a screenshot or short clip when you can.</li>
+                  <li><i className="ti ti-check"></i>Use #hashtags so others building the same thing find you.</li>
+                </ul>
+              </div>
 
-            {!loading && posts.length === 0 && (
-              <div className="projects-empty">No posts yet — share the first update.</div>
-            )}
-
-            {posts.map((p) => (
-              <div className="post-card" key={p.id}>
-                <div className="post-card-header">
-                  <span
-                    className="post-author-name"
-                    onClick={() => router.push(`/user/${p.user_id}`)}
-                  >
-                    {p.author_nickname}
-                  </span>
-                  <span className="post-time">{timeAgo(p.created_at)}</span>
-                </div>
-
-                <div className="post-content">{renderContentWithHashtags(p.content)}</div>
-
-                {p.media.length > 0 && (
-                  <div className={`post-media-grid count-${p.media.length === 1 ? '1' : p.media.length === 2 ? '2' : '3plus'}`}>
-                    {p.media.map((m) => (
-                      m.media_type === 'video'
-                        ? <video src={m.media_url} controls key={m.id} />
-                        : <img src={m.media_url} alt="" key={m.id} />
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  className={`like-btn ${likedIds.has(p.id) ? 'liked' : ''}`}
-                  onClick={() => handleLike(p.id)}
-                >
-                  <i className="ti ti-heart"></i> {p.likeCount}
+              <div className="side-card">
+                <h3><i className="ti ti-folder-plus"></i> Built something bigger?</h3>
+                <p className="side-cta-text">
+                  Projects get their own page with a media gallery, feedback thread, and collaborators.
+                </p>
+                <button className="btn btn-solid" style={{ width: '100%', padding: '10px', fontSize: '13px' }} onClick={() => router.push('/new-project')}>
+                  Post a project
                 </button>
               </div>
-            ))}
+            </aside>
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

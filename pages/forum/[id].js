@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../../lib/supabaseClient';
-import Sidebar from '../../components/Sidebar';
+import AppLayout from '../../components/AppLayout';
 
 export default function ForumPostDetail() {
   const router = useRouter();
@@ -98,7 +98,7 @@ export default function ForumPostDetail() {
 
   if (loading) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FDFBF7', color: '#6B6558' }}>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--black)', color: 'var(--muted)' }}>
         Loading…
       </div>
     );
@@ -106,7 +106,7 @@ export default function ForumPostDetail() {
 
   if (error || !post) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FDFBF7', color: '#6B6558' }}>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--black)', color: 'var(--muted)' }}>
         {error || 'Post not found.'}
       </div>
     );
@@ -118,26 +118,24 @@ export default function ForumPostDetail() {
         <title>{post.title} · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '720px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '720px' }}>
 
           <button
             onClick={() => router.push('/forum')}
-            style={{ background: 'none', border: 'none', color: '#C5A059', fontSize: '14px', cursor: 'pointer', marginBottom: '24px', padding: 0 }}
+            style={{ background: 'none', border: 'none', color: 'var(--tea)', fontSize: '14px', cursor: 'pointer', marginBottom: '24px', padding: 0 }}
           >
             ← Back to Forum
           </button>
 
-          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: '28px', color: '#1A1A1A', marginBottom: '12px', lineHeight: 1.3 }}>
+          <h1 className="page-title">
             {post.title}
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
             <span
               onClick={() => router.push(`/user/${post.user_id}`)}
-              style={{ color: '#C5A059', fontSize: '14px', textDecoration: 'underline', cursor: 'pointer' }}
+              style={{ color: 'var(--tea)', fontSize: '14px', textDecoration: 'underline', cursor: 'pointer' }}
             >
               by {post.author_nickname}
             </span>
@@ -153,38 +151,38 @@ export default function ForumPostDetail() {
           </div>
 
           <div style={{
-            background: '#FFFFFF',
-            border: '1px solid #E5E0D8',
+            background: 'var(--panel)',
+            border: '1px solid var(--line)',
             borderRadius: '14px',
             padding: '24px',
             marginBottom: '36px',
             fontSize: '15px',
             lineHeight: 1.7,
-            color: '#1A1A1A',
+            color: 'var(--text)',
             whiteSpace: 'pre-wrap'
           }}>
             {post.body}
           </div>
 
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '16px' }}>
             Replies ({replies.length})
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '28px' }}>
             {replies.length === 0 && (
-              <p style={{ color: '#9C9482', fontSize: '14px' }}>No replies yet. Be the first to respond.</p>
+              <p style={{ color: 'var(--muted)', fontSize: '14px' }}>No replies yet. Be the first to respond.</p>
             )}
             {replies.map((r) => (
               <div key={r.id} style={{
-                background: '#FFFFFF',
-                border: '1px solid #E5E0D8',
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
                 borderRadius: '12px',
                 padding: '16px 18px'
               }}>
-                <div style={{ fontSize: '13px', color: '#C5A059', marginBottom: '6px', fontWeight: 500 }}>
+                <div style={{ fontSize: '13px', color: 'var(--tea)', marginBottom: '6px', fontWeight: 500 }}>
                   {r.author_nickname}
                 </div>
-                <div style={{ fontSize: '14px', color: '#1A1A1A', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                <div style={{ fontSize: '14px', color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                   {r.content}
                 </div>
               </div>
@@ -193,8 +191,8 @@ export default function ForumPostDetail() {
 
           {/* Reply box */}
           <div style={{
-            background: '#FFFFFF',
-            border: '1px solid #E5E0D8',
+            background: 'var(--panel)',
+            border: '1px solid var(--line)',
             borderRadius: '14px',
             padding: '16px',
             display: 'flex',
@@ -213,7 +211,7 @@ export default function ForumPostDetail() {
                 resize: 'vertical',
                 fontSize: '15px',
                 fontFamily: 'inherit',
-                color: '#1A1A1A'
+                color: 'var(--text)'
               }}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -221,7 +219,7 @@ export default function ForumPostDetail() {
                 onClick={handlePostReply}
                 disabled={posting || !replyText.trim()}
                 style={{
-                  background: posting || !replyText.trim() ? '#E5E0D8' : '#C5A059',
+                  background: posting || !replyText.trim() ? 'var(--line)' : 'var(--tea)',
                   color: '#1A1A1A',
                   border: 'none',
                   padding: '10px 20px',
@@ -236,7 +234,7 @@ export default function ForumPostDetail() {
             </div>
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

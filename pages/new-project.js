@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 
 export default function NewProject() {
   const router = useRouter();
@@ -108,8 +108,8 @@ export default function NewProject() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FDFBF7',
-        color: '#6B6558'
+        background: 'var(--black)',
+        color: 'var(--muted)'
       }}>
         Loading…
       </div>
@@ -122,23 +122,18 @@ export default function NewProject() {
         <title>Post a project · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '1020px' }}>
 
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '640px' }}>
-
-          <h1 style={{
-            fontFamily: "'Newsreader', serif",
-            fontSize: '32px',
-            color: '#1A1A1A',
-            marginBottom: '8px'
-          }}>
+          <h1 className="page-title">
             Post a project
           </h1>
-          <p style={{ color: '#6B6558', fontSize: '15px', marginBottom: '36px' }}>
+          <p style={{ color: 'var(--muted)', fontSize: '15px', marginBottom: '36px' }}>
             Share what you built and get feedback from other builders.
           </p>
 
+          <div className="posts-layout posts-layout-fill">
+          <div style={{ maxWidth: '640px' }}>
           <form onSubmit={handleSubmit}>
 
             {/* Title */}
@@ -147,7 +142,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -162,11 +157,11 @@ export default function NewProject() {
                 style={{
                   width: '100%',
                   padding: '13px 16px',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: '15px',
-                  background: '#FFFFFF',
-                  color: '#1A1A1A',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',
                   outline: 'none'
                 }}
               />
@@ -178,7 +173,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -193,11 +188,11 @@ export default function NewProject() {
                 style={{
                   width: '100%',
                   padding: '14px 16px',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: '15px',
-                  background: '#FFFFFF',
-                  color: '#1A1A1A',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',
                   outline: 'none',
                   resize: 'vertical',
                   fontFamily: 'inherit',
@@ -212,7 +207,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -227,11 +222,11 @@ export default function NewProject() {
                 style={{
                   width: '100%',
                   padding: '13px 16px',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: '15px',
-                  background: '#FFFFFF',
-                  color: '#1A1A1A',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',
                   outline: 'none'
                 }}
               />
@@ -243,7 +238,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -258,11 +253,11 @@ export default function NewProject() {
                 style={{
                   width: '100%',
                   padding: '13px 16px',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: '15px',
-                  background: '#FFFFFF',
-                  color: '#1A1A1A',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',
                   outline: 'none'
                 }}
               />
@@ -274,7 +269,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -289,11 +284,11 @@ export default function NewProject() {
                 style={{
                   width: '100%',
                   padding: '13px 16px',
-                  border: '1px solid #E5E0D8',
+                  border: '1px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: '15px',
-                  background: '#FFFFFF',
-                  color: '#1A1A1A',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',
                   outline: 'none'
                 }}
               />
@@ -305,7 +300,7 @@ export default function NewProject() {
                 display: 'block',
                 fontSize: '13px',
                 fontWeight: 500,
-                color: '#6B6558',
+                color: 'var(--muted)',
                 marginBottom: '8px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em'
@@ -320,18 +315,18 @@ export default function NewProject() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1.5px dashed #E5E0D8',
+                  border: '1.5px dashed var(--line)',
                   borderRadius: '14px',
                   padding: '36px 20px',
                   cursor: 'pointer',
-                  background: '#FFFFFF',
+                  background: 'var(--panel)',
                   transition: 'border-color 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#C5A059'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#E5E0D8'}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--tea)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
               >
-                <i className="ti ti-photo-plus" style={{ fontSize: '28px', color: '#C5A059', marginBottom: '10px' }}></i>
-                <div style={{ fontSize: '14px', color: '#6B6558' }}>
+                <i className="ti ti-photo-plus" style={{ fontSize: '28px', color: 'var(--tea)', marginBottom: '10px' }}></i>
+                <div style={{ fontSize: '14px', color: 'var(--muted)' }}>
                   Click to add images or short video clips
                 </div>
               </label>
@@ -417,7 +412,7 @@ export default function NewProject() {
               type="submit"
               disabled={saving}
               style={{
-                background: saving ? '#E5E0D8' : '#C5A059',
+                background: saving ? 'var(--line)' : 'var(--tea)',
                 color: '#1A1A1A',
                 border: 'none',
                 padding: '14px 32px',
@@ -430,8 +425,31 @@ export default function NewProject() {
               {saving ? 'Posting…' : 'Post project'}
             </button>
           </form>
+          </div>
+
+          <aside className="posts-side">
+            <div className="side-card">
+              <h3><i className="ti ti-bulb"></i> Make it stand out</h3>
+              <ul className="side-tips">
+                <li><i className="ti ti-check"></i>Lead with what it does, not what it&apos;s built with.</li>
+                <li><i className="ti ti-check"></i>Say what you learned and what feedback you want.</li>
+                <li><i className="ti ti-check"></i>Screenshots or a short clip double the attention.</li>
+                <li><i className="ti ti-check"></i>A live demo link beats a thousand words.</li>
+              </ul>
+            </div>
+
+            <div className="side-card">
+              <h3><i className="ti ti-users"></i> After you post</h3>
+              <ul className="side-tips">
+                <li><i className="ti ti-check"></i>Your project gets its own page and feedback thread.</li>
+                <li><i className="ti ti-check"></i>Builders can request to join as collaborators.</li>
+                <li><i className="ti ti-check"></i>Its tech stack becomes browsable on the Tech Stack page.</li>
+              </ul>
+            </div>
+          </aside>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -76,8 +76,8 @@ export default function Dashboard() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FDFBF7',
-        color: '#6B6558'
+        background: 'var(--black)',
+        color: 'var(--muted)'
       }}>
         Loading dashboard…
       </div>
@@ -86,19 +86,25 @@ export default function Dashboard() {
 
   const initials = (nickname || 'B').slice(0, 2).toUpperCase();
 
+  const checklist = [
+    { label: 'Add a short bio', done: !!profile?.bio, href: '/profile' },
+    { label: 'List your skills', done: !!profile?.skills, href: '/profile' },
+    { label: 'Post your first project', done: myProjects.length > 0, href: '/new-project' },
+  ];
+  const doneCount = checklist.filter((c) => c.done).length;
+  const setupComplete = doneCount === checklist.length;
+
   return (
     <>
       <Head>
         <title>Dashboard · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{ padding: '36px 48px', maxWidth: '960px' }}>
+      <AppLayout nickname={nickname}>
+        <div style={{ maxWidth: '960px' }}>
 
           {/* Profile Header */}
-          <div style={{
+          <div className="dash-header" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '20px',
@@ -109,7 +115,7 @@ export default function Dashboard() {
               width: '72px',
               height: '72px',
               borderRadius: '50%',
-              background: '#C5A059',
+              background: 'var(--tea)',
               color: '#1A1A1A',
               display: 'flex',
               alignItems: 'center',
@@ -121,26 +127,31 @@ export default function Dashboard() {
               {initials}
             </div>
 
-            <div style={{ flex: 1, minWidth: '160px' }}>
-              <h1 style={{
-                fontFamily: "'Newsreader', serif",
-                fontSize: '28px',
-                color: '#1A1A1A',
-                margin: '0 0 4px 0'
-              }}>
+            <div className="dash-header-main" style={{ flex: 1, minWidth: '160px' }}>
+              <h1 className="page-title">
                 {nickname}
               </h1>
-              <p style={{ color: '#6B6558', fontSize: '14px', margin: 0 }}>
-                Your dashboard
-              </p>
+              <div className="dash-meta">
+                {[
+                  { label: 'Projects', value: myProjects.length },
+                  { label: 'Followers', value: followerCount },
+                  { label: 'Following', value: followingCount },
+                  { label: 'Likes received', value: likesReceived },
+                ].map((stat) => (
+                  <span key={stat.label} className="dash-meta-item">
+                    <strong>{stat.value}</strong> {stat.label}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <button
+              className="dash-header-edit"
               onClick={() => router.push('/profile')}
               style={{
                 background: 'transparent',
-                border: '1px solid #C5A059',
-                color: '#C5A059',
+                border: '1px solid var(--tea)',
+                color: 'var(--tea)',
                 padding: '10px 18px',
                 borderRadius: '10px',
                 fontSize: '14px',
@@ -156,7 +167,7 @@ export default function Dashboard() {
           {(profile?.bio || profile?.skills) && (
             <div style={{ marginBottom: '28px' }}>
               {profile?.bio && (
-                <p style={{ color: '#6B6558', fontSize: '15px', lineHeight: 1.6, marginBottom: '12px' }}>
+                <p style={{ color: 'var(--muted)', fontSize: '15px', lineHeight: 1.6, marginBottom: '12px' }}>
                   {profile.bio}
                 </p>
               )}
@@ -164,9 +175,9 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                   {profile.skills.split(',').map((s, i) => (
                     <span key={i} style={{
-                      background: '#F7F4EE',
-                      border: '1px solid #E5E0D8',
-                      color: '#6B6558',
+                      background: 'var(--panel-2)',
+                      border: '1px solid var(--line)',
+                      color: 'var(--muted)',
                       fontSize: '12px',
                       padding: '4px 10px',
                       borderRadius: '6px'
@@ -179,48 +190,39 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Stats */}
-          <div className="stats-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px',
-            marginBottom: '32px'
-          }}>
-            {[
-              { label: 'Projects', value: myProjects.length },
-              { label: 'Followers', value: followerCount },
-              { label: 'Following', value: followingCount },
-              { label: 'Likes received', value: likesReceived },
-            ].map((stat) => (
-              <div key={stat.label} style={{
-                background: '#FFFFFF',
-                border: '1px solid #E5E0D8',
-                borderRadius: '14px',
-                padding: '20px',
-                textAlign: 'center',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
-              }}>
-                <div style={{
-                  fontSize: '28px',
-                  fontWeight: 600,
-                  color: '#1A1A1A',
-                  marginBottom: '4px'
-                }}>
-                  {stat.value}
-                </div>
-                <div style={{ fontSize: '13px', color: '#6B6558' }}>
-                  {stat.label}
-                </div>
+          {/* Setup checklist, shown until the profile is complete */}
+          {!setupComplete && (
+            <div className="side-card" style={{ marginBottom: '32px' }}>
+              <h3><i className="ti ti-rocket"></i> Get set up</h3>
+              <div className="dash-progress">
+                <div
+                  className="dash-progress-fill"
+                  style={{ width: `${(doneCount / checklist.length) * 100}%` }}
+                />
               </div>
-            ))}
-          </div>
+              <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: '0 0 6px' }}>
+                {doneCount} of {checklist.length} complete
+              </p>
+              {checklist.map((item) => (
+                <div
+                  key={item.label}
+                  className={`dash-checklist-item ${item.done ? 'done' : ''}`}
+                  onClick={() => !item.done && router.push(item.href)}
+                >
+                  <span className="dash-check-circle"><i className="ti ti-check"></i></span>
+                  <span className="dash-check-label">{item.label}</span>
+                  {!item.done && <span className="dash-check-go">Do it →</span>}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
             <button
               onClick={() => router.push('/new-project')}
               style={{
-                background: '#C5A059',
+                background: 'var(--tea)',
                 color: '#1A1A1A',
                 border: 'none',
                 padding: '12px 22px',
@@ -236,8 +238,8 @@ export default function Dashboard() {
               onClick={() => router.push('/projects')}
               style={{
                 background: 'transparent',
-                border: '1px solid #C5A059',
-                color: '#C5A059',
+                border: '1px solid var(--tea)',
+                color: 'var(--tea)',
                 padding: '12px 22px',
                 borderRadius: '10px',
                 fontWeight: 500,
@@ -253,7 +255,7 @@ export default function Dashboard() {
           <h2 style={{
             fontFamily: "'Newsreader', serif",
             fontSize: '22px',
-            color: '#1A1A1A',
+            color: 'var(--text)',
             marginBottom: '20px'
           }}>
             Your projects
@@ -261,26 +263,26 @@ export default function Dashboard() {
 
           {myProjects.length === 0 ? (
             <div style={{
-              background: '#FFFFFF',
-              border: '1px solid #E5E0D8',
+              background: 'var(--panel)',
+              border: '1px solid var(--line)',
               borderRadius: '16px',
               padding: '56px 40px',
               textAlign: 'center',
               boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
             }}>
-              <div style={{ fontSize: '40px', color: '#C5A059', marginBottom: '16px' }}>
+              <div style={{ fontSize: '40px', color: 'var(--tea)', marginBottom: '16px' }}>
                 <i className="ti ti-folder-plus"></i>
               </div>
               <h3 style={{
                 fontFamily: "'Newsreader', serif",
                 fontSize: '22px',
-                color: '#1A1A1A',
+                color: 'var(--text)',
                 marginBottom: '10px'
               }}>
                 You haven’t posted a project yet
               </h3>
               <p style={{
-                color: '#6B6558',
+                color: 'var(--muted)',
                 fontSize: '15px',
                 marginBottom: '24px',
                 maxWidth: '340px',
@@ -292,7 +294,7 @@ export default function Dashboard() {
               <button
                 onClick={() => router.push('/new-project')}
                 style={{
-                  background: '#C5A059',
+                  background: 'var(--tea)',
                   color: '#1A1A1A',
                   border: 'none',
                   padding: '12px 24px',
@@ -312,8 +314,8 @@ export default function Dashboard() {
                   key={p.id}
                   onClick={() => router.push(`/project/${p.id}`)}
                   style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #E5E0D8',
+                    background: 'var(--panel)',
+                    border: '1px solid var(--line)',
                     borderRadius: '14px',
                     padding: '20px 24px',
                     cursor: 'pointer',
@@ -326,13 +328,13 @@ export default function Dashboard() {
                   <h3 style={{
                     fontSize: '17px',
                     fontWeight: 600,
-                    color: '#1A1A1A',
+                    color: 'var(--text)',
                     margin: '0 0 6px 0'
                   }}>
                     {p.title}
                   </h3>
                   <p style={{
-                    color: '#6B6558',
+                    color: 'var(--muted)',
                     fontSize: '14px',
                     margin: 0,
                     lineHeight: 1.5
@@ -344,7 +346,7 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

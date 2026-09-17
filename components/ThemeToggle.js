@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function ThemeToggle({ expanded }) {
+export default function ThemeToggle() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -16,12 +16,17 @@ export default function ThemeToggle({ expanded }) {
     localStorage.setItem('nexus-theme', next);
   }
 
-    return (
-    <>
-      <button className="sidebar-icon-btn" onClick={toggleTheme} title="Toggle theme">
+  return (
+    <div
+      className="sidebar-item-row"
+      onClick={toggleTheme}
+      style={{ cursor: 'pointer' }}
+      title="Toggle theme"
+    >
+      <button className="sidebar-icon-btn" tabIndex={-1}>
         <i className={`ti ${theme === 'light' ? 'ti-moon-stars' : 'ti-sun'}`}></i>
       </button>
-      {expanded && <span className="sidebar-label">Theme</span>}
-    </>
+      <span className="sidebar-label">{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
+    </div>
   );
 }

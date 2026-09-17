@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
+import AppLayout from '../components/AppLayout';
 
 export default function Advisor() {
   const router = useRouter();
@@ -99,8 +99,8 @@ export default function Advisor() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FDFBF7',
-        color: '#6B6558'
+        background: 'var(--black)',
+        color: 'var(--muted)'
       }}>
         Loading…
       </div>
@@ -113,29 +113,15 @@ export default function Advisor() {
         <title>AI Advisor · NEXUS-IT</title>
       </Head>
 
-      <Sidebar nickname={nickname} />
-
-      <div className="app-main">
-        <div style={{
-          maxWidth: '760px',
-          margin: '0 auto',
-          padding: '40px 24px 100px',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+      <AppLayout nickname={nickname}>
+        <div className="advisor-shell">
 
           {/* Header */}
-          <div style={{ marginBottom: '8px', textAlign: 'center' }}>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: '13px',
-              letterSpacing: '0.15em',
-              color: '#C5A059',
-              marginBottom: '24px'
-            }}>
-              // AI ADVISOR
-            </div>
+          <div style={{ marginBottom: '22px' }}>
+            <h1 className="page-title">AI Advisor</h1>
+            <p style={{ color: 'var(--muted)', fontSize: '15px', margin: 0 }}>
+              Project ideas, architecture feedback, and help getting unstuck, whenever you need it.
+            </p>
           </div>
 
           {/* Messages Area */}
@@ -165,43 +151,43 @@ export default function Advisor() {
                     position: 'absolute',
                     inset: 0,
                     borderRadius: '50%',
-                    border: '1px dashed #C5A059',
+                    border: '1px dashed var(--tea)',
                     opacity: 0.5
                   }} />
                   <div style={{
                     position: 'absolute',
                     top: '12px', left: '12px', right: '12px', bottom: '12px',
                     borderRadius: '50%',
-                    background: '#FFFFFF',
-                    border: '1px solid #E5E0D8',
+                    background: 'var(--panel)',
+                    border: '1px solid var(--line)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
                   }}>
-                    <i className="ti ti-topology-star-3" style={{ fontSize: '32px', color: '#C5A059' }}></i>
+                    <i className="ti ti-topology-star-3" style={{ fontSize: '32px', color: 'var(--tea)' }}></i>
                   </div>
                   <i className="ti ti-sparkles" style={{
                     position: 'absolute', top: '-4px', right: '4px',
-                    fontSize: '16px', color: '#D4AF37'
+                    fontSize: '16px', color: 'var(--tea-bright)'
                   }}></i>
                   <i className="ti ti-sparkles" style={{
                     position: 'absolute', bottom: '4px', left: '-8px',
-                    fontSize: '12px', color: '#D4AF37', opacity: 0.7
+                    fontSize: '12px', color: 'var(--tea-bright)', opacity: 0.7
                   }}></i>
                 </div>
 
-                <h1 style={{
+                <h2 style={{
                   fontFamily: "'Newsreader', serif",
-                  fontSize: '32px',
-                  fontWeight: 400,
-                  color: '#1A1A1A',
-                  margin: '0 0 12px'
+                  fontSize: '26px',
+                  fontWeight: 600,
+                  color: 'var(--text)',
+                  margin: '0 0 10px'
                 }}>
                   Hi {nickname.split(' ')[0]}. What shall we build today?
-                </h1>
+                </h2>
 
-                <p style={{ color: '#6B6558', fontSize: '15px', lineHeight: 1.6, marginBottom: '28px' }}>
+                <p style={{ color: 'var(--muted)', fontSize: '15px', lineHeight: 1.6, marginBottom: '28px' }}>
                   Ask for a project idea, feedback on your approach, or help getting unstuck.
                 </p>
 
@@ -215,26 +201,26 @@ export default function Advisor() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: '#FFFFFF',
-                        border: '1px solid #E5E0D8',
+                        background: 'var(--panel)',
+                        border: '1px solid var(--line)',
                         borderRadius: '999px',
                         padding: '10px 18px',
                         fontSize: '13.5px',
-                        color: '#1A1A1A',
+                        color: 'var(--text)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#C5A059';
-                        e.currentTarget.style.borderColor = '#C5A059';
+                        e.currentTarget.style.background = 'var(--tea)';
+                        e.currentTarget.style.borderColor = 'var(--tea)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#FFFFFF';
-                        e.currentTarget.style.borderColor = '#E5E0D8';
+                        e.currentTarget.style.background = 'var(--panel)';
+                        e.currentTarget.style.borderColor = 'var(--line)';
                       }}
                     >
-                      <i className={`ti ${item.icon}`} style={{ fontSize: '15px', color: '#C5A059' }}></i>
+                      <i className={`ti ${item.icon}`} style={{ fontSize: '15px', color: 'var(--tea)' }}></i>
                       {item.label}
                     </button>
                   ))}
@@ -249,9 +235,9 @@ export default function Advisor() {
                 style={{
                   alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
                   maxWidth: '85%',
-                  background: m.role === 'user' ? '#C5A059' : '#FFFFFF',
-                  color: m.role === 'user' ? '#1A1A1A' : '#1A1A1A',
-                  border: m.role === 'user' ? 'none' : '1px solid #E5E0D8',
+                  background: m.role === 'user' ? 'var(--tea)' : 'var(--panel)',
+                  color: m.role === 'user' ? 'var(--text)' : 'var(--text)',
+                  border: m.role === 'user' ? 'none' : '1px solid var(--line)',
                   borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   padding: '14px 18px',
                   fontSize: '15px',
@@ -268,11 +254,11 @@ export default function Advisor() {
             {sending && (
               <div style={{
                 alignSelf: 'flex-start',
-                background: '#FFFFFF',
-                border: '1px solid #E5E0D8',
+                background: 'var(--panel)',
+                border: '1px solid var(--line)',
                 borderRadius: '16px 16px 16px 4px',
                 padding: '14px 18px',
-                color: '#6B6558',
+                color: 'var(--muted)',
                 fontSize: '14px'
               }}>
                 Thinking…
@@ -292,13 +278,13 @@ export default function Advisor() {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            background: '#FFFFFF',
-            border: '1px solid #E5E0D8',
+            background: 'var(--panel)',
+            border: '1px solid var(--line)',
             borderRadius: '14px',
             padding: '8px 8px 8px 18px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
           }}>
-            <i className="ti ti-sparkles" style={{ fontSize: '16px', color: '#C5A059' }}></i>
+            <i className="ti ti-sparkles" style={{ fontSize: '16px', color: 'var(--tea)' }}></i>
             <input
               type="text"
               placeholder="Ask something..."
@@ -312,7 +298,7 @@ export default function Advisor() {
                 outline: 'none',
                 fontSize: '15px',
                 background: 'transparent',
-                color: '#1A1A1A'
+                color: 'var(--text)'
               }}
             />
             <button
@@ -322,7 +308,7 @@ export default function Advisor() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                background: sending || !input.trim() ? '#E5E0D8' : '#C5A059',
+                background: sending || !input.trim() ? 'var(--line)' : 'var(--tea)',
                 color: '#1A1A1A',
                 border: 'none',
                 borderRadius: '10px',
@@ -337,7 +323,7 @@ export default function Advisor() {
             </button>
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }

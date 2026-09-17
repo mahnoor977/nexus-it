@@ -1,191 +1,86 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
-import Sidebar from '../components/Sidebar';
-import Avatar from '../components/Avatar';
+import AppLayout from '../components/AppLayout';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 
-export default function PublicProfile() {
-  const { loading: authLoading } = useRequireAuth();
-  const router = useRouter();
-  const { id } = router.query;
+const SECTIONS = [
+  {
+    icon: 'ti-rocket',
+    title: 'Getting started',
+    body: 'Create your account, add your skills and bio in Settings, then post your first project from the New project page.',
+  },
+  {
+    icon: 'ti-folder',
+    title: 'Projects',
+    body: 'Showcase what you build with a description, tech stack, screenshots, GitHub and live demo links. Others can like it, leave feedback, and request to collaborate.',
+  },
+  {
+    icon: 'ti-news',
+    title: 'Posts',
+    body: 'Share quick updates and thoughts with the community. Use #hashtags to make them easier to find, and attach images or short videos.',
+  },
+  {
+    icon: 'ti-message',
+    title: 'Messages',
+    body: 'Message any builder from their profile or project page. You can edit or delete your own messages, share media, and block anyone who bothers you.',
+  },
+  {
+    icon: 'ti-messages',
+    title: 'Community forum',
+    body: 'Ask questions or start discussions. Every post gets its own reply thread, so answers stay attached to the question.',
+  },
+  {
+    icon: 'ti-sparkles',
+    title: 'AI Advisor',
+    body: 'Stuck on an idea, an architecture choice, or a bug? The advisor suggests project ideas and reviews your approach.',
+  },
+  {
+    icon: 'ti-shield',
+    title: 'Safety',
+    body: 'Report content or block users from any project, profile, or conversation. Blocked users cannot message you.',
+  },
+];
 
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [myNickname, setMyNickname] = useState('');
-  const [error, setError] = useState('');
-  const [followerCount, setFollowerCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [followBusy, setFollowBusy] = useState(false);
+export default function Docs() {
+  const { loading } = useRequireAuth();
+  const [nickname, setNickname] = useState('');
 
   useEffect(() => {
-    if (!id) return;
-
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setCurrentUserId(session.user.id);
-        setMyNickname(session.user.user_metadata?.nickname || 'Anonymous Builder');
-      }
-
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (profileError) {
-        setError('Profile not found.');
-        setLoading(false);
-        return;
-      }
-      setProfile(profileData);
-
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', id)
-        .order('created_at', { ascending: false });
-      setProjects(projectsData || []);
-
-      const { data: followersData } = await supabase
-        .from('follows')
-        .select('follower_id')
-        .eq('following_id', id);
-      setFollowerCount((followersData || []).length);
-      if (session) {
-        setIsFollowing((followersData || []).some((f) => f.follower_id === session.user.id));
-      }
-
-      const { data: followingData } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', id);
-      setFollowingCount((followingData || []).length);
-
-      setLoading(false);
+      if (session) setNickname(session.user.user_metadata?.nickname || 'Builder');
     }
-
     load();
-  }, [id]);
+  }, []);
 
-  async function handleFollowToggle() {
-    if (!currentUserId) {
-      router.push('/');
-      return;
-    }
-
-    setFollowBusy(true);
-
-    if (isFollowing) {
-      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', id);
-      setIsFollowing(false);
-      setFollowerCount((c) => c - 1);
-    } else {
-      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: id });
-      setIsFollowing(true);
-      setFollowerCount((c) => c + 1);
-    }
-
-    setFollowBusy(false);
-  }
-
-  if (loading) {
-    return <div className="dash-loading mono">Loading…</div>;
-  }
-
-  if (error || !profile) {
-    return <div className="dash-loading mono">{error}</div>;
-  }
-
-  const isOwnProfile = currentUserId === id;
-
-  if (authLoading) return <div className="dash-loading mono">Loading...</div>;
+  if (loading) return <div className="dash-loading mono">Loading...</div>;
 
   return (
     <>
-      <Head>
-        <title>{profile.nickname || 'Profile'} — NEXUS-IT</title>
-      </Head>
-      <div className="app-shell">
-        <Sidebar nickname={myNickname} />
-        <div className="app-main">
-          <div className="profile-page-content page-shell medium">
-            <div className="profile-header">
-              <Avatar url={profile.avatar_url} nickname={profile.nickname} size={64} />
-              <div className="profile-name-block">
-                <h1>{profile.nickname || 'Unnamed builder'}</h1>
-                <div className="profile-meta">
-                  {followerCount} follower{followerCount !== 1 ? 's' : ''} · {followingCount} following · {projects.length} project{projects.length !== 1 ? 's' : ''}
+      <Head><title>Docs · NEXUS-IT</title></Head>
+      <AppLayout nickname={nickname}>
+        <div className="page-shell medium">
+          <h1 className="page-title">Docs</h1>
+          <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '14px' }}>
+            A quick guide to everything on NEXUS-IT.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {SECTIONS.map((s) => (
+              <div className="card" key={s.title}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <i className={`ti ${s.icon}`} style={{ color: 'var(--tea)', fontSize: '20px' }}></i>
+                  <h3 style={{ fontSize: '17px', margin: 0 }}>{s.title}</h3>
                 </div>
+                <p style={{ color: 'var(--muted)', fontSize: '14.5px', lineHeight: 1.6, margin: 0 }}>
+                  {s.body}
+                </p>
               </div>
-              {isOwnProfile ? (
-                
-                <button
-                  className="btn"
-                  style={{ marginLeft: 'auto' }}
-                  onClick={() => router.push('/profile')}
-                >
-                  Edit profile
-                </button>
-              ) : (
-                currentUserId && (
-                  <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                    <button
-                      className={isFollowing ? 'btn' : 'btn btn-solid'}
-                      onClick={handleFollowToggle}
-                      disabled={followBusy}
-                    >
-                      {isFollowing ? 'Following' : 'Follow'}
-                    </button>
-                    <button
-                      className="btn"
-                      onClick={() => router.push(`/messages/${id}?nickname=${encodeURIComponent(profile.nickname || '')}`)}
-                    >
-                      Message
-                    </button>
-                  </div>
-                )
-              )}
-            </div>
-
-            {profile.bio && <p className="project-desc" style={{ marginBottom: '18px' }}>{profile.bio}</p>}
-
-            {profile.skills && (
-              <div className="profile-tags-display">
-                {profile.skills.split(',').map((skill, i) => (
-                  <span className="project-tag" key={i}>{skill.trim()}</span>
-                ))}
-              </div>
-            )}
-
-            <h2 style={{ fontSize: '18px', marginBottom: '14px' }}>Projects</h2>
-
-            {projects.length === 0 ? (
-              <div className="comments-empty">No projects posted yet.</div>
-            ) : (
-              <div className="projects-list">
-                {projects.map((p) => (
-                  <div
-                    className="project-card project-card-link"
-                    key={p.id}
-                    onClick={() => router.push(`/project/${p.id}`)}
-                  >
-                    <div className="project-card-top">
-                      <h3>{p.title}</h3>
-                    </div>
-                    <p className="project-desc">{p.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
   );
 }
